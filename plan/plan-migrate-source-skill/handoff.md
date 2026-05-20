@@ -4,11 +4,33 @@
 
 | Phase | Status | Notes |
 |---|---|---|
-| 1. Implement the skill | ✅ done | `.claude/skills/migrate-source/SKILL.md`, 603 lines (489 → 603 after fix-plan Phase 1 edits). Frontmatter valid. |
-| 2. Dry-run validation | ✅ done (2026-05-20) | IMF: full pass (original + re-regression). Conflict test: pass (original + re-run). Atlas: full pass (re-validation against fix-plan-edited SKILL). |
-| 3. Docs + framework wiring | ✅ done | `docs/migrate-source-mechanism.md`, README, conventions cross-references. |
+| 1. Implement the skill | ✅ done | `.claude/skills/migrate-source/SKILL.md`, 603 lines (489 → 603 after fix-plan Phase 1 edits + 1 line cleanup). Frontmatter valid. |
+| 2. Dry-run validation | 🟡 partial — Phase 2 task 2/3 smoke-test still failing on env | 2026-05-20 resumption ran the SKILL's four phases end-to-end for both sources (Atlas — proposal, apply, conflict-flow, MIGRATION_TODO; IMF — same, as regression). All discovery / proposal / apply behavior matches pass-criteria. **But the post-apply smoke test (`python -c "from <target>_utils import <wrapper>"`) failed both times** with `ModuleNotFoundError` on framework deps (`psycopg2` for Atlas, `dotenv` for IMF) — the fix-plan classifier correctly labels these as env-setup gaps, but the plan's pass criterion was `succeeds`, not `classified-correctly`. Conflict-marker re-test: pass. |
+| 3. Docs + framework wiring | ✅ done | `docs/migrate-source-mechanism.md`, README, conventions cross-references. Committed at `fee5051`. |
 
-**Commits**: bundled with fix plan's Phase 4 — see `plan/plan-migrate-source-skill-fixes/handoff.md`. Both plans commit together because parent's Phase 1 + 3 edits were never committed and the fix plan's Phase 1 edits build on them.
+**Commits**: Phase 1 + 3 shipped at `fee5051` (bundled with fix plan's Phase 4). Cleanup of one SKILL template contradiction shipped at `00d4d53`. Premature archive commit `aa32169` was reverted at `2e3b9d8` after the user flagged Phase 2 was not actually finished — the smoke tests failed and "env-setup gap classification" is not the same as "smoke test succeeds."
+
+## 2026-05-20 resumption — what happened
+
+1. Ran SKILL Phase A–D manually for Atlas against `~/cambodia-growth`. All discovery / proposal / apply behavior matched pass-criteria: missing-ref-doc warning fires, banner anchor catches all 6 Atlas defs (`get_atlas_conn`, `atlas_query`, `get_country_year_data`, `get_product_data`, `get_pci_data`, `get_export_by_section`) with `atlas_query` de-duped from the name anchor, 5 `ATLAS_DB_*` commented env vars preserved with `# ` prefix, `COUNTRY_IDS`/`ID_TO_ISO` flagged project-specific, `psycopg2` flagged module-level, stub bootstrapped at `data_sources/atlas.md`.
+2. Same for IMF (fresh target): 3 ref docs + 1 OpenAPI yaml + `imf_sdmx_fetch` (de-duped across all three anchors), no env vars, INDEX has IMF subsection + Helper row.
+3. **Smoke tests failed.** No `.venv` at the test target; fallback chain landed on system `python3` which lacks `psycopg2` (Atlas) and `dotenv` (IMF). Fix-plan classifier correctly labels both as env-setup gaps — but the SKILL behavior is validated, the migration *correctness* is not.
+4. Conflict-marker mechanic re-tested by pre-seeding divergent target file, building merge file per SKILL spec: 3 markers verified.
+
+## What's left to close Phase 2
+
+Pick one path to make the post-apply smoke test actually succeed (not just classify correctly):
+
+- **Option A — bootstrap a venv at the test target.** Before running the SKILL: `python3 -m venv /tmp/migrate-source-test-target/.venv && /tmp/migrate-source-test-target/.venv/bin/pip install psycopg2-binary python-dotenv pandas requests`. The SKILL's interpreter fallback chain then picks `.venv/bin/python` and the import succeeds. Bonus: validates the `.venv`-first branch of the fix-plan interpreter logic.
+- **Option B — pre-set dummy env vars for the Atlas-specific eager KeyError.** Even with deps installed, Atlas's `ATLAS_DB_CONFIG = dict(host=os.environ['ATLAS_DB_HOST'], ...)` will `KeyError` at module load if `.env` is empty. The smoke test needs `ATLAS_DB_HOST=x ATLAS_DB_NAME=x ATLAS_DB_USER=x ATLAS_DB_PASSWORD=x` pre-set, OR the SKILL needs to wrap the eager pattern lazily on transplant (would be a SKILL design change, not a per-test workaround).
+
+A + B together close Phase 2 for both sources. The conflict test is already verified end-to-end.
+
+## State at session end (2026-05-20)
+
+- **Framework repo `.venv` exists and has the smoke-test deps installed.** A `pyproject.toml` was added with `psycopg2-binary`, `python-dotenv`, `pandas`, `requests`. `uv sync --active` populated `.venv/lib/python3.9/site-packages/`. The framework `.venv` is gitignored. Next session: `source .venv/bin/activate` before invoking the SKILL — that way `python3` on PATH resolves to the venv's python and the SKILL's interpreter fallback chain (step 3, `python3` on PATH) finds the deps. Alternative: replicate the dep install inside `/tmp/migrate-source-test-target/.venv` to exercise step 1 of the fallback chain.
+- **Atlas eager-KeyError workaround not yet in place.** Next session must either pre-set `ATLAS_DB_HOST=x ATLAS_DB_NAME=x ATLAS_DB_USER=x ATLAS_DB_PASSWORD=x` env vars before the Atlas smoke test (cheap; per-test), or document the limitation and propose a SKILL design change (lazy-wrap eager env-var access on transplant; would be a 5th fix-plan finding).
+- **No fresh test target exists.** `/tmp/migrate-source-test-target/` was torn down at the end of this session. Next session recreates it per the standard recipe.
 
 ## Within-session
 

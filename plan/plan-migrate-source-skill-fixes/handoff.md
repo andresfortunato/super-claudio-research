@@ -4,12 +4,12 @@
 
 | Phase | Status | Notes |
 |---|---|---|
-| 1. SKILL edits | ✅ done | All four findings + both templates updated in `.claude/skills/migrate-source/SKILL.md`. |
-| 2. Atlas re-validation | ✅ done (2026-05-20) | All pass-criteria met: missing-ref-doc warning emitted; banner anchor caught all 6 Atlas defs (1 name-anchor de-dupe); 5 `ATLAS_DB_*` env vars preserved commented; stub bootstrapped; smoke test classified correctly as env-setup gap (`psycopg2` allowlisted). |
-| 3. IMF re-regression | ✅ done (2026-05-20) | Parity with parent-plan IMF session: no false missing-ref-doc warning; only `imf_sdmx_fetch` lifted by banner+name+docstring anchors (de-duped); env vars `(none)`; 3 `.md` + 1 `.yaml` copied; INDEX has IMF subsection + Helper row; smoke test classified as env-setup gap (`dotenv` allowlisted). |
-| 4. Commit | ⏳ pending user approval | All edits ready: SKILL fixes + parent plan's staged docs/wiring + both plan dirs. |
+| 1. SKILL edits | ✅ done | All four findings + both templates updated in `.claude/skills/migrate-source/SKILL.md`. Plus 1-line cleanup of a template-rule contradiction at `00d4d53`. |
+| 2. Atlas re-validation | 🟡 SKILL behavior validated; smoke test still failing on env | 2026-05-20: missing-ref-doc warning emits, banner anchor catches all 6 Atlas defs (1 name-anchor de-dupe), 5 `ATLAS_DB_*` env vars preserved commented in target, stub bootstrapped, classifier correctly labels `ModuleNotFoundError: psycopg2` as env-setup gap. But the **post-apply smoke test did not literally `succeed`** — the parent plan's pass-criterion. Closing the loop needs a target venv with framework deps installed (and dummy `ATLAS_DB_*` env vars to dodge the eager `KeyError` from `ATLAS_DB_CONFIG`). See parent plan handoff "What's left to close Phase 2" for the recipe. |
+| 3. IMF re-regression | 🟡 SKILL behavior validated; smoke test still failing on env | 2026-05-20: parity with parent-plan IMF session (no false missing-ref-doc warning; only `imf_sdmx_fetch` lifted; env vars `(none)`; 3 `.md` + 1 `.yaml` copied; INDEX has IMF subsection + Helper row). Smoke test classified as env-setup gap (`dotenv` allowlisted) but again **did not literally `succeed`**. Same recipe to close as Atlas. |
+| 4. Commit | ✅ done | `fee5051` (bundle) + `00d4d53` (cleanup). |
 
-**Commits**: none yet — Phase 4 awaiting user approval. Phase 1 changes uncommitted in working tree alongside the parent plan's staged docs/wiring.
+**Commits**: `fee5051` (parent + fix-plan bundled ship) + `00d4d53` (SKILL template cleanup). Premature archive commit `aa32169` reverted at `2e3b9d8` once the user flagged that Phase 2 of the parent plan was not actually finished — the smoke tests failed and "env-setup gap classification" is not the same as "smoke test succeeds."
 
 ## Re-validation (2026-05-20)
 

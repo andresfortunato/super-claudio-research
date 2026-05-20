@@ -1,0 +1,12 @@
+[project]
+name = "research-to-policy"
+version = "0.1.0"
+description = "r2p framework dev environment — deps here cover the smoke-test interpreter used by /r2p-migrate-source validation runs."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "psycopg2-binary",
+    "python-dotenv",
+    "pandas",
+    "requests",
+]
