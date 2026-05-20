@@ -54,6 +54,11 @@ const EXCLUDE = new Set([
 const REQUIRED_GITIGNORE_LINES = [
   'internal_docs/',
   'literature/',
+  '.env',
+  '.env.*',
+  '!.env.example',
+  'data/*',
+  '!data/README.md',
 ];
 
 async function fileExists(path) {

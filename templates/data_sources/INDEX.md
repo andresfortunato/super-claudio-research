@@ -60,11 +60,15 @@ and the INDEX's grouping does the organizing work.
 
 ## Helper functions
 
-If the project has a utility module (`<project>_utils.py` or
-analogous R file) that fronts these sources, list the helper
-functions here so the bridge from "API mechanics" to "wrapper we
-already wrote" is one table.
+Required when the project has a utility module (`<project>_utils.py`
+or analogous R file). List each wrapper here so the bridge from "API
+mechanics" to "wrapper we already wrote" is one table; a researcher
+who hits a strange function name in a notebook jumps here, finds
+the row, and lands on the reference doc.
+
+Full protocol (env-var pattern, wrapper signatures, docstring
+back-links): `.claude/conventions/data-access.md`.
 
 | Helper | Source |
 |---|---|
-| *(none yet)* | — |
+| *(none yet — add `wrapper_name(args)` → `data_sources/<file>.md` as wrappers land)* | — |

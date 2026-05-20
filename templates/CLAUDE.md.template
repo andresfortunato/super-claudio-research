@@ -28,7 +28,7 @@ Diagnostics", "Economic Complexity", "McMillan-Rodrik decomposition".>
 
 ```
 project_root/
-├── data/                  # local datasets (large files gitignored)
+├── data/                  # local cached datasets (large files gitignored; data/README.md is the inventory)
 ├── notebooks/             # numbered analytical notebooks
 ├── output/                # charts (PNG), metadata (JSON), reports (MD/CSV)
 │                          # opt-in: output/<theme>/ for theme-parallel projects
@@ -164,6 +164,17 @@ one `<source>_<thing>.md` per source-and-purpose, plus `INDEX.md` for
 quick-nav. Each doc carries a `Status: verified <date>` line and at
 least one re-fetchable headline anchor. Full protocol:
 `.claude/conventions/data-sources.md` (read on demand).
+
+## Data Access
+
+Runtime layer of the data pipeline: `.env` (gitignored) + `.env.example`
+(committed contract) + `<project>_utils.py` at project root with one
+wrapper per source (`atlas_query`, `wb_fetch`, `imf_sdmx_fetch`, …),
+each docstring back-linking to its `data_sources/` doc. The
+`data_sources/INDEX.md` "Helper functions" table maps wrappers ↔ docs.
+Local cached files land in `data/` (gitignored except `data/README.md`,
+the on-disk inventory). Full protocol:
+`.claude/conventions/data-access.md` (read on demand).
 
 ## Internal Docs
 

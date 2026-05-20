@@ -113,11 +113,13 @@ instead ("the response object has these top-level keys";
 3. **Conventions for adding new sources** — three or four
    bullet points: drop the spec, add a usage guide, add an
    INDEX row, cross-link from CLAUDE.md if core.
-4. *(Optional)* **Helper functions** — if the project has a
-   `<project>_utils.py` or analogous R file, list the helper
-   functions and which sources they front. This is the bridge
-   from "here's how the API works" to "here's the wrapper we
-   already wrote."
+4. **Helper functions** — list the wrappers in
+   `<project>_utils.py` (or analogous R file) and which source
+   each fronts. This is the bidirectional bridge from "here's how
+   the API works" to "here's the wrapper we already wrote," and
+   is **required** whenever the project has a utility module.
+   Pattern, signatures, and discipline rules live in the sibling
+   `.claude/conventions/data-access.md`.
 
 ## Naming
 
@@ -150,11 +152,13 @@ instead ("the response object has these top-level keys";
   grouping does the organizing work. If the folder grows past
   ~20 files, split *the project* into focused engagements — not
   the folder into hierarchies.
-- **No project-utility-module rules in v1.** Whether to bundle
-  `imf_sdmx_fetch()` into a project utility module is a separate
-  convention question (deferred). The data-sources doc may
-  *reference* such helpers if they exist; it does not *require*
-  them.
+- **Project-utility-module rules live in the sibling convention.**
+  How wrappers like `imf_sdmx_fetch()` are organized (env vars,
+  function signatures, docstring back-links to these docs) is the
+  scope of `.claude/conventions/data-access.md`. The two
+  conventions cross-link via the INDEX's "Helper functions" table:
+  this convention requires the table to *exist* and *map wrappers
+  to reference docs*; data-access prescribes the wrappers' shape.
 
 ## Adding a new source — recipe
 
@@ -170,6 +174,12 @@ instead ("the response object has these top-level keys";
 5. If a helper function in the project's utility module fronts
    the source, cross-link both ways.
 
+> **Transplanting from another r2p project?** Use
+> `/r2p-migrate-source --from <donor-path> --source <slug>` instead
+> of hand-writing — it lifts the ref doc (with the donor's
+> headline anchor stripped to a `TODO(migrate)`) and the rest of
+> the source's data layer in one proposal-then-apply cycle.
+
 ## What this convention does NOT cover
 
 - **The data files themselves** — `data/README.md` documents
@@ -184,4 +194,7 @@ instead ("the response object has these top-level keys";
   one line ("not an API; manual download").
 - **Auth secrets** — never commit keys. Document the env-var
   name (`IMF_API_KEY`, `WB_TOKEN`) and how to obtain one; the
-  secret itself stays in the researcher's local environment.
+  secret itself stays in the researcher's local environment. The
+  env-var naming convention, `.env.example` contract, and how
+  wrappers read these values are scoped to
+  `.claude/conventions/data-access.md`.

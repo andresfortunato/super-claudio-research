@@ -128,6 +128,7 @@ User-invoked skills (`/<name>` in Claude Code):
 | `/wiki-ingest` | Adding a raw source to the wiki | Distills `raw/<path>` into one or more `wiki/` pages |
 | `/wiki-lint` | After a batch of ingests | Flags orphans, contradictions, stale pages, page-budget violations |
 | `/scan-sources` | Refreshing tracked sources | Re-scrapes `sources/registry.yaml` entries due for refetch (delegates to `web-scraping`) |
+| `/r2p-migrate-source` | Importing a source from another r2p project | Transplants one source's full data layer (ref doc + wrapper + env vars + INDEX + cache entry) via `MIGRATION_PROPOSAL.md` → user approves → apply + import smoke test |
 | `/research-cleanup` | Before a milestone or handoff | Project-wide orphan + intermediate proposal at `cleanup-proposal.md` (never deletes) |
 
 Background hooks (silent unless their condition holds):
@@ -160,6 +161,7 @@ Conventions installed (long-form rules read on demand from `.claude/conventions/
 | `project-conventions` | `project_conventions/<domain>.md` flat folder + `INDEX.md`; "Use this whenever ..." opener |
 | `source-registry` | `sources/registry.yaml` watchlist + dedup via `seen.jsonl` |
 | `data-sources` | `data_sources/<source>_<thing>.md` with anchor-as-smoke-test pattern |
+| `data-access` | `.env` + `.env.example` contract, `<project>_utils.py` wrappers, `data/README.md` inventory, INDEX bridge to `data_sources/` |
 
 Each convention file is the single source of truth for its rule. Pointer blocks in `templates/CLAUDE.md.template` and the README link to it; they don't duplicate prose.
 
@@ -171,7 +173,7 @@ The framework's own internals — useful if you're proposing a new convention, h
 
 ```text
 .claude/
-├── conventions/                       ← 12 convention files (long-form rules, on-demand reads)
+├── conventions/                       ← 13 convention files (long-form rules, on-demand reads)
 ├── hooks/
 │   ├── check-insights.sh              ← Stop hook: archival tripwire + insights tripwire
 │   ├── retrieve-learnings.sh          ← UserPromptSubmit: trigger-keyword learning retrieval
@@ -190,6 +192,7 @@ The framework's own internals — useful if you're proposing a new convention, h
 │   ├── wiki-lint/                     ← orphans, contradictions, stale, budget
 │   ├── research-cleanup/              ← orphan + intermediate proposal
 │   ├── scan-sources/                  ← registry-driven targeted scraping
+│   ├── migrate-source/                ← r2p→r2p source transplant (proposal-then-apply)
 │   └── web-scraping/                  ← Playwright/httpx/BeautifulSoup toolkit (delegated to)
 └── settings.template.json             ← copied to .claude/settings.json (project-shared)
 
@@ -207,6 +210,8 @@ docs/
 ├── verification-architecture.md
 ├── source-registry-mechanism.md
 ├── data-sources-mechanism.md
+├── data-access-mechanism.md
+├── migrate-source-mechanism.md
 ├── methods-mechanism.md
 └── project-conventions-mechanism.md
 
@@ -217,6 +222,8 @@ templates/                              ← seeds installed by `r2p init`
 ├── raw/README.md                      ← immutable-sources convention
 ├── sources/                           ← registry.yaml + README.md + seen.jsonl
 ├── data_sources/                      ← INDEX.md + README.md + EXAMPLE_world_bank_api.md
+├── data/README.md                     ← on-disk inventory template (data/ otherwise gitignored)
+├── .env.example                       ← committed env-var contract (.env stays local)
 ├── methods/                           ← README.md + EXAMPLE_method/rule.md
 ├── project_conventions/               ← INDEX.md + README.md + EXAMPLE_visualization.md
 ├── handoff.md                         ← session-end handoff template

@@ -72,10 +72,14 @@ The INDEX has three required parts:
 3. **How to add a new source** — the recipe, three or four
    bullets. Keeps the discipline honest.
 
-The (optional but recommended) fourth part is a list of helper
-functions in the project's utility module that front the
-documented sources. This bridges "here's the API" with "here's
-the wrapper we already wrote."
+The fourth part is a list of helper functions in the project's
+utility module that front the documented sources. This bridges
+"here's the API" with "here's the wrapper we already wrote," and
+is **required** when the project has a utility module. The
+sibling `data-access` convention prescribes the wrappers' shape
+(env-var pattern, function signatures, docstring back-links); this
+convention requires the INDEX table to exist and map wrappers to
+reference docs.
 
 ## Why headline anchors are first-class
 

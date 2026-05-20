@@ -24,6 +24,7 @@ const SCAFFOLDING_DIRS = [
   'raw',
   'deliverables',
   'sources',
+  'data',
   'data_sources',
   'methods',
   'project_conventions',
@@ -56,6 +57,15 @@ internal_docs/
 
 # Reference literature (large PDFs, often copyrighted)
 literature/
+
+# Secrets and per-machine config (see .env.example for the contract)
+.env
+.env.*
+!.env.example
+
+# Local cached data — large binaries; data/README.md is the committed inventory
+data/*
+!data/README.md
 `;
 
 async function fileExists(path) {
@@ -194,6 +204,11 @@ export async function installProject(target) {
     target,
   );
   await mirrorDir(
+    join(FRAMEWORK_ROOT, 'templates/data'),
+    join(target, 'data'),
+    target,
+  );
+  await mirrorDir(
     join(FRAMEWORK_ROOT, 'templates/methods'),
     join(target, 'methods'),
     target,
@@ -258,7 +273,17 @@ export async function installProject(target) {
     );
   }
 
-  // 6. .gitignore — share framework scaffolding, hide local state
+  // 6. .env.example — committed contract for env vars (.env stays local)
+  const envExamplePath = join(target, '.env.example');
+  const envExampleSrc = join(FRAMEWORK_ROOT, 'templates/.env.example');
+  if (!(await fileExists(envExamplePath))) {
+    await copyFile(envExampleSrc, envExamplePath);
+    console.log('  + .env.example (from template — edit for your project)');
+  } else {
+    console.log('  ~ .env.example (exists, leaving as-is)');
+  }
+
+  // 7. .gitignore — share framework scaffolding, hide local state
   const gitignorePath = join(target, '.gitignore');
   if (await fileExists(gitignorePath)) {
     const existing = await readFile(gitignorePath, 'utf-8');
