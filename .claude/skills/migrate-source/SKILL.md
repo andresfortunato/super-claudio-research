@@ -368,7 +368,9 @@ auth) is the lower bound.
 ## Template: MIGRATION_PROPOSAL.md
 
 Write this to `<target>/MIGRATION_PROPOSAL.md`. Fill every section;
-leave `(none)` rather than omitting a heading.
+leave `(none)` rather than omitting a heading. Exception: `## Warnings`
+is omitted entirely when there are no warnings (an empty Warnings
+heading is misleading).
 
 ```markdown
 # Migration proposal: `<slug>` from `<donor-path>` → `<target-path>`
