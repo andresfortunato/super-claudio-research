@@ -81,7 +81,7 @@ Wire it into `.claude/settings.json`:
       {
         "matcher": "",
         "hooks": [
-          { "type": "command", "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/check-insights.sh" },
+          { "type": "command", "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/check-evidence.sh" },
           { "type": "command", "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/check-<name>.sh" }
         ]
       }
@@ -123,7 +123,7 @@ Keep it under 5 lines.
 
 ## Rules of thumb
 
-- **One convention, one concern.** "insights-logging" is one. "handoff-format" is one. Don't bundle.
+- **One convention, one concern.** "evidence-logging" is one. "handoff-format" is one. Don't bundle.
 - **The convention file is for Claude; the design doc is for humans.** Don't blend them.
 - **Hooks are optional.** A convention without enforcement is fine if the user remembers to apply it. Add a hook only when forgetting is costly.
 - **Pre-commit checks belong in pre-commit hooks, not Claude Code Stop hooks.** Stop hooks are for *agent-facing* discipline, not for human git hygiene.

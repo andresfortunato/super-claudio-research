@@ -14,7 +14,7 @@ specification, a data-source preference.
 ## Where decision records live
 
 - One file per decision: `decisions/YYYY-MM-DD_<slug>.md`.
-- `decisions/` lives at project root, sibling of `insights/`, `wiki/`,
+- `decisions/` lives at project root, sibling of `evidence/`, `wiki/`,
   `data/`. The directory is **committed** (researcher-shared, not local).
 - Slug is short, decision-bearing: `2026-05-12_use-pwt-rgdpe-not-rgdpo.md`,
   not `2026-05-12_decision1.md`.
@@ -100,7 +100,7 @@ surviving even after the decision is wrong.
   `decisions/YYYY-MM-DD_use-<deflator>.md`. Future `git blame` surfaces both.
 - **Cross-link from `plan.md`.** A plan's `Decisions Made` section
   references the relevant `decisions/*.md` files by relative path.
-- **Cross-link from insights.** If `insights/NN_*.md` rests on a methodology
+- **Cross-link from evidence.** If `evidence/NN_*.md` rests on a methodology
   call, link the record from the insight's Source line so invalidation has
   a known impact surface.
 - **The record is the artifact, not the discussion.** Brainstorms and
@@ -114,7 +114,7 @@ being over-recorded. Calibrate to "would a peer reviewer ask?"
 
 ## Distinct from neighboring conventions
 
-- **`insights-logging`** captures *findings* from the data; decisions
+- **`evidence-logging`** captures *findings* from the data; decisions
   capture *choices* about how to look at it.
 - **`plan-structure`'s "Decisions Made"** is a pointer list; records live in `decisions/`.
 - **`handoff-format`** is tactical session state; decisions are durable.

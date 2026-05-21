@@ -6,11 +6,12 @@ maintains it. Researchers may correct factual errors but should not restructure.
 
 ## Mental model
 
-`raw/` is the immutable archive — papers, scrapes, dataset notes. Never edited.
+`wiki/raw/` is the immutable archive — papers, scrapes, dataset notes. Never edited.
 
-`wiki/` is the distilled, queryable knowledge layer built *from* `raw/`. Every
-claim in `wiki/` cites a source page, which cites a `raw/` file. This is the
-Karpathy three-layer pattern: raw → distilled → schema (this file).
+`wiki/{sources,concepts,entities,synthesis}/` is the distilled, queryable
+knowledge layer built *from* `wiki/raw/`. Every claim cites a source page,
+which cites a `wiki/raw/` file. This is the Karpathy three-layer pattern:
+raw → distilled → schema (this file).
 
 ## Page types
 
@@ -39,7 +40,7 @@ YAML frontmatter at the top of every page, between `---` fences.
 ```yaml
 ---
 type: source
-raw_path: raw/2026-04-12_studwell_how-asia-works.md
+raw_path: wiki/raw/2026-04-12_studwell_how-asia-works.md
 ingested_at: 2026-05-05
 title: How Asia Works
 author: Joe Studwell
@@ -94,7 +95,7 @@ sources:
 
 ## Naming conventions
 
-- **Slugs**: lowercase kebab-case. Strip articles ("the", "a"). No dates in slugs except for source pages, where the date prefix from `raw/` is encoded in the source page's `slug` field, not the filename.
+- **Slugs**: lowercase kebab-case. Strip articles ("the", "a"). No dates in slugs except for source pages, where the date prefix from `wiki/raw/` is encoded in the source page's `slug` field, not the filename.
 - **Source slugs**: `<author-or-org>-<year>-<short-title>.md`. Example: `studwell-2013-how-asia-works.md`. For scrapes without a clear author: `<source-slug>-<YYYYMMDD>-<title>.md`.
 - **Concept slugs**: assert the claim. `industrial-policy-needs-export-discipline.md` is better than `industrial-policy.md`.
 - **Entity slugs**: canonical name, English transliteration if needed. `vietnam-state-bank.md`, not `sbv.md` (acronyms are aliased inside the page, not slugged).
@@ -103,7 +104,7 @@ sources:
 
 - All links are **relative paths** within `wiki/`: `[Studwell 2013](../sources/studwell-2013-how-asia-works.md)`.
 - Every concept and entity page MUST link to at least one source page.
-- Every source page MUST link back to its `raw/` file (relative path, e.g. `../../raw/2026-04-12_studwell_how-asia-works.md`).
+- Every source page MUST link back to its `wiki/raw/` file (relative path, e.g. `../raw/2026-04-12_studwell_how-asia-works.md`).
 - Bidirectional linking is expected: if concept X cites source S, and source S advances concept X, S's page should mention X.
 
 ## Page structure
@@ -117,7 +118,7 @@ Inside the frontmatter fence, use this body skeleton:
 
 **Type**: <book / paper / scrape / dataset note / transcript>
 **Date**: <publication date>
-**Raw file**: [<filename>](../../raw/<filename>)
+**Raw file**: [<filename>](../raw/<filename>)
 
 ## What it is
 1-3 sentences.
@@ -194,8 +195,8 @@ Why this entity matters to the project's questions.
 
 ## Worked example: ingesting a paper
 
-A researcher drops `raw/2026-04-12_studwell_how-asia-works.md` (a markdown
-extract of the book) into `raw/`. They run `/wiki-ingest raw/2026-04-12_studwell_how-asia-works.md`.
+A researcher drops `wiki/raw/2026-04-12_studwell_how-asia-works.md` (a markdown
+extract of the book) into `wiki/raw/`. They run `/wiki-ingest wiki/raw/2026-04-12_studwell_how-asia-works.md`.
 
 The skill:
 1. Reads the file. Identifies it as a book about East Asian industrial policy.
@@ -210,6 +211,6 @@ The skill:
 
 ## What the wiki is NOT
 
-- **Not a dump of `raw/` content.** Source pages are descriptors, not transcripts.
+- **Not a dump of `wiki/raw/` content.** Source pages are descriptors, not transcripts.
 - **Not a personal notebook.** No first-person voice, no daily log entries, no scratch.
 - **Not auto-maintained.** `/wiki-ingest` is explicit. Nothing writes to `wiki/` automatically.

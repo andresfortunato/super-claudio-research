@@ -1,7 +1,7 @@
 # learnings/
 
 Tacit gotchas and discoveries — the kind of thing a colleague would warn
-you about over coffee. The third bucket alongside `insights/` (formal
+you about over coffee. The third bucket alongside `evidence/` (formal
 evidence-based findings) and `decisions/` (peer-reviewable methodology
 calls).
 
@@ -37,7 +37,7 @@ files by hand.
 
 ## When NOT to capture
 
-- A formal finding with a chart behind it → `insights/NN_<slug>.md`.
+- A formal finding with a chart behind it → `evidence/NN_<slug>.md`.
 - A peer-reviewable methodology call → `decisions/YYYY-MM-DD_<slug>.md`.
 - A reference doc for an external API → `data_sources/<slug>.md`.
 - An operational rule with diagnostic counts → `methods/<slug>/rule.md`.

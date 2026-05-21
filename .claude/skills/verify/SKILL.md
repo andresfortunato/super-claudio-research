@@ -84,13 +84,13 @@ every check — the budget is ≤2k tokens. Choose by artifact:
    silently happen when joins are revised.
 4. **Source citation.** Does the deliverable referencing this chart
    actually cite a source line? Grep for the chart filename in
-   `deliverables/`, `insights/`, and confirm a citation is nearby.
+   `deliverables/`, `evidence/`, and confirm a citation is nearby.
 5. **Provenance.** Same as A.5.
 
 ### C. Paragraph (a span inside a markdown deliverable)
 
 1. **Number-to-evidence trace.** For every numeric claim in the paragraph,
-   find the supporting `output/`, `insights/`, or table cell. Flag any
+   find the supporting `output/`, `evidence/`, or table cell. Flag any
    number that has no traceable source.
 2. **Sign and magnitude consistency.** Do the numbers in the paragraph
    agree with the regression / chart they implicitly cite? If the
@@ -105,7 +105,7 @@ every check — the budget is ≤2k tokens. Choose by artifact:
    `git log` on the cited output, read its identification strategy,
    flag mismatches.
 5. **Insight cross-check.** If the paragraph references a finding,
-   confirm the corresponding `insights/NN_*.md` exists and the numbers
+   confirm the corresponding `evidence/NN_*.md` exists and the numbers
    match.
 
 ## Workflow
@@ -181,7 +181,7 @@ Skill will:
    most recent commit → parse `Run:` line → script path.
 4. Read the script header; confirm this artifact is in `Outputs:`.
 5. Read the regression JSON; check coefficient signs against the
-   adjacent `insights/NN_*.md` claim, check magnitudes, read N.
+   adjacent `evidence/NN_*.md` claim, check magnitudes, read N.
 6. Print the markdown report. Total cost ≈1.2k tokens.
 
 ```
@@ -194,7 +194,7 @@ Skill will:
    the most recent edit if no answer.
 2. Pick four checks from menu C: number-to-evidence trace, sign-magnitude
    consistency, source citation, insight cross-check.
-3. Grep numeric claims; for each, find the supporting `output/`, `insights/`,
+3. Grep numeric claims; for each, find the supporting `output/`, `evidence/`,
    or `wiki/` page.
 4. Print the report.
 
@@ -202,10 +202,10 @@ Skill will:
 
 - `.claude/conventions/script-header.md` — script header schema verify reads against.
 - `.claude/conventions/analytical-commit-format.md` — commit-message format verify parses.
-- `.claude/conventions/insights-logging.md` — paragraph checks may
-  cross-reference insight docs.
+- `.claude/conventions/evidence-logging.md` — paragraph checks may
+  cross-reference evidence docs.
 - `docs/verification-architecture.md` — how /verify fits with the
-  insights Stop hook and `/deliverable-review`.
+  evidence Stop hook and `/deliverable-review`.
 
 ## What this skill does NOT do
 

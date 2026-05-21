@@ -8,7 +8,7 @@ effect. The kind of thing a colleague would warn you about over coffee.
 The learning-capture skill (`.claude/skills/learning-capture/SKILL.md`)
 drives the write. This file documents the **file shape**, the **index
 format**, the **retrieval contract**, and the **boundary** with
-`insights/` and `decisions/`.
+`evidence/` and `decisions/`.
 
 ## Where learnings live
 
@@ -23,7 +23,7 @@ format**, the **retrieval contract**, and the **boundary** with
   (`.claude/hooks/retrieve-learnings.sh`) reads this file on every user
   prompt; entries without an index row are invisible.
 - **Project-wide, not theme-aware.** Even in projects using the opt-in
-  theme-parallel layout for `insights/` and `output/`, learnings stay
+  theme-parallel layout for `evidence/` and `output/`, learnings stay
   flat. A gotcha about a survey wave is universal — trigger-keyword
   matching does the routing, not directory structure.
 
@@ -125,7 +125,7 @@ entry, add the entry — don't delete the file.
 ## Discipline
 
 - **One learning per file.** Don't bundle unrelated gotchas. A
-  multi-symptom write-up belongs in `insights/NN_*.md`, not here.
+  multi-symptom write-up belongs in `evidence/NN_*.md`, not here.
 - **Be specific.** "PWT rgdpo inflates oil-exporter productivity by ~40%
   in 2010–2019 vs rgdpe" is useful. "Be careful with PWT" is not.
 - **Triggers, not titles.** The title summarizes; the triggers route.
@@ -140,8 +140,8 @@ entry, add the entry — don't delete the file.
 
 ## Distinct from neighboring conventions
 
-- **`insights-logging`** captures *findings from the data* — numbered
-  evidence-based docs (`insights/NN_*.md`) with charts behind every
+- **`evidence-logging`** captures *findings from the data* — numbered
+  evidence-based docs (`evidence/NN_*.md`) with charts behind every
   claim. Learnings are *operational warnings* — "before you try to
   build a panel from EPH 2014 onward, note that PONDII isn't there".
   A learning may *prompt* an insight, but the learning itself is not
@@ -176,7 +176,7 @@ entry, add the entry — don't delete the file.
 
 This convention codifies a gap surfaced during an audit of an
 applied-research project that ran without r2p conventions. The
-project produced excellent insights and a handful of decision records
+project produced excellent evidence and a handful of decision records
 but had no place for tacit warnings — "PONDII didn't exist in 2014
 EPH waves", "asking-vs-transaction price gap is ~10%",
 "housing-share assumption uncertainty bands swing the headline".

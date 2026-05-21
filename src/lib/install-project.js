@@ -19,11 +19,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const FRAMEWORK_ROOT = resolve(__dirname, '../..');
 
 const SCAFFOLDING_DIRS = [
-  'insights',
+  'evidence',
   'wiki',
-  'raw',
+  'wiki/raw',
+  'wiki/raw/scraped',
   'deliverables',
-  'sources',
   'data',
   'data_sources',
   'methods',
@@ -182,20 +182,14 @@ export async function installProject(target) {
     await mkdir(join(target, dir), { recursive: true });
   }
   await copyIfAbsent(
-    join(FRAMEWORK_ROOT, 'templates/insights/INDEX.md'),
-    join(target, 'insights/INDEX.md'),
+    join(FRAMEWORK_ROOT, 'templates/evidence/INDEX.md'),
+    join(target, 'evidence/INDEX.md'),
     target,
   );
   await mirrorDir(join(FRAMEWORK_ROOT, 'templates/wiki'), join(target, 'wiki'), target);
-  await mirrorDir(join(FRAMEWORK_ROOT, 'templates/raw'), join(target, 'raw'), target);
   await mirrorDir(
     join(FRAMEWORK_ROOT, 'templates/deliverables'),
     join(target, 'deliverables'),
-    target,
-  );
-  await mirrorDir(
-    join(FRAMEWORK_ROOT, 'templates/sources'),
-    join(target, 'sources'),
     target,
   );
   await mirrorDir(
@@ -249,13 +243,13 @@ export async function installProject(target) {
     target,
   );
 
-  // 4. sources/seen.jsonl (empty seed — append-only dedup log)
-  const seenPath = join(target, 'sources/seen.jsonl');
+  // 4. wiki/raw/seen.jsonl (empty seed — append-only dedup log)
+  const seenPath = join(target, 'wiki/raw/seen.jsonl');
   if (!(await fileExists(seenPath))) {
     await writeFile(seenPath, '');
-    console.log('  + sources/seen.jsonl (empty seed)');
+    console.log('  + wiki/raw/seen.jsonl (empty seed)');
   } else {
-    console.log('  ~ sources/seen.jsonl (exists, leaving as-is)');
+    console.log('  ~ wiki/raw/seen.jsonl (exists, leaving as-is)');
   }
 
   // 5. CLAUDE.md (only if absent — never overwrite). If one exists, drop the
@@ -308,9 +302,9 @@ export function printNextSteps() {
   console.log('Done. Next steps:');
   console.log('  1. Edit CLAUDE.md to fit your project.');
   console.log('  2. Verify .claude/settings.json hooks list matches what you want enabled.');
-  console.log('  3. Test the insights hook:');
+  console.log('  3. Test the evidence hook:');
   console.log('       touch output/06_test_chart.png   # simulate analysis');
-  console.log('       bash .claude/hooks/check-insights.sh   # should print JSON');
+  console.log('       bash .claude/hooks/check-evidence.sh   # should print JSON');
   console.log('       rm output/06_test_chart.png');
   console.log('');
   console.log('  Adopting a pre-framework project? See docs/r2p-adopt.md in the');

@@ -17,7 +17,7 @@ the title yet, the memo's question is not yet sharp.
 **Audience**: internal Lab + <other researchers, if any>
 **Length**: ~<N> words
 **Linked decision records**: `decisions/YYYY-MM-DD_<slug>.md`, ...
-**Linked insights**: `insights/NN_<slug>.md`, ...
+**Linked evidence**: `evidence/NN_<slug>.md`, ...
 **Linked wiki pages**: `wiki/concepts/<slug>.md`, ...
 
 ---
@@ -154,7 +154,7 @@ out and pointers in.
 -->
 
 ### 7.1 This memo builds on
-- `insights/NN_<slug>.md`
+- `evidence/NN_<slug>.md`
 - `wiki/concepts/<slug>.md`
 - prior memo `deliverables/<slug>/memo.md`
 

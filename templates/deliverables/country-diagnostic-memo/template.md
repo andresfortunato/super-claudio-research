@@ -13,7 +13,7 @@ and come back.
 **Audience**: <e.g. internal Lab + counterpart researcher at <institution>>
 **Length**: ~<N> words body + appendices
 **Linked decision records**: `decisions/YYYY-MM-DD_<slug>.md`, ...
-**Linked insights**: `insights/NN_<slug>.md`, ...
+**Linked evidence**: `evidence/NN_<slug>.md`, ...
 
 ---
 
@@ -84,7 +84,7 @@ data source.
 
 **Figure 1: <assertion-style title>.**
 ![Figure 1](../output/<chart>.png)
-*<2–3 sentences. Source: <dataset>. See `insights/NN_<slug>.md`.*
+*<2–3 sentences. Source: <dataset>. See `evidence/NN_<slug>.md`.*
 
 **Figure 2: <assertion-style title>.**
 ...

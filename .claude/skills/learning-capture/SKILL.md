@@ -5,7 +5,7 @@ description: (r2p) Capture learnings from the current session — gotchas, insig
 
 # Learning Capture
 
-Capture institutional knowledge so future sessions don't repeat mistakes or miss insights. Learnings are the third bucket alongside `insights/` (formal evidence-based findings) and `decisions/` (peer-reviewable methodology calls): they hold the *tacit* gotchas and discoveries — the kind of thing a colleague would warn you about over coffee.
+Capture institutional knowledge so future sessions don't repeat mistakes or miss discoveries. Learnings are the third bucket alongside `evidence/` (formal evidence-based findings) and `decisions/` (peer-reviewable methodology calls): they hold the *tacit* gotchas and discoveries — the kind of thing a colleague would warn you about over coffee.
 
 ## When to use
 
@@ -98,15 +98,15 @@ Bad: `"data error wave fix"` — generic; will misfire on unrelated work.
 
 ## Guidelines
 
-- **One learning per file.** Don't bundle unrelated things. A multi-symptom write-up belongs in `insights/NN_*.md` or a methodology section, not in `learnings/`.
+- **One learning per file.** Don't bundle unrelated things. A multi-symptom write-up belongs in `evidence/NN_*.md` or a methodology section, not in `learnings/`.
 - **Be specific.** "PWT rgdpo inflates oil-exporter productivity by ~40% in 2010–2019 (vs rgdpe)" is useful. "Be careful with PWT" is not.
 - **Include the context that makes it actionable.** A future session reading this learning should know exactly what to do differently — which variable, which year, which sample.
-- **Don't duplicate what belongs in `decisions/` or `insights/`.** A peer-reviewable methodology call (chose `rgdpe` over `rgdpo`) goes in `decisions/`; an evidence-based finding (Argentina's productivity slowdown decomposes 60/40 within/between sectors) goes in `insights/`. A learning is the *gotcha* — the thing you'd want a future session to know *before* it tries the same step.
+- **Don't duplicate what belongs in `decisions/` or `evidence/`.** A peer-reviewable methodology call (chose `rgdpe` over `rgdpo`) goes in `decisions/`; an evidence-based finding (Argentina's productivity slowdown decomposes 60/40 within/between sectors) goes in `evidence/`. A learning is the *gotcha* — the thing you'd want a future session to know *before* it tries the same step.
 - **Severity** (gotchas only): `high` = cost hours of debugging or invalidated a published result; `medium` = cost significant time; `low` = minor surprise worth noting.
 
 ## Boundary with neighboring artifacts
 
-- **`insights/`** is project-wide formal findings: numbered docs (`insights/NN_*.md`), evidence-based, with a chart or panel CSV behind every claim. Learnings don't replace insights — a learning may *prompt* a follow-up insight, but the learning itself is the operational warning, not the citable finding.
+- **`evidence/`** is project-wide formal findings: numbered docs (`evidence/NN_*.md`), evidence-based, with a chart or panel CSV behind every claim. Learnings don't replace evidence — a learning may *prompt* a follow-up evidence doc, but the learning itself is the operational warning, not the citable finding.
 - **`decisions/`** is peer-reviewable methodology calls (`decisions/YYYY-MM-DD_<slug>.md`). A learning that surfaces a methodology choice (use `rgdpe`, not `rgdpo`) graduates to a decision record once the team agrees. The learning records the discovery; the decision record is the citable form.
 - **`brainstorms/`** is decisions-pre-planning (the conversation that produces a `decisions/` record). Learnings are not brainstorms — they're tacit knowledge from execution, not deliberation.
 

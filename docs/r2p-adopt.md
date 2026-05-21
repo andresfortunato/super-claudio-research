@@ -56,7 +56,7 @@ Nothing happens automatically — that's by design.
 ## Preconditions
 
 - `r2p init` has been run. Look for `.claude/conventions/` and the
-  scaffolding directories (`insights/`, `decisions/`, `archive/`, etc.). If
+  scaffolding directories (`evidence/`, `decisions/`, `archive/`, etc.). If
   missing, write a one-line proposal that says "Run `r2p init` first" and
   stop.
 - Run from project root.
@@ -88,22 +88,22 @@ then content peek for ambiguous cases). See the pattern → slot table below.
 
 Findings split into four buckets:
 
-- **Likely raw data** — moves to `raw/<source>/`. Filename has `raw_*`,
-  `_orig`, or sits in a directory called `raw/` already.
+- **Likely raw data** — moves to `wiki/raw/<source>/`. Filename has `raw_*`,
+  `_orig`, or sits in a directory called `wiki/raw/` already.
 - **Likely processed/intermediate** — moves to `data/processed/`. `_v2.csv`,
   `_clean`, `panel_*`, sits in `data/` but not `data/raw/`.
 - **Likely chart/output** — moves to `output/`. `.png`/`.pdf`/`.svg` outside
   `output/`. Suggest a numeric prefix (`output/NN_<slug>`) for sortability if
   the project has more than ~5 charts.
 - **Unclear provenance — researcher decides.** Top-level `.csv` or
-  `.parquet` with no obvious raw/processed marker, files whose name doesn't
+  `.parquet` with no obvious raw-or-processed marker, files whose name doesn't
   match any pattern. List these explicitly under a "researcher decides"
   subheader rather than guessing wrong.
 
 For markdown files outside framework dirs (`README.md`, `NOTES.md`, etc.):
 peek at content. If it reads as **methodology** → flag for audit 3
 (archaeology). If it reads as **findings** (specific numbers, charts
-referenced, "we find") → propose extracting into `insights/NN_<slug>.md`.
+referenced, "we find") → propose extracting into `evidence/NN_<slug>.md`.
 If neither → leave in place and note its presence.
 
 For scripts in `scripts/`, `src/`, `code/`, or `analysis/`: don't propose
@@ -172,10 +172,10 @@ This overlaps with `/research-cleanup`. Adoption is a natural moment to
 confront accumulated cruft, so we run it once here. After adoption, defer
 to `/research-cleanup`. Cross-link in the proposal so the researcher knows.
 
-- **Charts without insights.** For every image under `output/`, `figures/`,
+- **Charts without evidence.** For every image under `output/`, `figures/`,
   `charts/`, or any directory with >5 image files: grep its basename across
   all `.md` files in the project. Zero hits → orphan candidate. Propose
-  either writing a retroactive `insights/NN_<slug>.md` (if the chart is
+  either writing a retroactive `evidence/NN_<slug>.md` (if the chart is
   load-bearing — filename suggests it answers a question) or noting it for
   later cleanup.
 - **Scripts without inbound references.** For every script outside framework
@@ -210,21 +210,21 @@ section so the migration is bisectable.
    diff first.
 3. **Section 3** (decisions/ archaeology) — high-value; doing this early
    surfaces what the project has already settled.
-4. **Section 1** (file moves) — biggest diff; do it in chunks (raw/
+4. **Section 1** (file moves) — biggest diff; do it in chunks (wiki/raw/
    first, then output/, then intermediates).
 5. **Section 4** (orphan analysis) — defer to a separate session, or to
    `/research-cleanup` once you're r2p-native.
 
 After each section, commit with a message like:
 - `adopt: extract methodology calls to decisions/`
-- `adopt: move raw inputs to raw/`
+- `adopt: move raw inputs to wiki/raw/`
 - `adopt: prune CLAUDE.md duplicates now covered by conventions/`
 
 ## 1. File classification
 
-### Likely raw data → `raw/<source>/`
+### Likely raw data → `wiki/raw/<source>/`
 - `data/wb_indicators_2024.csv` (847 KB) → propose
-  `raw/world-bank/wb_indicators_2024.csv`. **Rationale**: filename pattern;
+  `wiki/raw/world-bank/wb_indicators_2024.csv`. **Rationale**: filename pattern;
   treated as source of truth in scripts (no upstream generator).
 
 ### Likely processed/intermediate → `data/processed/`
@@ -238,7 +238,7 @@ After each section, commit with a message like:
 
 ### Unclear provenance — researcher decides
 - `combined_data.csv` (3.2 MB) at root. Could be raw download or derived.
-  **Action**: open and inspect, then move to `raw/` or `data/processed/`.
+  **Action**: open and inspect, then move to `wiki/raw/` or `data/processed/`.
 
 ### Scripts directory
 - `scripts/` exists (14 .py files). Framework doesn't rename. **Action**:
@@ -288,7 +288,7 @@ originating sentence or leave a one-line pointer.
 (Cross-link: `/research-cleanup` is the ongoing-maintenance equivalent.
 This is a one-time sweep at adoption.)
 
-### Charts without insights
+### Charts without evidence
 - `output/explore_07.png`, `output/old_fdi_v3.png` — neither referenced in
   any markdown. **Decide**: keep + write retroactive insight, or move to
   `_archive/`.
@@ -334,7 +334,7 @@ because adoption is a natural moment to confront accumulated cruft.
 
 `/research-cleanup` runs **periodically**, once the project is r2p-native.
 Its scope: *catching newly-accumulated cruft against framework reference
-points* (raw watermark, insights cross-references, recent `Run:` commits in
+points* (raw watermark, evidence cross-references, recent `Run:` commits in
 the analytical-commit-format).
 
 After adoption, do not re-run this doc. Use `/research-cleanup` for
@@ -405,7 +405,7 @@ The audit is about pre-framework cruft, not framework state.
 Apply in priority order. First matching rule wins. If nothing matches,
 classify as "unclear — researcher decides".
 
-### Raw data → `raw/<source>/`
+### Raw data → `wiki/raw/<source>/`
 
 Filename / path patterns:
 
@@ -413,7 +413,7 @@ Filename / path patterns:
 raw_*                       # explicit raw prefix
 *_raw.*                     # explicit raw suffix
 *_orig.*                    # original/unmodified marker
-*/raw/**                    # already in a raw/ subtree
+*/raw/**                    # already in a wiki/raw/ subtree
 data/raw/**
 *_v1.*                      # often the first download
 download_*
@@ -451,7 +451,7 @@ Strengthening:
 - Generated by a script in the repo (grep its filename in scripts/).
 - Sits in a `data/` directory but **not** under `data/raw/`.
 
-If a `data/` directory exists with no `raw/` subdir, treat all data files
+If a `data/` directory exists with no `wiki/raw/` subdir, treat all data files
 as "unclear" rather than guessing — the researcher's organization isn't
 the framework's, and the wrong slot is worse than no slot.
 
@@ -489,8 +489,8 @@ and decide:
   `decisions/YYYY-MM-DD_<slug>.md`.
 - **Findings document** (specific numbers, charts referenced, "we find",
   "shows that", "result:") → propose extracting into
-  `insights/NN_<slug>.md`. Suggest the next free `NN` from
-  `ls insights/ | sort | tail -1`.
+  `evidence/NN_<slug>.md`. Suggest the next free `NN` from
+  `ls evidence/ | sort | tail -1`.
 - **Project README** with mixed methodology + scope + setup → keep README
   in place; flag methodology sections for archaeology, suggest moving
   setup instructions to `project_conventions/` if operational.
@@ -654,7 +654,7 @@ When proposing a `decisions/YYYY-MM-DD_<slug>.md` filename:
 Before running the four audits, gather:
 
 1. **Framework installed?** `test -d .claude/conventions/` and at least
-   3 of the scaffolding dirs (`insights/`, `decisions/`, `archive/`,
+   3 of the scaffolding dirs (`evidence/`, `decisions/`, `archive/`,
    `wiki/`, etc.). If not → write a one-section proposal recommending
    `r2p init` and stop.
 2. **Git status.** `git status --porcelain | head -20`. If non-empty,

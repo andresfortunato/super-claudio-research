@@ -84,8 +84,8 @@ A handoff has to serve three readers at once. Tune the content, not the format.
   handoff persists across them. Old session state is in git history.
 - **No fabricated commit hashes.** If you haven't committed yet, write `(uncommitted)`
   in `last commit on plan branch` and resolve the field at commit time.
-- **Distinct from insights.** Handoff is tactical ("where am I, what's next");
-  insights (`.claude/conventions/insights-logging.md`) are substantive
+- **Distinct from evidence.** Handoff is tactical ("where am I, what's next");
+  evidence (`.claude/conventions/evidence-logging.md`) are substantive
   ("what did the data teach us"). Don't merge them.
 
 ## Closing out

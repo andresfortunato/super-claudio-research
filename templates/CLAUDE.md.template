@@ -32,10 +32,13 @@ project_root/
 ├── notebooks/             # numbered analytical notebooks
 ├── output/                # charts (PNG), metadata (JSON), reports (MD/CSV)
 │                          # opt-in: output/<theme>/ for theme-parallel projects
-├── raw/                   # immutable source materials (papers, downloads, scrapes)
-├── wiki/                  # LLM-owned distilled knowledge — index.md, log.md, pages
-├── insights/              # evidence-based findings doc + INDEX (project-level)
-│                          # opt-in: insights/<theme>/NN_*.md for theme-parallel
+├── wiki/                  # LLM-owned distilled knowledge + immutable raw layer
+│   ├── pages and types/   # sources/, concepts/, entities/, synthesis/
+│   └── raw/               # immutable archive: papers, scrapes, datasets
+│       ├── registry.yaml  # scrape watchlist
+│       └── scraped/       # /scan-sources output, per-slug subdirs
+├── evidence/              # chart-backed findings + INDEX (project-level)
+│                          # opt-in: evidence/<theme>/NN_*.md for theme-parallel
 ├── data_sources/          # external API/dataset reference docs (INDEX + per-source)
 ├── methods/               # operational methodology specs (one folder per method)
 ├── project_conventions/   # project-bespoke style/process rules (visualization, etc.)
@@ -43,7 +46,7 @@ project_root/
 ├── plan/                  # multi-phase implementation plans (gitignored)
 ├── brainstorms/           # decisions-pre-planning, output of /brainstorming (gitignored)
 │                          # opt-in: brainstorms/<theme>/<topic>.md for theme-parallel
-├── learnings/             # tacit gotchas + insights, retrieval-keyed (project-wide)
+├── learnings/             # tacit gotchas + tips, retrieval-keyed (project-wide)
 ├── archive/               # permanent record of completed plans (one .md per plan + index.md)
 ├── internal_docs/         # concept notes, workplans, mission plans, team notes (gitignored)
 ├── literature/            # reference papers + PDFs (gitignored — copyrighted)
@@ -65,20 +68,21 @@ per domain; `INDEX.md` for quick-nav. Read the relevant file on
 demand when work touches the domain. Full protocol:
 `.claude/conventions/project-conventions.md` (read on demand).
 
-## Insights Logging
+## Evidence Logging
 
-After any substantive data analysis: write `insights/NN_<slug>.md` and update
-`insights/INDEX.md`. Projects with multiple parallel lines of inquiry may
-opt into `insights/<theme>/NN_*.md` subfolders (flat layout stays default).
-Full protocol: `.claude/conventions/insights-logging.md` (read on demand).
-A Stop hook nudges if artifacts were produced without an insights doc.
+After any substantive data analysis: write `evidence/NN_<slug>.md` and update
+`evidence/INDEX.md`. Projects with multiple parallel lines of inquiry may
+opt into `evidence/<theme>/NN_*.md` subfolders (flat layout stays default).
+Full protocol: `.claude/conventions/evidence-logging.md` (read on demand).
+A Stop hook nudges if analysis artifacts were produced without an evidence doc.
 
 ## Wiki
 
 Distilled, queryable project knowledge in `wiki/`, built from immutable
-sources in `raw/`. Schema and rules: `wiki/SCHEMA.md`. Use `/wiki-ingest
-<raw/path>` to add a source; `/wiki-lint` to audit. Claude owns `wiki/`;
-researchers may correct factual errors. See `wiki/README.md` for orientation.
+sources in `wiki/raw/`. Schema and rules: `wiki/SCHEMA.md`. Use
+`/wiki-ingest <wiki/raw/path>` to add a source; `/wiki-lint` to audit.
+Claude owns the wiki; researchers may correct factual errors. See
+`wiki/README.md` for orientation.
 
 ## Script Headers
 
@@ -90,7 +94,7 @@ how `/verify` and future-you trace what produced any given output.
 ## Analytical Commit Format
 
 Commits that produce or modify analytical artifacts under `output/`,
-`insights/`, or `deliverables/<name>/charts/` include `Run:` and `Out:`
+`evidence/`, or `deliverables/<name>/charts/` include `Run:` and `Out:`
 lines in the message so `git log -- output/<file>` resolves to a script.
 Full protocol: `.claude/conventions/analytical-commit-format.md`
 (read on demand).
@@ -135,7 +139,7 @@ divergences, sample-restriction side effects) live at
 The `retrieve-learnings.sh` UserPromptSubmit hook surfaces relevant
 learnings when ≥2 trigger keywords appear in a prompt; the
 `precompact-handoff.sh` hook nudges to capture surprises before
-context is compacted. Distinct from `insights/` (formal findings)
+context is compacted. Distinct from `evidence/` (formal findings)
 and `decisions/` (peer-reviewable methodology calls). Full protocol:
 `.claude/conventions/learning-capture.md` (read on demand).
 
@@ -149,11 +153,11 @@ load-bearing changes to `decisions/`. Full protocol:
 
 ## Source Registry
 
-Tracked-source watchlist in `sources/registry.yaml` plus dedup ledger
-`sources/seen.jsonl`. Use `/scan-sources` to refresh entries due for
+Tracked-source watchlist in `wiki/raw/registry.yaml` plus dedup ledger
+`wiki/raw/seen.jsonl`. Use `/scan-sources` to refresh entries due for
 re-scrape; `/scan-sources --slug=<slug>` for one source;
 `/scan-sources --category=<cat>` to filter; `--force` to bypass the
-freq window. Scraped content lands in `raw/sources/<slug>/...md` and
+freq window. Scraped content lands in `wiki/raw/scraped/<slug>/...md` and
 requires explicit `/wiki-ingest` for wiki promotion. Full protocol:
 `.claude/conventions/source-registry.md` (read on demand).
 
@@ -184,7 +188,7 @@ team-internal scoping notes — live in `internal_docs/` (gitignored by
 the framework). Distinct from `brainstorms/` (methodology
 deliberation) and `decisions/` (citable methodology calls). If
 something in here becomes citable, copy the extract to `decisions/`
-or `raw/` rather than linking the gitignored path. See
+or `wiki/raw/` rather than linking the gitignored path. See
 `internal_docs/README.md` for orientation.
 
 ## Literature
@@ -192,9 +196,9 @@ or `raw/` rather than linking the gitignored path. See
 Reference papers, articles, and book chapters in `literature/` —
 gitignored by the framework (large PDFs, often copyrighted). Pull a
 paper into the wiki with `/wiki-ingest literature/<file>.pdf`.
-Distinct from `raw/` (project-specific source materials). Bibliography
-files can be committed by exception (`!literature/refs.bib`). See
-`literature/README.md` for orientation.
+Distinct from `wiki/raw/` (project-specific committed source materials).
+Bibliography files can be committed by exception (`!literature/refs.bib`).
+See `literature/README.md` for orientation.
 
 ## Slides
 
@@ -210,4 +214,3 @@ research-to-policy framework will install more over time. Each
 convention ships with its own pointer template; copy the relevant
 block in here and trim to project specifics.
 -->
-

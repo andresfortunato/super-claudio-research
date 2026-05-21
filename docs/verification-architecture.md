@@ -13,7 +13,7 @@ The three layers, ordered by cost:
 
 | Layer                    | Trigger          | Cost budget | Cadence                              |
 |--------------------------|------------------|-------------|--------------------------------------|
-| Insights-logging Stop hook | Automatic, end-of-turn | ~100 tok/turn | Every turn that touches `output/0*` |
+| Evidence-logging Stop hook | Automatic, end-of-turn | ~100 tok/turn | Every turn that touches `output/0*` |
 | `/verify`                | User-invoked     | ≤2k tokens  | Per-artifact, before publishing      |
 | `/deliverable-review`    | User-invoked     | ≤12k tokens | Per advanced draft, before sending   |
 
@@ -35,7 +35,7 @@ broad enough to catch real defects (and produce noise on every turn),
 or narrow enough to be quiet (and miss most real defects). The three
 layers each take a different cut at the verification problem:
 
-- **Insights Stop hook** catches *missing distillation*. You ran the
+- **Evidence Stop hook** catches *missing distillation*. You ran the
   analysis but didn't write down what you learned.
 - **`/verify`** catches *artifact-level defects*. The regression's
   signs flipped, the chart's axis is wrong, the paragraph cites a
@@ -84,14 +84,14 @@ JSONL substrate. Conventions cost zero install and rely on git, which
 the project already uses. The discipline is on the researcher; `/verify`
 flags missing headers when it can't trace an artifact.
 
-## Layer 1: Insights-logging Stop hook
+## Layer 1: Evidence-logging Stop hook
 
-**Existing — covered in `docs/insights-mechanism.md`.**
+**Existing — covered in `docs/evidence-mechanism.md`.**
 
-A bash Stop hook (`check-insights.sh`) that runs at every turn-end
+A bash Stop hook (`check-evidence.sh`) that runs at every turn-end
 and silently exits unless: (a) uncommitted analysis artifacts are
 present in `output/0*` or `methods/`, AND (b) no new
-`insights/NN_*.md` is staged. When both fire, it emits a one-shot
+`evidence/NN_*.md` is staged. When both fire, it emits a one-shot
 `additionalContext` reminder.
 
 Cost: ~100 tokens per turn (and zero on most turns).
@@ -177,10 +177,10 @@ Picture a researcher's day:
    in `output/`. No automatic log; the researcher commits when done with
    the change, including `Run:` and `Out:` lines per the
    `analytical-commit-format` convention.
-2. **End-of-turn** — Claude's reply ends. The insights Stop hook fires;
+2. **End-of-turn** — Claude's reply ends. The evidence Stop hook fires;
    sees `output/06c_fdi_at_entry.png` is uncommitted but no
-   `insights/0*.md` is staged. Emits a one-shot reminder. Claude writes
-   `insights/03_fdi_entry_threshold.md`. Both files committed together.
+   `evidence/0*.md` is staged. Emits a one-shot reminder. Claude writes
+   `evidence/03_fdi_entry_threshold.md`. Both files committed together.
 3. **Before publishing the chart externally** — the researcher types
    `/verify output/06c_fdi_at_entry.png`. The skill picks four
    chart-menu checks (axis sanity, provenance, source citation,
@@ -245,7 +245,7 @@ artifact-level (use `/verify`) or it's deliverable-level (use
 ## Tradeoffs accepted
 
 - **User-invoked is opt-in.** A researcher who never types `/verify`
-  gets only the insights Stop hook. Trade: predictable cost vs
+  gets only the evidence Stop hook. Trade: predictable cost vs
   opt-in coverage. Accepted because mandatory verification at high
   cost (always-fire `/deliverable-review`) is far worse.
 - **The check menus in `/verify` are not exhaustive.** They catch
@@ -289,7 +289,7 @@ artifact-level (use `/verify`) or it's deliverable-level (use
 ## Provenance
 
 The three-layer structure adapts patterns from two sources:
-- **Conditional Stop hook** — the existing `insights-logging` pattern,
+- **Conditional Stop hook** — the existing `evidence-logging` pattern,
   preserved unchanged.
 - **Forked parallel review** — Pedro Cossio's seven-pass deliverable
   review, refitted to policy-research lenses (substituting

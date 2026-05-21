@@ -28,13 +28,13 @@ A plan exists in `plan/plan-[name]/` with `plan.md` and at least one phase file.
 
 ### The artifact is ground truth
 
-The plan captures the analysis intent; what landed in `output/` (charts, tables, .meta.json) and `insights/` (evidence-based findings) is reality. When they diverge, the artifact wins for what was actually measured; the plan wins for intent and constraints. The plan tells you *which* artifacts and *why* — the artifact tells you *what the data actually showed*.
+The plan captures the analysis intent; what landed in `output/` (charts, tables, .meta.json) and `evidence/` (evidence-based findings) is reality. When they diverge, the artifact wins for what was actually measured; the plan wins for intent and constraints. The plan tells you *which* artifacts and *why* — the artifact tells you *what the data actually showed*.
 
 ### Verify with evidence
 
 Every task has a done state — the script runs end-to-end, sign-of-coefficients holds against the brainstorm prediction, the chart re-renders byte-identical (or sign-and-magnitude-identical for stochastic content), the source citation is present, the row count reconciles. Don't mark a task complete without running its verification. Unchecked tasks compound: if task 2 is subtly wrong and task 3 builds on it, you've wasted two tasks of context instead of catching it early.
 
-Default verification when the plan doesn't specify: does the script run end-to-end with the same seed? Do diagnostic counts in `methods/<slug>/rule.md` still match the rule? Do downstream insights still cite the artifact correctly? For per-artifact sanity (one regression, one chart, one paragraph) use `/verify` (≤2k tokens). For last-mile multi-lens audit on advanced deliverable drafts use `/deliverable-review` (≤12k tokens).
+Default verification when the plan doesn't specify: does the script run end-to-end with the same seed? Do diagnostic counts in `methods/<slug>/rule.md` still match the rule? Do downstream evidence docs still cite the artifact correctly? For per-artifact sanity (one regression, one chart, one paragraph) use `/verify` (≤2k tokens). For last-mile multi-lens audit on advanced deliverable drafts use `/deliverable-review` (≤12k tokens).
 
 ### Escalate what matters, work around what doesn't
 
@@ -163,7 +163,7 @@ touch plan/plan-[name]/.completed
 
 Do NOT skip this step. Do NOT stop the session before writing the marker. The `.completed` file is what triggers archival — without it, the plan sits in `plan/` forever.
 
-After writing the marker, the next Stop event fires `check-insights.sh` Tripwire 1 (BLOCKING). The hook writes a `.archival-triggered` sentinel for loop-protection and instructs you to launch the **archivist** subagent (defined in `.claude/agents/archivist.md`). The archivist is the **only** post-`.completed` agent — there is no separate cleanup pass; user-invoked `/research-cleanup` covers that boundary.
+After writing the marker, the next Stop event fires `check-evidence.sh` Tripwire 1 (BLOCKING). The hook writes a `.archival-triggered` sentinel for loop-protection and instructs you to launch the **archivist** subagent (defined in `.claude/agents/archivist.md`). The archivist is the **only** post-`.completed` agent — there is no separate cleanup pass; user-invoked `/research-cleanup` covers that boundary.
 
 The archivist:
 - Reads `plan.md`, `phases/phase-*.md`, `handoff.md`, `log.md`

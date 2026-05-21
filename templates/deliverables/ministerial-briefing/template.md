@@ -95,7 +95,7 @@ briefing is built on sand — write the memo first.
 -->
 
 - `deliverables/<country-diagnostic>/memo.md` — full diagnostic, 12 pages
-- `insights/NN_<slug>.md` — supporting numbers
+- `evidence/NN_<slug>.md` — supporting numbers
 - `decisions/YYYY-MM-DD_<slug>.md` — methodology choices
 
 ---

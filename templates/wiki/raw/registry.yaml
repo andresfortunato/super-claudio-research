@@ -1,10 +1,10 @@
-# sources/registry.yaml — the project's source watchlist.
+# wiki/raw/registry.yaml — the project's source watchlist.
 #
 # This file is the single authority for what /scan-sources fetches. Add
 # entries by hand; /scan-sources will only update `last_scraped`.
 #
 # Required fields per entry:
-#   slug             — short kebab-case id (also the directory name under raw/sources/)
+#   slug             — short kebab-case id (also the directory name under wiki/raw/scraped/)
 #   url              — the page to fetch
 #   category         — one of: investment | company | innovation | infrastructure | policy | news | other
 #   freq             — one of: daily | weekly | monthly | adhoc
@@ -14,7 +14,7 @@
 #   notes            — free-text rationale; null acceptable but discouraged
 #
 # See `.claude/conventions/source-registry.md` for the full protocol and
-# `templates/sources/README.md` for how to register a new source.
+# `wiki/raw/README.md` for how to register a new source.
 #
 # The four examples below are commented out. Uncomment and edit them, or
 # delete and start fresh. They are intentionally generic — replace with your

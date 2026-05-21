@@ -43,7 +43,7 @@ research:
 - **`output/` for parallel-agent scratch.** scc plans rarely run with
   parallel agents; ours do (deliverable review fan-out, ingestion runs).
   The `output/` subdir gives parallel agents a scratch space that doesn't
-  pollute `insights/` or `methods/`.
+  pollute `evidence/` or `methods/`.
 
 ## Why project-root vs `quality_reports/plans/`
 
@@ -78,10 +78,10 @@ than leaving it to ad-hoc placement.
 
 ## What this does NOT do
 
-- **It does not replace insights-logging.** Plans describe intent and
-  scope; insights describe what the data taught you. A plan whose
+- **It does not replace evidence-logging.** Plans describe intent and
+  scope; evidence describes what the data taught you. A plan whose
   verification log says "phase 3 done" is not a substitute for the
-  `insights/NN_*.md` doc that records the substantive findings.
+  `evidence/NN_*.md` doc that records the substantive findings.
 - **It does not enforce a planning-before-execution norm at runtime.** A
   Stop hook could detect "edits in `notebooks/` without a plan" and nudge,
   but that would punish legitimate exploratory work. We rely on the

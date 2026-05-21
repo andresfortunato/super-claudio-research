@@ -30,7 +30,7 @@ What's missing is a place for **load-bearing project knowledge** that:
 The pattern adopted here is Andrej Karpathy's three-layer wiki:
 
 ```
-raw/        immutable archive (papers, scrapes, datasets)
+wiki/raw/        immutable archive (papers, scrapes, datasets)
 wiki/       distilled, schema-conforming pages (LLM-owned)
 SCHEMA.md   the rules the LLM follows when writing the distilled layer
 ```
@@ -46,7 +46,7 @@ preferences — they're forcing functions against drift.
 
 | Type      | Budget | Why                                                          |
 |-----------|--------|--------------------------------------------------------------|
-| source    | 300    | A source page is a *descriptor*, not a copy. Anything longer means the page is duplicating `raw/`. |
+| source    | 300    | A source page is a *descriptor*, not a copy. Anything longer means the page is duplicating `wiki/raw/`. |
 | concept   | 800    | A concept is a claim with evidence. 800 words = ~3-5 paragraphs of claim + evidence + caveats. Beyond that, the concept is two concepts. |
 | entity    | 600    | Entities are reference cards. They aggregate aliases, dates, and the project's reasons for caring. They should not become essays. |
 | synthesis | (none) | Synthesis pages aggregate across ≥3 sources to answer a question. Capping length would defeat the purpose. Instead, require `last_condensed` so they can't quietly rot. |
@@ -58,7 +58,7 @@ synthesis — it looks current and isn't.
 
 ## Three operations
 
-### Ingest (`/wiki-ingest <raw/path>`)
+### Ingest (`/wiki-ingest <wiki/raw/path>`)
 
 Explicit, never automatic. The researcher decides which raw files become
 load-bearing knowledge. Auto-ingest would silently bloat the wiki with
@@ -91,10 +91,10 @@ Lint emits a markdown report; the researcher decides what to act on.
 
 ## What this does NOT do
 
-- **No auto-ingest.** Writes to `raw/` do not trigger `/wiki-ingest`. The
+- **No auto-ingest.** Writes to `wiki/raw/` do not trigger `/wiki-ingest`. The
   researcher controls what's load-bearing.
-- **No live web fetches.** The wiki is built from `raw/`; new sources land
-  in `raw/` via the `web-scraping` skill or `/scan-sources` (Phase 7).
+- **No live web fetches.** The wiki is built from `wiki/raw/`; new sources land
+  in `wiki/raw/` via the `web-scraping` skill or `/scan-sources` (Phase 7).
 - **No automatic conflict resolution.** Lint surfaces contradictions; the
   researcher reconciles by editing pages or adding a synthesis.
 - **No versioning beyond git.** The wiki is plain markdown; git is the
@@ -133,8 +133,8 @@ Lint emits a markdown report; the researcher decides what to act on.
   enforce the new budget, update `wiki-ingest/SKILL.md` to know when to
   produce it.
 - **Plug in `/scan-sources`.** Phase 7 lands continuous-scrape content in
-  `raw/sources/<slug>/`. The ingest skill reads those files the same way
-  it reads any other `raw/` content — no changes needed at the wiki layer.
+  `wiki/raw/scraped/<slug>/`. The ingest skill reads those files the same way
+  it reads any other `wiki/raw/` content — no changes needed at the wiki layer.
 - **Subagent ingest.** For large sources (a 400-page report), `/wiki-ingest`
   can fan out to a subagent that reads chunks and proposes pages, with
   the parent skill doing the merge. Not in v1; the seam is there.

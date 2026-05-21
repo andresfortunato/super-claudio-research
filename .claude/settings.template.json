@@ -1,5 +1,5 @@
 {
-  "_comment": "Copy this to .claude/settings.json in your research project to enable framework hooks. Skills installed under .claude/skills/<name>/SKILL.md are auto-discovered by Claude Code. Stop nudges when analysis evidence appears without an insights doc; UserPromptSubmit surfaces relevant learnings; PreCompact reminds to refresh the active plan handoff and capture session learnings.",
+  "_comment": "Copy this to .claude/settings.json in your research project to enable framework hooks. Skills installed under .claude/skills/<name>/SKILL.md are auto-discovered by Claude Code. Stop nudges when analysis artifacts appear without an evidence doc; UserPromptSubmit surfaces relevant learnings; PreCompact reminds to refresh the active plan handoff and capture session learnings.",
   "hooks": {
     "Stop": [
       {
@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/check-insights.sh"
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/check-evidence.sh"
           }
         ]
       }

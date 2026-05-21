@@ -1,7 +1,7 @@
 # Analytical Commit Format — Protocol
 
 **Trigger**: Any commit that produces or modifies analytical artifacts
-under `output/`, `insights/`, or `deliverables/<name>/charts/`. The
+under `output/`, `evidence/`, or `deliverables/<name>/charts/`. The
 commit message includes `Run:` and `Out:` lines so future-you can trace
 "what produced this chart" through `git log` alone.
 
@@ -64,7 +64,7 @@ Out: output/12a_growth_path.png, output/12b_sector_shares.png, output/12c_fdi_fl
 ## When this convention applies
 
 - Any commit touching `output/*` produced by an analytical script.
-- Any commit touching `insights/NN_<slug>.md` (the insights doc records evidence; the commit should record what ran to produce it — frequently the underlying analytical commit and the insights commit are the same).
+- Any commit touching `evidence/NN_<slug>.md` (the evidence doc records evidence; the commit should record what ran to produce it — frequently the underlying analytical commit and the evidence commit are the same).
 - Any commit touching `deliverables/<name>/charts/*` or charts pulled from `output/` into a deliverable.
 
 When this convention does **not** apply:

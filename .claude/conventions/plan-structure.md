@@ -80,7 +80,7 @@ verification in `plan.md` should be **domain-shaped**:
 - **Breakpoint alignment** ("the structural break lands within ±1 year of
   the privatization reform date").
 - **Source citation present** ("every claim in the memo references either
-  an `insights/NN_*.md` doc or a `wiki/` page").
+  an `evidence/NN_*.md` doc or a `wiki/` page").
 - **Reproducibility** ("script has a valid header; commit message has
   `Run:`/`Out:` lines per the analytical-commit-format convention;
   rerunning produces the same artifact hash").
@@ -107,7 +107,7 @@ its own and survives plan close-out.
   genealogy survives plan close-out.
 - **`output/` is scratch.** Parallel agents may stage intermediate files
   there; gitignore or clean on plan close. Do not let it become a shadow
-  `insights/`.
+  `evidence/`.
 
 ## Completion and archival
 
@@ -119,7 +119,7 @@ researcher has confirmed there is no remaining work. At that point:
    from a "✅ COMPLETE" line in `handoff.md` (which would mis-fire on
    intermediate phase-completion summaries).
 2. **Stop hook fires.** On the next Stop event, the
-   `check-insights.sh` hook (Tripwire 1) finds the marker, writes a
+   `check-evidence.sh` hook (Tripwire 1) finds the marker, writes a
    `.archival-triggered` sentinel, and emits a Stop-blocking instruction
    to launch the **archivist** subagent
    (`~/.claude/agents/archivist.md`).

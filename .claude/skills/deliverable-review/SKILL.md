@@ -61,7 +61,7 @@ runs.
 ### 1. Data validity
 
 Are the numbers in the deliverable real? Trace every numeric claim
-back to `output/`, `insights/NN_*.md`, or a cited external source.
+back to `output/`, `evidence/NN_*.md`, or a cited external source.
 Flag: numbers without a chain of evidence; numbers that disagree
 with the underlying CSV or regression JSON; outdated numbers
 (supporting file has a more recent commit than the deliverable's
@@ -144,7 +144,7 @@ without telling the user.
    the same turn.** Each subagent gets:
    - the deliverable path,
    - the lens brief (one of the seven sections above),
-   - the relevant supporting files (`output/`, `insights/`,
+   - the relevant supporting files (`output/`, `evidence/`,
      `wiki/index.md`, the deliverable profile),
    - a strict ≤1.5k-token budget per lens (so 7 lenses × 1.5k ≈ 10.5k,
      leaving ~1.5k for the synthesizer).
@@ -247,7 +247,7 @@ Skill will:
    Found. Read recommended lenses: all seven.
 3. Spawn 7 parallel subagents via Task — one per lens — each with
    the deliverable path, the lens brief, and pointers to
-   `insights/INDEX.md`, `wiki/index.md`. Each capped at 1.5k tokens.
+   `evidence/INDEX.md`, `wiki/index.md`. Each capped at 1.5k tokens.
 4. Receive 7 lens reports.
 5. Synthesize: 3 cross-lens agreements (data validity + framing both
    flagged a stale chart citation; identification + peer-Lab both

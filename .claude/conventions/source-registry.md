@@ -8,21 +8,22 @@ edits are manual; scraping is invoked via `/scan-sources`.
 This convention defines the **single source of truth** for what gets
 periodically scraped. There are no free-form bookmarks, no cron jobs
 crawling the web, no LLM-discovers-its-own-sources. A URL gets
-re-fetched only if it is listed in `sources/registry.yaml`.
+re-fetched only if it is listed in `wiki/raw/registry.yaml`.
 
 ## Where the registry lives
 
-- Single file: `sources/registry.yaml` at the project root.
-- Sidecar: `sources/seen.jsonl` — append-only dedup log of every
+- Single file: `wiki/raw/registry.yaml` (collocated with the
+  immutable raw layer that holds the scraped output).
+- Sidecar: `wiki/raw/seen.jsonl` — append-only dedup log of every
   fetched item's content hash. Written by `/scan-sources`; never edited
   by hand.
 - Both files are **committed**. The registry is project-shared
   knowledge: every researcher on the engagement should know what's
   being tracked. The seen-log is committed too so dedup survives a
   fresh clone.
-- Scraped output lands under `raw/sources/<slug>/YYYY-MM-DD_<title-slug>.md`,
-  one file per fetched item. Governed by `raw/`'s immutability rule
-  (see `templates/raw/README.md`).
+- Scraped output lands under `wiki/raw/scraped/<slug>/YYYY-MM-DD_<title-slug>.md`,
+  one file per fetched item. Governed by `wiki/raw/`'s immutability rule
+  (see `wiki/raw/README.md`).
 
 ## Registry schema
 
@@ -30,7 +31,7 @@ YAML list, one entry per source. Required fields per entry:
 
 | field             | type   | meaning                                                                 |
 |-------------------|--------|-------------------------------------------------------------------------|
-| `slug`            | string | short kebab-case identifier; used as directory name under `raw/sources/` |
+| `slug`            | string | short kebab-case identifier; used as directory name under `wiki/raw/scraped/` |
 | `url`             | string | the page to fetch                                                       |
 | `category`        | enum   | one of `investment` \| `company` \| `innovation` \| `infrastructure` \| `policy` \| `news` \| `other` |
 | `freq`            | enum   | one of `daily` \| `weekly` \| `monthly` \| `adhoc`                       |
@@ -77,7 +78,7 @@ Pick the cheapest method that works. Upgrade only when the cheap one breaks.
 
 ## Scraped-content frontmatter
 
-Every file `/scan-sources` writes to `raw/sources/<slug>/YYYY-MM-DD_<title-slug>.md`
+Every file `/scan-sources` writes to `wiki/raw/scraped/<slug>/YYYY-MM-DD_<title-slug>.md`
 carries this YAML frontmatter:
 
 ```yaml
@@ -97,14 +98,14 @@ boilerplate (nav, footer, ads).
 
 ## Dedup — how it works
 
-Same URL fetched twice should not produce two files in `raw/sources/<slug>/`.
+Same URL fetched twice should not produce two files in `wiki/raw/scraped/<slug>/`.
 The dedup key is `content_sha256` — the sha256 of the **post-extraction
 body** (not the raw HTML, which is volatile due to ads and tracking).
 
-`sources/seen.jsonl` is the dedup ledger. One JSON object per line:
+`wiki/raw/seen.jsonl` is the dedup ledger. One JSON object per line:
 
 ```json
-{"slug": "investment-news-cambodia", "url": "https://example.com/article", "content_sha256": "9f1c...e3a4", "scraped_at": "2026-05-05T14:32:11Z", "raw_path": "raw/sources/investment-news-cambodia/2026-05-05_new-port-deal.md"}
+{"slug": "investment-news-cambodia", "url": "https://example.com/article", "content_sha256": "9f1c...e3a4", "scraped_at": "2026-05-05T14:32:11Z", "raw_path": "wiki/raw/scraped/investment-news-cambodia/2026-05-05_new-port-deal.md"}
 ```
 
 `/scan-sources` checks `seen.jsonl` before writing each file. If
@@ -147,11 +148,11 @@ The registry is a small amount of typing for a lot of structure.
 - **The registry is the only authority.** A URL that isn't in the
   registry should not be scraped by `/scan-sources`. One-off scrapes
   for a specific question go through the `web-scraping` skill directly
-  and land at `raw/<date>_<slug>.md` (loose), not under `raw/sources/`.
+  and land at `wiki/raw/<date>_<slug>.md` (loose), not under `wiki/raw/scraped/`.
 - **`last_scraped` is hook-maintained.** Never edit by hand. If a
   source's last fetch was bad and you want to re-fire, use
   `/scan-sources --slug=<slug> --force`.
-- **`sources/seen.jsonl` is append-only.** Never delete rows. If you
+- **`wiki/raw/seen.jsonl` is append-only.** Never delete rows. If you
   truly want to re-ingest a duplicate, use `--force` and accept the
   duplicate-file noise; the seen-log is the audit trail.
 - **Commit registry edits with the rationale.** A new entry's `notes`
@@ -163,9 +164,9 @@ The registry is a small amount of typing for a lot of structure.
 
 ## Hand-off to the wiki
 
-`/scan-sources` lands content in `raw/sources/<slug>/...md`. It does
+`/scan-sources` lands content in `wiki/raw/scraped/<slug>/...md`. It does
 **not** auto-ingest into `wiki/`. Promotion to load-bearing knowledge
-requires explicit `/wiki-ingest <raw/sources/<slug>/<file>.md>`. This
+requires explicit `/wiki-ingest <wiki/raw/scraped/<slug>/<file>.md>`. This
 is intentional: scraped content should not silently shape the wiki's
 claims. The researcher curates.
 

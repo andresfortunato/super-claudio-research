@@ -108,7 +108,7 @@ whose claims age out should adopt the pattern.
 
 ### 1. The convention file (`.claude/conventions/data-sources.md`)
 
-Documents the boundary with `raw/sources/`, `wiki/concepts/`,
+Documents the boundary with `wiki/raw/scraped/`, `wiki/concepts/`,
 and `data/README.md`; the required sections per doc; the
 headline-anchor discipline; the INDEX schema; the naming
 pattern; and the recipe for adding a source. Read on demand by
@@ -175,11 +175,11 @@ researcher running `/verify` against a chart that depends on an
 IMF figure can re-check the doc's anchor as part of the same
 session.
 
-## Boundary with `raw/sources/` (revisited)
+## Boundary with `wiki/raw/scraped/` (revisited)
 
 The two folders are easy to confuse. The clearest rule:
 
-- `raw/sources/<slug>/` is *content fetched from a tracked
+- `wiki/raw/scraped/<slug>/` is *content fetched from a tracked
   URL*, governed by `source-registry`. Files are markdown,
   written by `/scan-sources`, with frontmatter (url,
   scraped_at, content hash). The folder is automated.
@@ -189,7 +189,7 @@ The two folders are easy to confuse. The clearest rule:
   The folder is curated.
 
 A `data_sources/imf_sdmx_api.md` documents how to query an API.
-A `raw/sources/policy-bulletin/2026-05-05_central-bank-rate.md`
+A `wiki/raw/scraped/policy-bulletin/2026-05-05_central-bank-rate.md`
 is a scraped policy announcement. They never overlap — but
 they both contribute to the project's evidence base, the former
 by making external data legible, the latter by preserving

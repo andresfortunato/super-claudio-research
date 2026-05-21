@@ -1,14 +1,14 @@
-# Insights Logging — Protocol
+# Evidence Logging — Protocol
 
 **Trigger**: After any data-analysis session, phase, or implementation step
 that produces evidence (charts, panels, comparisons, regressions, decompositions).
 
-## Where insights live
+## Where evidence lives
 
-- Per-doc file: `insights/NN_<short_slug>.md` (e.g. `insights/02_phase3b_bilateral_fdi.md`).
+- Per-doc file: `evidence/NN_<short_slug>.md` (e.g. `evidence/02_phase3b_bilateral_fdi.md`).
 - Numbering is **sequential across the whole project**, regardless of plan/phase.
-  Use `ls insights/ | sort` to find the next free `NN`.
-- Index: `insights/INDEX.md` — one row per insight in a markdown table:
+  Use `ls evidence/ | sort` to find the next free `NN`.
+- Index: `evidence/INDEX.md` — one row per evidence doc in a markdown table:
   `| NN | [Title](NN_slug.md) | YYYY-MM-DD | source |` (add a `theme`
   column if the project uses theme subfolders — see below).
 
@@ -20,7 +20,7 @@ collide ("which theme is `07_` about?"). The opt-in alternative is
 a one-level subfolder per theme:
 
 ```
-insights/
+evidence/
 ├── INDEX.md
 ├── 01_overall_macro_priors.md          # cross-cutting; lives at top level
 ├── spatial-equilibrium/
@@ -40,10 +40,10 @@ Rules:
 - **Numbering can be per-theme or global.** Per-theme (`01_`, `02_`
   inside each subfolder) is usually less friction; pick one shape
   per project and stay consistent.
-- **Cross-cutting insights stay flat.** When a finding spans themes,
-  put it at `insights/NN_*.md` — don't force it into one theme's
+- **Cross-cutting evidence stays flat.** When a finding spans themes,
+  put it at `evidence/NN_*.md` — don't force it into one theme's
   folder.
-- **Hooks accept both shapes.** `check-insights.sh` globs flat and
+- **Hooks accept both shapes.** `check-evidence.sh` globs flat and
   subfolder paths; you can adopt or migrate gradually without
   retrofitting.
 
@@ -57,19 +57,19 @@ Rationale and tradeoffs: `docs/theme-parallel-mechanism.md`.
 **Source**: <plan/phase, notebook, or script that produced these>
 **Data**: <datasets used — e.g. WB BX.KLT.DINV.WD.GD.ZS, output/06b_panel.csv>
 
-## Insights
+## Findings
 1. **<one-sentence claim>** — <specific number/comparison that proves it>. <Implication.>
 2. ...
 
 ## Charts referenced
-- `output/06c_fdi_at_entry.png` — supports insight 1, 2
+- `output/06c_fdi_at_entry.png` — supports finding 1, 2
 - ...
 
-## What this insight does NOT establish
+## What this evidence does NOT establish
 - ... (scope honesty)
 ```
 
-## What counts as a good insight
+## What counts as good evidence
 
 - A **specific number** or comparison the reader can cite
   (`Cambodia FDI/GDP = 9.6% in 2024 — above every sustainer's at-entry value except CZE 2001 (8.3%)`).
@@ -78,23 +78,26 @@ Rationale and tradeoffs: `docs/theme-parallel-mechanism.md`.
 
 ## What doesn't count
 
-- "We built a chart of X." (process, not insight)
-- Generic stylized facts already in CLAUDE.md or prior insight docs.
+- "We built a chart of X." (process, not finding)
+- Generic stylized facts already in CLAUDE.md or prior evidence docs.
 - Anything without a number, percentile, or named comparison.
 
 ## How many
 
-3–8 insights per doc. Fewer than 3 means the analysis wasn't deep enough;
+3–8 findings per doc. Fewer than 3 means the analysis wasn't deep enough;
 more than 8 means padding. Be ruthlessly relevant.
 
 ## Discipline
 
-- **One commit** updates `insights/NN_*.md` AND `insights/INDEX.md` together —
+- **One commit** updates `evidence/NN_*.md` AND `evidence/INDEX.md` together —
   the index is what makes the corpus searchable.
-- **Never overwrite** a previous insight doc — append a new numbered one if a
+- **Never overwrite** a previous evidence doc — append a new numbered one if a
   finding gets revised, and reference the prior doc in the new one.
-- Insights persist across plans; they're a project-level asset, not a
+- Evidence persists across plans; it's a project-level asset, not a
   plan-level artifact.
-- The insights doc is **distinct from the handoff** — handoff is tactical
-  ("what's done, what's next"); insight is substantive ("what we learned
+- The evidence doc is **distinct from the handoff** — handoff is tactical
+  ("what's done, what's next"); evidence is substantive ("what we learned
   from the data").
+- **Distinct from `learnings/`** — evidence is *what the data shows*;
+  learnings are *operational gotchas we tripped over* (e.g. a survey
+  vintage that's missing a variable). See `.claude/conventions/learning-capture.md`.

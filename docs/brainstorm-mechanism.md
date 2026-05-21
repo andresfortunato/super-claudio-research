@@ -30,7 +30,7 @@ an exploratory brainstorm (summary only).
 Documents the file shape (`brainstorms/<topic>.md`), the five-section
 output structure (Problem / Decisions / Research / Open Questions /
 Constraints), the optional "Decision records to file" section, and the
-boundary with `decisions/`, `plan/`, `insights/`, and `/verify`. Read on
+boundary with `decisions/`, `plan/`, `evidence/`, and `/verify`. Read on
 demand by Claude when invoked by the skill or when the researcher edits
 a brainstorm.
 

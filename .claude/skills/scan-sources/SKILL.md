@@ -1,24 +1,24 @@
 ---
 name: scan-sources
-description: (r2p) Read sources/registry.yaml and re-scrape any entry due for re-fetch (now > last_scraped + freq), delegating to the web-scraping skill, deduping by content hash against sources/seen.jsonl, and landing new content in raw/sources/<slug>/. Use when the user says "scan sources", "/scan-sources", "/scan-sources --slug=<slug>", "/scan-sources --category=<cat>", "/scan-sources --force", or otherwise asks to refresh the project's tracked sources. Always explicit; never auto-fires on a clock.
+description: (r2p) Read wiki/raw/registry.yaml and re-scrape any entry due for re-fetch (now > last_scraped + freq), delegating to the web-scraping skill, deduping by content hash against wiki/raw/seen.jsonl, and landing new content in wiki/raw/scraped/<slug>/. Use when the user says "scan sources", "/scan-sources", "/scan-sources --slug=<slug>", "/scan-sources --category=<cat>", "/scan-sources --force", or otherwise asks to refresh the project's tracked sources. Always explicit; never auto-fires on a clock.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Skill
 ---
 
 # scan-sources
 
 Targeted, polite, deduped scraping of the URLs listed in
-`sources/registry.yaml`. Reads the registry, decides which entries are
+`wiki/raw/registry.yaml`. Reads the registry, decides which entries are
 due, hands fetching off to the `web-scraping` skill, dedupes by content
-sha256, lands fresh content in `raw/sources/<slug>/`, and updates
+sha256, lands fresh content in `wiki/raw/scraped/<slug>/`, and updates
 `last_scraped` in the registry. Audit trail is git history of the
-registry + the per-fetch frontmatter on each `raw/sources/*` file —
+registry + the per-fetch frontmatter on each `wiki/raw/scraped/*` file —
 no separate run log.
 
 ## Preconditions
 
-- `sources/registry.yaml` exists in the project root. If absent, stop
-  and tell the user to seed it from `templates/sources/registry.yaml`.
-- `sources/seen.jsonl` exists (seeded empty by `r2p init`). If absent,
+- `wiki/raw/registry.yaml` exists in the project root. If absent, stop
+  and tell the user to seed it from `templates/wiki/raw/registry.yaml`.
+- `wiki/raw/seen.jsonl` exists (seeded empty by `r2p init`). If absent,
   create it as an empty file before the first fetch.
 - The `web-scraping` skill is installed and discoverable. Without it,
   this skill cannot fetch.
@@ -41,7 +41,7 @@ For each invocation:
 
 ### 1. Load and validate the registry
 
-- Read `sources/registry.yaml`. Parse with a YAML parser
+- Read `wiki/raw/registry.yaml`. Parse with a YAML parser
   (`python3 -c "import yaml; ..."` is acceptable; the skill is
   Python-friendly, unlike hooks).
 - Validate each entry has the six required fields: `slug`, `url`,
@@ -87,9 +87,9 @@ For each due entry, in order:
 
 - Compute `sha256` over the **extracted markdown body** (not the
   frontmatter, not the raw HTML).
-- Read `sources/seen.jsonl`. If a row already exists with the same
+- Read `wiki/raw/seen.jsonl`. If a row already exists with the same
   `slug` and `content_sha256`, the content is a duplicate:
-  - Skip writing a new file under `raw/sources/<slug>/`.
+  - Skip writing a new file under `wiki/raw/scraped/<slug>/`.
   - Still update `last_scraped` in the registry (we did fetch).
   - Note the duplicate in the per-run report (step 7).
   - Do not append to `seen.jsonl` (the existing row already represents this content).
@@ -111,21 +111,21 @@ If the content is new (no matching `content_sha256` in `seen.jsonl`):
    ```
 2. Slugify the title for the filename: lowercase, kebab-case, strip
    punctuation, truncate to ~60 chars. Format:
-   `raw/sources/<slug>/YYYY-MM-DD_<title-slug>.md`.
+   `wiki/raw/scraped/<slug>/YYYY-MM-DD_<title-slug>.md`.
    If a file with the exact same path already exists (date + title-slug
    collision), append `-2`, `-3`, … to disambiguate. (Rare; usually
    means two different articles published the same day with identical
    titles.)
 3. Write the file: frontmatter + body.
-4. Append one row to `sources/seen.jsonl`:
+4. Append one row to `wiki/raw/seen.jsonl`:
    ```json
-   {"slug": "<slug>", "url": "<url>", "content_sha256": "<hash>", "scraped_at": "<ts>", "raw_path": "raw/sources/<slug>/<filename>.md"}
+   {"slug": "<slug>", "url": "<url>", "content_sha256": "<hash>", "scraped_at": "<ts>", "raw_path": "wiki/raw/scraped/<slug>/<filename>.md"}
    ```
 
 ### 6. Update registry `last_scraped`
 
 After each entry (whether fresh, duplicate, or failed), update the
-entry's `last_scraped` field in `sources/registry.yaml` to the current
+entry's `last_scraped` field in `wiki/raw/registry.yaml` to the current
 ISO8601 UTC. Preserve all other fields and YAML structure exactly.
 Use a YAML round-trip library (Python `ruamel.yaml`) when available,
 or careful in-place edit otherwise — preserving comments and ordering
@@ -146,8 +146,8 @@ Due: 4 entries
   - exchange-disclosures-kh     [monthly]  fetch failed: 503
 
 Files written: 2
-  + raw/sources/investment-news-cambodia/2026-05-05_new-port-deal.md
-  + raw/sources/portinfra-tracker/2026-05-05_sihanoukville-throughput-q1.md
+  + wiki/raw/scraped/investment-news-cambodia/2026-05-05_new-port-deal.md
+  + wiki/raw/scraped/portinfra-tracker/2026-05-05_sihanoukville-throughput-q1.md
 
 Registry updated: last_scraped fields for 4 entries
 ```
@@ -161,7 +161,7 @@ No sources due. Most recent: <slug> @ <ts>.
 ## Rules
 
 - **Don't auto-ingest into `wiki/`.** Scraped content lands in
-  `raw/sources/`. Promotion to `wiki/` requires the user to invoke
+  `wiki/raw/scraped/`. Promotion to `wiki/` requires the user to invoke
   `/wiki-ingest` explicitly. The skill must not call `/wiki-ingest` itself.
 - **Idempotent.** Two consecutive `/scan-sources` runs an hour apart
   produce zero new files (the freq window for daily is 24h; weekly is
@@ -193,11 +193,11 @@ User: /scan-sources --category=investment
 
 Skill will:
 
-1. Load `sources/registry.yaml`; filter to `category: investment`.
+1. Load `wiki/raw/registry.yaml`; filter to `category: investment`.
 2. Apply freq check; identify 3 of 5 investment entries are due (the
    other 2 were scraped <24h ago).
 3. Delegate fetching to `web-scraping` skill, three times.
-4. For each: compute content sha256, check `sources/seen.jsonl`, write
+4. For each: compute content sha256, check `wiki/raw/seen.jsonl`, write
    fresh file or skip as duplicate.
 5. Update `last_scraped` for all 3 entries.
 6. Report: 2 fresh + 1 duplicate + 0 failures.
@@ -214,4 +214,4 @@ Skill will:
   invokes; the skill runs once and exits.
 - **Does not fetch sources outside the registry.** A URL the
   researcher mentions in passing does not get added to the registry by
-  this skill. Edits to `sources/registry.yaml` are manual.
+  this skill. Edits to `wiki/raw/registry.yaml` are manual.

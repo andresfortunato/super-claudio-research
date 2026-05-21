@@ -11,20 +11,20 @@
 #   .claude/conventions/plan-structure.md "Completion and archival" and
 #   docs/plan-archival-mechanism.md.
 #
-# Tripwire 2 — Insights logging (NON-BLOCKING nudge).
-#   Nudge Claude to write insights/NN_*.md when a session produced new
-#   analysis evidence (charts, panels, methods notes) without a new
-#   insights doc to record what was learned. Only emits when:
+# Tripwire 2 — Evidence logging (NON-BLOCKING nudge).
+#   Nudge Claude to write evidence/NN_*.md when a session produced new
+#   analysis artifacts (charts, panels, methods notes) without a new
+#   evidence doc to record what was learned. Only emits when:
 #     1. There ARE uncommitted analysis artifacts
 #        (output/[<theme>/]0[0-9]*_*.{png,csv,meta.json} or methods/*.md), AND
-#     2. There are NO uncommitted insights/[<theme>/]NN_*.md changes.
-#   Both flat (output/01_*, insights/01_*.md) and theme-parallel
-#   (output/<theme>/01_*, insights/<theme>/01_*.md) layouts satisfy
-#   the tripwire. See .claude/conventions/insights-logging.md and
+#     2. There are NO uncommitted evidence/[<theme>/]NN_*.md changes.
+#   Both flat (output/01_*, evidence/01_*.md) and theme-parallel
+#   (output/<theme>/01_*, evidence/<theme>/01_*.md) layouts satisfy
+#   the tripwire. See .claude/conventions/evidence-logging.md and
 #   docs/theme-parallel-mechanism.md.
 #
 # SILENT by default. Tripwire 1 fires before tripwire 2 when both apply
-# (archival is the higher-signal event; the insights nudge can wait for
+# (archival is the higher-signal event; the evidence nudge can wait for
 # the next Stop after archival completes).
 
 set -euo pipefail
@@ -62,7 +62,7 @@ EOF
   done
 fi
 
-# === Tripwire 2: insights logging ===
+# === Tripwire 2: evidence logging ===
 # Skip if not a git repo (no way to detect "what changed this session").
 git rev-parse --git-dir >/dev/null 2>&1 || exit 0
 
@@ -79,16 +79,16 @@ analysis_hit=$(printf '%s\n' "$status" | grep -E \
   '^([ AM?]+|[?]+) (output/([^/]+/)?0[0-9][a-z]?_.*\.(png|csv|meta\.json)|methods/[^/]+/.*\.md|methods/[^/]+\.md)$' \
   || true)
 
-# If no analysis evidence, exit silently.
+# If no analysis artifacts, exit silently.
 [[ -z "$analysis_hit" ]] && exit 0
 
-# If new/modified insights/*.md exists, the user is already capturing — silent.
-# Accepts both flat (insights/NN_*.md) and theme-parallel (insights/<theme>/NN_*.md).
-insights_hit=$(printf '%s\n' "$status" | grep -E \
-  '^([ AM?]+|[?]+) insights/([^/]+/)?[0-9]+_.*\.md$' \
+# If new/modified evidence/*.md exists, the user is already capturing — silent.
+# Accepts both flat (evidence/NN_*.md) and theme-parallel (evidence/<theme>/NN_*.md).
+evidence_hit=$(printf '%s\n' "$status" | grep -E \
+  '^([ AM?]+|[?]+) evidence/([^/]+/)?[0-9]+_.*\.md$' \
   || true)
 
-[[ -n "$insights_hit" ]] && exit 0
+[[ -n "$evidence_hit" ]] && exit 0
 
 # Conditions met: emit additionalContext nudge.
 # Show first ~5 analysis files so Claude can see the evidence.
@@ -98,7 +98,7 @@ cat <<EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "Stop",
-    "additionalContext": "Insights checkpoint — uncommitted analysis evidence detected without a corresponding insights doc.\n\nAnalysis artifacts (sample):\n${top_artifacts//$'\n'/\\n}\n\nNo new insights/*.md found in git status. Before stopping:\n  1. Read .claude/conventions/insights-logging.md\n  2. Find the next free NN with: ls insights/ | sort\n  3. Write insights/NN_<slug>.md with 3–8 evidence-based findings\n  4. Append a row to insights/INDEX.md\n  5. Commit the analysis artifacts and the insights doc together\n\nIf this was research/exploration with no real new evidence, you can ignore this nudge and proceed."
+    "additionalContext": "Evidence checkpoint — uncommitted analysis artifacts detected without a corresponding evidence doc.\n\nAnalysis artifacts (sample):\n${top_artifacts//$'\n'/\\n}\n\nNo new evidence/*.md found in git status. Before stopping:\n  1. Read .claude/conventions/evidence-logging.md\n  2. Find the next free NN with: ls evidence/ | sort\n  3. Write evidence/NN_<slug>.md with 3–8 evidence-based findings\n  4. Append a row to evidence/INDEX.md\n  5. Commit the analysis artifacts and the evidence doc together\n\nIf this was research/exploration with no real new evidence, you can ignore this nudge and proceed."
   }
 }
 EOF

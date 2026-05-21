@@ -47,7 +47,7 @@ grows) or vanish entirely (decisions become uninherited). See
 - **Decision records.** Methodology calls worth defending in peer
   review live at `decisions/YYYY-MM-DD_<slug>.md` — durable beyond any
   single plan. The archive entry cross-links to them.
-- **Source code.** Scripts, notebooks, data, charts, insights stay
+- **Source code.** Scripts, notebooks, data, charts, evidence stay
   where they are; the archive entry references them but never copies
   them.
 

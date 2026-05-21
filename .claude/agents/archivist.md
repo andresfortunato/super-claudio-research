@@ -69,7 +69,7 @@ If you notice repo-wide cruft during your read of plan files, **recommend the us
 
 ## Constraints
 
-- **Don't modify source code.** Only `plan/`, `archive/`, `CLAUDE.md`, and `.scc/status/` are in scope. Source files under `scripts/`, `R/`, `notebooks/`, `data/`, `output/`, `insights/`, `methods/`, `decisions/`, `learnings/`, `wiki/` are off-limits.
+- **Don't modify source code.** Only `plan/`, `archive/`, `CLAUDE.md`, and `.scc/status/` are in scope. Source files under `scripts/`, `R/`, `notebooks/`, `data/`, `output/`, `evidence/`, `methods/`, `decisions/`, `learnings/`, `wiki/` are off-limits.
 - **Don't delete `learnings/`.** Learnings persist independently of plans — they're the project's tacit knowledge corpus, not the plan's output.
 - **Don't delete `decisions/` or `methods/` files** the plan referenced. Cross-link to them; the records survive.
 - **Be concise.** The archive entry is a useful reference, not a copy of the plan. Aim for 60–150 lines. If a key decision needed three paragraphs in `plan.md`, two sentences here is enough — the reader can dig into `decisions/<date>_<slug>.md` if they need the full reasoning.

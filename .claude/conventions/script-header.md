@@ -98,7 +98,7 @@ set seed 42
 ## What counts as "analytical"
 
 Scripts that:
-- Read data and produce **outputs that show up in deliverables, insights, or memos** (charts, regression tables, summary CSVs).
+- Read data and produce **outputs that show up in deliverables, evidence docs, or memos** (charts, regression tables, summary CSVs).
 - Are reproducible end-to-end (you can re-run them later).
 
 Scripts that don't need a header:

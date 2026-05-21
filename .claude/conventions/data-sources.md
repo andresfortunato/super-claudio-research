@@ -18,8 +18,8 @@ itself.
 Three folders look adjacent and would be confusing if researchers
 reinvented the boundaries:
 
-- **`raw/sources/<slug>/`** is *fetched content* — markdown files
-  scraped from tracked URLs, governed by the source-registry
+- **`wiki/raw/scraped/<slug>/`** is *fetched content* — markdown
+  files scraped from tracked URLs, governed by the source-registry
   convention. `data_sources/` is *how-to-access* docs, written
   by hand. The two never overlap: a registry entry watches a
   news outlet; a `data_sources/` doc explains the IMF SDMX

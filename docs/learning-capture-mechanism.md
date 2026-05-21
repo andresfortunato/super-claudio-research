@@ -6,7 +6,7 @@ Applied research projects accumulate two kinds of valuable knowledge:
 the *formal findings* a peer reviewer reads (a chart, a regression, a
 ranked list of decompositions) and the *methodology calls* a peer
 reviewer pushes on (deflator choice, identification strategy). Both
-have homes in r2p — `insights/NN_*.md` for findings,
+have homes in r2p — `evidence/NN_*.md` for findings,
 `decisions/YYYY-MM-DD_<slug>.md` for choices.
 
 A third kind of knowledge has no home in v1: the *tacit warnings* — the
@@ -36,7 +36,7 @@ worth preserving. Drives a two-file write: `learnings/<slug>.md` plus a
 
 Documents the file shape, the index format, the retrieval contract
 (min 2 trigger matches, top 3 surfaced), the atomicity rule (both
-files updated together), and the boundary with `insights/`,
+files updated together), and the boundary with `evidence/`,
 `decisions/`, and `brainstorms/`.
 
 ### 3. The retrieval hook (`.claude/hooks/retrieve-learnings.sh`)
@@ -60,7 +60,7 @@ compacted away.
         ┌───────────────────────────┼───────────────────────────┐
         ▼                           ▼                           ▼
    ┌─────────┐               ┌──────────┐                ┌──────────┐
-   │insights/│               │decisions/│                │learnings/│
+   │evidence/│               │decisions/│                │learnings/│
    └─────────┘               └──────────┘                └──────────┘
    findings                  methodology                  tacit
    from data                 calls                        warnings
@@ -74,7 +74,7 @@ compacted away.
 
 The three are **distinct in stakes, structure, and audience**:
 
-- **`insights/`** is *what the data shows*. A peer reviewer reads it for
+- **`evidence/`** is *what the data shows*. A peer reviewer reads it for
   the headline numbers; a successor researcher reads it to understand
   what's been established. Stakes-graded by `/verify` and surfaced via
   `INDEX.md`. The Stop hook nudges if analysis happens without an
@@ -96,7 +96,7 @@ serve different consumption patterns.
 
 ## Why project-wide, not theme-aware
 
-Even in projects using the opt-in theme-parallel layout for `insights/`
+Even in projects using the opt-in theme-parallel layout for `evidence/`
 and `output/` (see `docs/theme-parallel-mechanism.md`), learnings stay
 flat at `learnings/<slug>.md` — never `learnings/<theme>/<slug>.md`.
 
@@ -153,7 +153,7 @@ how much to weight the warning. A `high`-severity gotcha cost the
 project hours or invalidated a published number; a `low`-severity
 gotcha is a footnote.
 
-Insights are *neutral* knowledge — they don't carry "this hurt us"
+Insights (the learning type) are *neutral* knowledge — they don't carry "this hurt us"
 weight. The body sections (Discovery / Why it matters / When to
 apply) carry the import without needing a severity tag.
 
@@ -217,7 +217,7 @@ learnings need.
 
 This mechanism codifies a gap surfaced during an audit of an
 applied-research project that ran without r2p conventions. The
-project produced excellent insights and a handful of decision records,
+project produced excellent evidence and a handful of decision records,
 but operational warnings — survey-wave breakage, deflator-divergence
 patterns, sample-restriction side effects — lived in researcher heads
 and commit messages. Each new researcher onboarding to the project
@@ -233,6 +233,6 @@ ports from `super-claudio-code`. The retrieval hook
 constitution forbids JS leakage outside the `r2p` CLI itself.
 
 The directory choice (`learnings/`, project root, sibling of
-`insights/` and `decisions/`) deviates from scc's `.scc/learnings/`
+`evidence/` and `decisions/`) deviates from scc's `.scc/learnings/`
 nesting. r2p treats learnings as project-level knowledge worth
 sharing in the repo, not as framework-internal state.

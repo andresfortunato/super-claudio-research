@@ -47,7 +47,7 @@ The plan allows two or more valid interpretations and the choice materially affe
 
 **Example**: "Restrict to working-age population" — 15–64 (ILO standard) or 25–54 (prime-age, common in wage-gap papers)? Both are viable; the choice shifts the headline coefficient by ~20%.
 
-**Why**: Guessing wrong wastes a task's worth of context and may produce a misleading artifact downstream insights cite. The user can resolve this in one sentence.
+**Why**: Guessing wrong wastes a task's worth of context and may produce a misleading artifact downstream evidence docs cite. The user can resolve this in one sentence.
 
 **Severity filter**: Implementation details (chart palette, intermediate filename) — use your judgment. Methodological calls or anything that affects the headline finding — escalate.
 

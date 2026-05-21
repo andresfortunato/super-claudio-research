@@ -26,15 +26,15 @@ It does *not* target: software engineering teams (Claude Code's defaults already
 
 Every hook script must be silent unless the condition it checks for actually trips. A hook that fires on every Stop, every PostToolUse — even with friendly text — degrades into noise within days. Researchers stop reading it; Claude stops adapting to it.
 
-Concretely: `check-insights.sh` returns nothing if no analytical artifacts are uncommitted. The hook is the only one shipping in v1 — earlier drafts had a PostToolUse manifest hook and PreCompact/SessionStart hooks; all were removed because the install footprint exceeded their value.
+Concretely: `check-evidence.sh` returns nothing if no analytical artifacts are uncommitted. The hook is the only one shipping in v1 — earlier drafts had a PostToolUse manifest hook and PreCompact/SessionStart hooks; all were removed because the install footprint exceeded their value.
 
 If you can't make a hook silent-by-default, it probably belongs as a user-invoked skill (`/verify`, `/wiki-lint`, `/scan-sources`, `/research-cleanup`) instead.
 
 ### 2. Conditional, not always-fire
 
-Closely related to (1) but stronger: the *trigger* must reflect actual evidence that the convention applies, not a clock or a session boundary. Always-fire prompts pressure Claude into mechanical compliance — writing a trivial insights doc to satisfy the rule, listing two-line "decisions" that don't deserve the ceremony.
+Closely related to (1) but stronger: the *trigger* must reflect actual evidence that the convention applies, not a clock or a session boundary. Always-fire prompts pressure Claude into mechanical compliance — writing a trivial evidence doc to satisfy the rule, listing two-line "decisions" that don't deserve the ceremony.
 
-Trigger discipline: tripwires read `git status`, the filesystem, file mtimes, or specific tool calls. They never fire just because a session ended or a context boundary approached. The Stop hook for insights checks "are there uncommitted analytical artifacts AND no new insights doc staged?" — both halves matter.
+Trigger discipline: tripwires read `git status`, the filesystem, file mtimes, or specific tool calls. They never fire just because a session ended or a context boundary approached. The Stop hook for evidence checks "are there uncommitted analytical artifacts AND no new evidence doc staged?" — both halves matter.
 
 ### 3. Composable, not monolithic
 
@@ -56,13 +56,13 @@ CLAUDE.md is loaded into every session. Long-form rules in CLAUDE.md cost tokens
 
 The pointer block names the convention, says when it applies, and points at `.claude/conventions/<name>.md` for the protocol. Claude reads the full protocol on demand when the situation matches the trigger. This pattern is the single biggest token-cost lever in the framework.
 
-The ten pointer blocks shipped in v1: Insights Logging, Wiki, Script Headers, Analytical Commit Format, Handoff Format, Plan Structure, Decision Records, Methods, Source Registry, Data Sources.
+The ten pointer blocks shipped in v1: Evidence Logging, Wiki, Script Headers, Analytical Commit Format, Handoff Format, Plan Structure, Decision Records, Methods, Source Registry, Data Sources.
 
 ### 6. Markdown-first, language-neutral core
 
-The framework's substrate is markdown — convention docs, wiki pages, insights, handoffs, decision records, deliverable templates. Claude reads markdown natively, researchers can edit markdown in any tool (VS Code, Obsidian, plain text), and markdown survives format migrations.
+The framework's substrate is markdown — convention docs, wiki pages, evidence, handoffs, decision records, deliverable templates. Claude reads markdown natively, researchers can edit markdown in any tool (VS Code, Obsidian, plain text), and markdown survives format migrations.
 
-Language-specific concerns (R vs. Python vs. Stata) live inside scripts and surface in the script-header `Env:` line. The single hook (`check-insights.sh`) is pure bash + standard Unix tools — no external dependencies. Adding a new analytical language is mostly a script-header convention update; no framework rewrite needed.
+Language-specific concerns (R vs. Python vs. Stata) live inside scripts and surface in the script-header `Env:` line. The single hook (`check-evidence.sh`) is pure bash + standard Unix tools — no external dependencies. Adding a new analytical language is mostly a script-header convention update; no framework rewrite needed.
 
 LaTeX/Beamer add-ons are deferred to v1.1+ (Pedro / Hugo Sant'Anna patterns), and only as opt-in extensions — never as the default deliverable substrate.
 
@@ -123,7 +123,7 @@ A few things deliberately omitted in v1, with the reasoning:
 - **No project-management dashboard.** WIP-limits, multi-engagement views, and Hugo-style vault managers are deferred — useful for researchers juggling 3+ countries, premature for the pilot.
 - **No agent-of-agents.** Forked parallel review (`/deliverable-review`) spawns subagents in fixed shape; there is no general-purpose agent orchestrator. The framework is composable building blocks, not a workflow engine.
 - **No always-on quality gates.** No CI for "did you run `/verify`?" or "did you update the wiki?" — those would invite mechanical compliance. The discipline lives in the user-invoked skills and the silent-conditional hooks.
-- **No LLM-managed source-of-truth code.** `wiki/` is LLM-owned but `raw/` is immutable; the source-registry is YAML edited by humans (Claude only updates `last_scraped`). Script headers are written by humans (or by Claude, but always inspectable in the script). Trust boundaries are explicit.
+- **No LLM-managed source-of-truth code.** `wiki/` is LLM-owned but `wiki/raw/` is immutable; the source-registry is YAML edited by humans (Claude only updates `last_scraped`). Script headers are written by humans (or by Claude, but always inspectable in the script). Trust boundaries are explicit.
 
 ## Cross-references
 

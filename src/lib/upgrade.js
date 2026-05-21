@@ -6,6 +6,11 @@
 //   - present and divergent       → write "<rel>.framework-new" sidecar
 //     (never overwrite the live file) and add to a tally
 //
+// Also runs a one-shot v1→v2 path migration before the file sweep: renames
+// pre-rename layout (insights/, top-level raw/, top-level sources/) into the
+// current shape (evidence/, wiki/raw/, wiki/raw/registry.yaml). Only safe
+// renames execute; ambiguous cases are surfaced as warnings.
+//
 // At the end, prints a one-line summary and (separately) a one-line warning
 // if the project still has the obsolete <project>/.claude/skills/ directory
 // from a pre-Phase-3 install layout. Never auto-deletes anything.
@@ -25,6 +30,8 @@ import {
   stat,
   chmod,
   readdir,
+  rename,
+  unlink,
 } from 'node:fs/promises';
 import { join, dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -35,10 +42,11 @@ const FRAMEWORK_ROOT = resolve(__dirname, '../..');
 // Paths are relative to FRAMEWORK_ROOT. Match exactly.
 const EXCLUDE = new Set([
   'templates/CLAUDE.md.template',
-  'templates/insights/INDEX.md',
+  'templates/evidence/INDEX.md',
   'templates/wiki/index.md',
   'templates/wiki/log.md',
-  'templates/sources/registry.yaml',
+  'templates/wiki/raw/registry.yaml',
+  'templates/wiki/raw/seen.jsonl',
   'templates/data_sources/INDEX.md',
   'templates/project_conventions/INDEX.md',
   // Archivist appends rows here across sessions; framework never overwrites.
@@ -118,6 +126,78 @@ async function compareFiles(srcPath, dstPath) {
   return srcBuf.equals(dstBuf);
 }
 
+// Move oldPath → newPath if safe. Safe = oldPath exists, newPath doesn't.
+// Returns one of: 'renamed' | 'already-new' | 'no-old' | 'both-exist'.
+async function safeRename(target, oldRel, newRel, label) {
+  const oldPath = join(target, oldRel);
+  const newPath = join(target, newRel);
+  const oldHas = await fileExists(oldPath);
+  const newHas = await fileExists(newPath);
+  if (!oldHas && newHas) return 'already-new';
+  if (!oldHas && !newHas) return 'no-old';
+  if (oldHas && newHas) {
+    console.log(`  ⚠ migrate skipped: ${oldRel} AND ${newRel} both exist — resolve manually.`);
+    return 'both-exist';
+  }
+  await mkdir(dirname(newPath), { recursive: true });
+  await rename(oldPath, newPath);
+  console.log(`  ↻ migrated ${label}: ${oldRel} → ${newRel}`);
+  return 'renamed';
+}
+
+// One-shot v1→v2 layout migration. Renames:
+//   insights/                              → evidence/
+//   raw/                                   → wiki/raw/   (merges into wiki/)
+//   raw/sources/<slug>/                    → wiki/raw/scraped/<slug>/  (via the move above)
+//   sources/registry.yaml                  → wiki/raw/registry.yaml
+//   sources/seen.jsonl                     → wiki/raw/seen.jsonl
+//   .claude/hooks/check-insights.sh        → .claude/hooks/check-evidence.sh
+//   .claude/conventions/insights-logging.md → .claude/conventions/evidence-logging.md
+//   docs/insights-mechanism.md (if vendored) → docs/evidence-mechanism.md
+// Each rename is skipped if both old and new exist (user resolves manually).
+async function migrateLayout(target) {
+  let touched = 0;
+  const renames = [
+    ['insights', 'evidence', 'evidence folder'],
+    ['raw', 'wiki/raw', 'raw archive folder'],
+    ['sources/registry.yaml', 'wiki/raw/registry.yaml', 'scrape registry'],
+    ['sources/seen.jsonl', 'wiki/raw/seen.jsonl', 'dedup ledger'],
+    ['.claude/hooks/check-insights.sh', '.claude/hooks/check-evidence.sh', 'evidence hook'],
+    [
+      '.claude/conventions/insights-logging.md',
+      '.claude/conventions/evidence-logging.md',
+      'evidence convention',
+    ],
+  ];
+  for (const [oldRel, newRel, label] of renames) {
+    const result = await safeRename(target, oldRel, newRel, label);
+    if (result === 'renamed') touched++;
+  }
+  // Tidy: remove empty sources/ and sources/README.md after migration.
+  const sourcesDir = join(target, 'sources');
+  if (await fileExists(sourcesDir)) {
+    try {
+      const remaining = await readdir(sourcesDir);
+      const onlyReadme = remaining.length === 1 && remaining[0] === 'README.md';
+      const empty = remaining.length === 0;
+      if (onlyReadme) {
+        await unlink(join(sourcesDir, 'README.md'));
+        console.log('  ↻ removed legacy sources/README.md (content moved to wiki/raw/README.md)');
+      }
+      if (onlyReadme || empty) {
+        await readdir(sourcesDir).then((files) =>
+          files.length === 0 ? import('node:fs/promises').then((m) => m.rmdir(sourcesDir)) : null,
+        );
+        console.log('  ↻ removed empty legacy sources/ directory');
+        touched++;
+      }
+    } catch {
+      // best-effort tidy; skip silently if it doesn't apply
+    }
+  }
+  return touched;
+}
+
 export async function upgradeProject(target) {
   if (await isFrameworkRepo(target)) {
     console.log('Refusing to run r2p init --upgrade against the framework repo itself.');
@@ -126,6 +206,12 @@ export async function upgradeProject(target) {
   }
 
   console.log(`Upgrading research-to-policy framework files in: ${target}`);
+
+  // 0. One-shot layout migration (insights→evidence, raw→wiki/raw, sources→wiki/raw).
+  const migrated = await migrateLayout(target);
+  if (migrated > 0) {
+    console.log('');
+  }
 
   const candidates = [];
   for await (const rel of walkFiles('.claude/conventions')) candidates.push(rel);
@@ -228,15 +314,20 @@ export async function upgradeProject(target) {
   }
 
   console.log('');
-  if (sidecars.length === 0 && copied === 0) {
+  if (sidecars.length === 0 && copied === 0 && migrated === 0) {
     console.log('No upgrades needed — project is in sync with the framework.');
   } else if (sidecars.length === 0) {
-    console.log(`Upgrade complete: ${copied} new file(s) added, ${identical} unchanged.`);
+    console.log(
+      `Upgrade complete: ${migrated} migration(s), ${copied} new file(s) added, ${identical} unchanged.`,
+    );
   } else {
     console.log(
       `${sidecars.length} file(s) have framework-new sidecars; review with \`git diff\` or your editor.`,
     );
-    if (copied > 0) console.log(`  (${copied} new file(s) added, ${identical} unchanged.)`);
+    if (copied > 0 || migrated > 0)
+      console.log(
+        `  (${migrated} migration(s), ${copied} new file(s) added, ${identical} unchanged.)`,
+      );
   }
 
   return true;

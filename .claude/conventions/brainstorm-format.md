@@ -13,13 +13,13 @@ conventions.
 ## Where brainstorms live
 
 - One file per topic: `brainstorms/<topic>.md`.
-- `brainstorms/` lives at project root, sibling of `plan/`, `insights/`,
+- `brainstorms/` lives at project root, sibling of `plan/`, `evidence/`,
   `decisions/`. It is **gitignored** (researcher-local working state, not a
   shared artifact). Decisions that graduate to citable status get filed in
   `decisions/` instead.
 - Slug is short, decision-bearing: `productivity_deflator_choice.md`,
   not `brainstorm_2026_05_08.md`.
-- Theme-parallel projects (see `insights-logging.md`) may use
+- Theme-parallel projects (see `evidence-logging.md`) may use
   `brainstorms/<theme>/<topic>.md` for theme-bound discussions; flat is
   the default. Cross-cutting brainstorms always stay flat.
 
@@ -85,8 +85,8 @@ and hands off — it does not write the plan itself.
   later session revisits a brainstorm, prefer dated `## Update: <date>`
   sections (mirroring the addendum pattern in
   `internal-research-memo`) over rewriting earlier text.
-- **Brainstorms are not insights.** Insights are evidence-based findings
-  with concrete numbers (`insights/NN_*.md`); brainstorms are
+- **Brainstorms are not evidence.** Evidence is chart-backed findings
+  with concrete numbers (`evidence/NN_*.md`); brainstorms are
   decisions-pre-execution. Don't conflate.
 
 ## Distinct from neighboring conventions
@@ -98,7 +98,7 @@ and hands off — it does not write the plan itself.
   form of methodology calls (one file per decision; structured;
   committed). Brainstorms are the *conversation* that produced them
   (gitignored; free-form; transient working state).
-- **`insights-logging`** — insights describe *what the data shows*;
+- **`evidence-logging`** — evidence describes *what the data shows*;
   brainstorms describe *how we chose to look at it*.
 - **`/verify`** — `/verify` sanity-checks a single existing artifact (a
   regression, a chart, a paragraph). Brainstorming happens *before* the

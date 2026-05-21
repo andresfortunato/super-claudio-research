@@ -11,10 +11,10 @@ four parallel themes (spatial equilibrium, labor markets, fiscal
 incidence, productivity decomposition) for the same counterpart over
 the same year. Each theme had its own audience and its own
 deliverable target; each accumulated its own charts, panels, and
-findings. Forcing all four through one flat `insights/NN_*.md`
+findings. Forcing all four through one flat `evidence/NN_*.md`
 sequence collided in two ways:
 
-1. **Numbering was opaque.** `insights/07_*.md` could be the third
+1. **Numbering was opaque.** `evidence/07_*.md` could be the third
    spatial-equilibrium finding or the first fiscal one. Readers
    couldn't tell from the index without opening the file.
 2. **Cross-theme navigation was lossy.** A reader looking only for
@@ -28,7 +28,7 @@ flat stays default, no declaration is required, hooks accept both
 shapes:
 
 ```
-insights/
+evidence/
 ├── INDEX.md
 ├── 01_overall_macro_priors.md          # cross-cutting
 ├── spatial-equilibrium/
@@ -39,7 +39,7 @@ insights/
 ```
 
 The same opt-in extends to `output/<theme>/0[0-9]_*` artifacts. The
-`check-insights.sh` Stop hook globs both flat and subfolder paths;
+`check-evidence.sh` Stop hook globs both flat and subfolder paths;
 the `INDEX.md` template includes an optional `Theme` column.
 
 ## Why opt-in, not required
@@ -66,7 +66,7 @@ commitment that drifts: themes get renamed, retired, or split, and
 the declaration file becomes either a chore to maintain or a
 silent liar.
 
-Subfolders make the theme set self-documenting — `ls insights/`
+Subfolders make the theme set self-documenting — `ls evidence/`
 shows the live themes, no second source of truth. Adding a theme is
 `mkdir`; retiring one is leaving an empty folder (or removing it if
 nothing references it). Theme strings stay free-form
@@ -86,11 +86,11 @@ view of just this theme's findings? If yes, subfolder. If no, the
 finer grouping is structure inside one theme's flat sequence and
 doesn't need its own folder.
 
-## Cross-cutting insights
+## Cross-cutting evidence
 
 Some findings span themes — a macro prior that frames every theme,
 a data-quality note that bites all of them, a methodological choice
-shared across deliverables. Those stay at `insights/NN_*.md` (top
+shared across deliverables. Those stay at `evidence/NN_*.md` (top
 level, no subfolder). The convention is: **if a finding is referenced
 by deliverables in two or more themes, it's cross-cutting** — file
 it flat and link to it from each theme's working notes.
@@ -116,25 +116,25 @@ it flat and link to it from each theme's working notes.
 
 ## What this does NOT do
 
-- **Doesn't enforce per-theme INDEX files.** A single `insights/INDEX.md`
+- **Doesn't enforce per-theme INDEX files.** A single `evidence/INDEX.md`
   with a `Theme` column suffices. Per-theme indexes are extra ceremony
   for no extra signal; project owners can add them if they want, but
   the framework doesn't require them.
-- **Doesn't mandate matching `output/` and `insights/` themes.** A
+- **Doesn't mandate matching `output/` and `evidence/` themes.** A
   project can use theme subfolders in `output/` only (where the
   collision pressure is highest from chart filenames) and stay flat
-  in `insights/`. Or vice versa. The hook tripwires accept either
+  in `evidence/`. Or vice versa. The hook tripwires accept either
   half independently.
 - **Doesn't extend to `wiki/`, `methods/`, `data_sources/`,
   `decisions/`.** Those are project-level reference layers; cross-theme
   reuse is expected and theme subfolders would obscure it. Theme
-  parallelism is bounded to evidence accumulation (`insights/`,
+  parallelism is bounded to evidence accumulation (`evidence/`,
   `output/`).
 
 ## Provenance
 
 This pattern was identified by auditing a four-theme Buenos Aires
-research project (the cordoba audit) where flat `insights/` numbering
+research project (the cordoba audit) where flat `evidence/` numbering
 had degraded to the point that the index couldn't be used for
 navigation. The constraint that hooks accept both shapes — rather
 than forcing a migration — comes from the v1 framework constitution:

@@ -2,7 +2,7 @@
 
 A long-form internal-only research note: a working paper, a deep-dive on a
 methodological question, an extended exploration of a phenomenon that may
-or may not survive scrutiny, or a synthesis of several insights into a
+or may not survive scrutiny, or a synthesis of several findings into a
 coherent argument. Lower stakes than the country-diagnostic-memo (which
 goes to a counterpart institution) but with more room to think out loud
 and make speculative-but-flagged moves.

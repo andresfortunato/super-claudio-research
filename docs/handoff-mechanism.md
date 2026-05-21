@@ -67,8 +67,8 @@ the original tactical state, without redesigning the file.
 
 ## What this does NOT do
 
-- **It does not replace `insights-logging`.** Handoff is tactical ("where am
-  I, what's next"); insights are substantive ("what did the data teach us").
+- **It does not replace `evidence-logging`.** Handoff is tactical ("where am
+  I, what's next"); evidence is substantive ("what did the data teach us").
   Cross-pointing is fine; merging would dilute both.
 - **It does not replace git history.** Old session state is preserved in git.
   The handoff is the *current* snapshot, not the journal.

@@ -45,7 +45,7 @@ wins because:
 
 ## Why JSONL for the dedup log
 
-`sources/seen.jsonl` is JSON Lines: append-only, greppable, parseable
+`wiki/raw/seen.jsonl` is JSON Lines: append-only, greppable, parseable
 from Python/R, survives merge conflicts. One row per successful fetch.
 The dedup key is `(slug, content_sha256)`; the `url` is informational
 (URLs change; content does not).
@@ -82,12 +82,12 @@ The invokable workflow. Reads the registry, applies filters
 (`--slug`, `--category`, `--force`), checks freq for each entry,
 delegates fetching to the existing `web-scraping` skill, computes the
 content hash, dedupes against `seen.jsonl`, writes new content to
-`raw/sources/<slug>/`, updates `last_scraped` in the registry. Reports
+`wiki/raw/scraped/<slug>/`, updates `last_scraped` in the registry. Reports
 a structured per-run summary. The audit trail is git history of the
-registry plus the per-fetch frontmatter on each `raw/sources/*` file —
+registry plus the per-fetch frontmatter on each `wiki/raw/scraped/*` file —
 no separate run log.
 
-### 3. The templates (`templates/sources/{registry.yaml,README.md}`)
+### 3. The templates (`templates/wiki/raw/{registry.yaml,README.md}`)
 
 Seeded by `r2p init` into target projects. The registry has four
 commented examples covering the four "shape" archetypes
@@ -98,19 +98,19 @@ The README explains how to register, retire, force, and query.
 ### 4. The CLAUDE.md pointer (~5 lines)
 
 Tells Claude the registry exists, points at the convention file for
-the schema, and notes that scrapes land in `raw/sources/<slug>/` and
+the schema, and notes that scrapes land in `wiki/raw/scraped/<slug>/` and
 require `/wiki-ingest` for wiki promotion.
 
 ### 5. Audit trail (git, not a separate log)
 
 Every `/scan-sources` invocation that produces fresh content lands files
-under `raw/sources/<slug>/` (with full frontmatter: url, scraped_at,
+under `wiki/raw/scraped/<slug>/` (with full frontmatter: url, scraped_at,
 content_sha256, title) and bumps `last_scraped` in the registry. Both
 are committed normally. To reconstruct what was fetched when:
 
 ```bash
-git log -- sources/registry.yaml          # registry edits, including last_scraped bumps
-git log -- raw/sources/                   # every fresh-content commit
+git log -- wiki/raw/registry.yaml          # registry edits, including last_scraped bumps
+git log -- wiki/raw/scraped/                   # every fresh-content commit
 ```
 
 Failures and duplicates show up in the per-run report (stderr / chat
@@ -152,7 +152,7 @@ URL doesn't enter the dedup decision because URLs change (the article
 moved; the index URL got a query parameter). Content is the truth.
 
 When a duplicate is detected:
-- No new file is written under `raw/sources/<slug>/`.
+- No new file is written under `wiki/raw/scraped/<slug>/`.
 - `last_scraped` in the registry IS updated (we did fetch).
 - The duplicate is reported in the per-run output.
 - `seen.jsonl` is NOT appended (the prior row already represents this
@@ -224,9 +224,9 @@ structure. It's worth it.
   broken URL but also means a chronically-broken source isn't
   obvious from the registry alone — the researcher must read the
   per-run reports. The summary mitigates this in the common case;
-  for systematic monitoring, scan `git log -- sources/registry.yaml`
+  for systematic monitoring, scan `git log -- wiki/raw/registry.yaml`
   for entries whose `last_scraped` keeps advancing without matching
-  commits under `raw/sources/<slug>/`.
+  commits under `wiki/raw/scraped/<slug>/`.
 - **No locking on parallel runs.** Two `/scan-sources` invocations
   in parallel could race on `seen.jsonl` and `registry.yaml` writes.
   The skill is invoked by humans, not daemons; this is not expected
@@ -267,7 +267,7 @@ underlying tracker had been re-scraped six times across the
 engagement, with no record of which pull supported the chart. The
 source-registry pairs with the `script-header` and
 `analytical-commit-format` conventions on the analytical side: the
-registry + `raw/sources/*` frontmatter answers "where did this
+registry + `wiki/raw/scraped/*` frontmatter answers "where did this
 content come from"; the script header + commit `Run:`/`Out:` lines
 answer "which pull, by which script, produced this chart." Together
 they trace a number all the way back to a URL and a date.
