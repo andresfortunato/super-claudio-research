@@ -258,6 +258,20 @@ r2p plan init <slug>      # creates plan/plan-<slug>/{plan.md, handoff.md, log.m
 
 For each framework convention or template seed, `--upgrade` either copies it in (if absent), silently skips it (if byte-identical), or writes a `<file>.framework-new` sidecar (if divergent — your version stays put). Review sidecars with your preferred diff tool and merge manually. `CLAUDE.md`, `insights/INDEX.md`, `wiki/index.md`, `wiki/log.md`, `sources/registry.yaml`, `archive/index.md`, and other user-curated seeds are left alone. New gitignored slots that ship with the framework (e.g. `internal_docs/`, `literature/`) are appended to your existing `.gitignore` framework block on upgrade.
 
+### Updating `CLAUDE.md` from the template sidecar
+
+`r2p init` and `r2p init --upgrade` both (re)write `CLAUDE_TEMPLATE.md` at your project root — a verbatim copy of the framework's current `templates/CLAUDE.md.template`. Your own `CLAUDE.md` is never overwritten. The sidecar is your **diff target**: when a framework upgrade ships new pointer sections (e.g. `## Data Access`, `## Internal Docs`, `## Literature`, `## Slides`), they show up in `CLAUDE_TEMPLATE.md` and you decide what to pull into `CLAUDE.md`.
+
+**Workflow** — do this by hand, not by asking Claude to fetch from the framework repo:
+
+1. **Open both files side-by-side** in your editor: `CLAUDE.md` (your live file) and `CLAUDE_TEMPLATE.md` (the framework's current shape).
+2. **Compare the `##` section headers.** Anything in `CLAUDE_TEMPLATE.md` that's missing from your `CLAUDE.md` is a candidate to add. `grep -E "^## " CLAUDE.md CLAUDE_TEMPLATE.md` gives you the diff in seconds.
+3. **Copy the relevant pointer blocks** verbatim from the template into your `CLAUDE.md`. Order in the template is a suggestion, not a constraint — append at the bottom or insert thematically as you prefer.
+4. **Edit the copied sections to fit your project.** Drop slots you don't use, tighten language to your project's voice, swap framework examples for project-specific ones, add cross-references to your real decisions/methods/data sources. The template is a *starting point*; `CLAUDE.md` is yours to curate.
+5. **Commit.** The next `r2p init --upgrade` will refresh `CLAUDE_TEMPLATE.md` again without touching your edits, so you can repeat this loop whenever the framework ships new sections.
+
+Asking Claude to "read the framework's `templates/CLAUDE.md.template` and update my file" round-trips through the source repo unnecessarily — the sidecar at `CLAUDE_TEMPLATE.md` is already the right diff target, local to your project.
+
 To copy a working set of conventions from one project repo into another (without going through the framework):
 
 ```bash
