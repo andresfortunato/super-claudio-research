@@ -35,5 +35,5 @@ a claim is cheap and correct; deleting an evidence doc destroys the record.
 
 Protocols: `.claude/conventions/{claims,evidence,methods,sources}.md`.
 
-`_legacy/` holds v1's `research/methods/` and `research/methods/` while their content is
+`_legacy/` holds v1's `decisions/` and `learnings/` while their content is
 folded into `research/methods/` and `sources/`. It is deleted when that finishes.

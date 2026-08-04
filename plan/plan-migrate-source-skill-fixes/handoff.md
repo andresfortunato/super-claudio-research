@@ -1,5 +1,17 @@
 # Handoff — /r2p-migrate-source fix plan
 
+## ⛔ PAUSED — v2 invalidated Phases 2 and 3 (added 2026-08-04)
+
+r2p v2 (merged to `main` 2026-08-04) deleted `.claude/conventions/data-access.md`
+into `sources.md` and moved `data_sources/` to `research/sources/`. The SKILL's
+preconditions and Glob patterns still target both, so it refuses on any v2
+project — the Atlas re-validation and IMF re-regression below cannot run as
+written. Phase 1's four edits remain correct in intent; they need repathing.
+
+See the parent plan's handoff (`plan/plan-migrate-source-skill/handoff.md`) for
+the full note, and `TODO.md` → "v2.1" for the re-scope item. Everything below is
+preserved as the v1-era record.
+
 ## Status
 
 | Phase | Status | Notes |

@@ -12,6 +12,7 @@ Entry format:
 
 ## Entries
 
+- **Framework v2 — Consolidation** (2026-08-04) — conventions 13 → 7 mandatory + 2 optional, layout 15 → 8 scaffolded dirs, wiki gated behind `r2p init --with-wiki`; promoted from the six-month Córdoba pilot audit. Executed in the pilot repo, so this entry is written from the shipped commits. [Full archive](plan-r2p-v2-consolidation.md)
 - **Framework v1.2 — Skill Independence** (2026-05-08) — vendored `planning`, `implementation`, and `agent-teams` from scc; added `r2p plan init <slug>` CLI subcommand; r2p is now fully standalone. [Full archive](plan-skill-independence.md)
 - **Framework v1.1 — Córdoba Lessons** (2026-05-08) — shipped six convention hardening fixes, opt-in theme-parallel layout, brainstorming/learning-capture/archival skills and hooks (ported from scc), and a researcher-audience README rewrite. [Full archive](plan-cordoba-lessons.md)
 - **Install Redesign** (2026-05-07) — replaced `install.sh` with Node-based `r2p` CLI; symlink-skills + copy-conventions split; `--upgrade` with `.framework-new` sidecars. [Full archive](plan-install-redesign.md)

@@ -35,25 +35,34 @@ import {
 } from 'node:fs/promises';
 import { join, dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { toProjectRel, isNotInstalled } from './template-map.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FRAMEWORK_ROOT = resolve(__dirname, '../..');
 
-// Paths are relative to FRAMEWORK_ROOT. Match exactly.
+// Paths are relative to FRAMEWORK_ROOT. Match exactly — a path that no longer
+// exists under templates/ never fires, so these must be re-checked whenever the
+// template layout moves. A missed entry is not data loss (divergent files get a
+// `.framework-new` sidecar and the original is untouched) but it sidecars a file
+// whose whole purpose is to accumulate project state, on every upgrade forever.
 const EXCLUDE = new Set([
   'templates/CLAUDE.md.template',
-  'templates/evidence/INDEX.md',
-  'templates/wiki/index.md',
-  'templates/wiki/log.md',
-  'templates/wiki/raw/registry.yaml',
-  'templates/wiki/raw/seen.jsonl',
-  'templates/data_sources/INDEX.md',
-  'templates/project_conventions/INDEX.md',
+  // Project state, not framework content: indexes and counters that the project
+  // appends to across sessions. Divergence is the expected steady state.
+  'templates/research/claims.md',
+  'templates/research/evidence/INDEX.md',
+  'templates/research/evidence/.next-id',
+  'templates/research/methods/INDEX.md',
+  'templates/research/sources/INDEX.md',
+  'templates/claude_conventions_project/INDEX.md',
+  'templates/research/wiki/index.md',
+  'templates/research/wiki/log.md',
+  'templates/research/wiki/raw/registry.yaml',
+  'templates/research/wiki/raw/seen.jsonl',
   // Archivist appends rows here across sessions; framework never overwrites.
-  'templates/archive/index.md',
+  'templates/plan_dir/archive/index.md',
   // Loose templates referenced from convention docs; no fixed project copy.
   'templates/handoff.md',
-  'templates/decision-record.md',
 ]);
 
 // Gitignore lines the framework requires. Upgrade appends any missing on an
@@ -92,11 +101,20 @@ async function isFrameworkRepo(target) {
 // Project-relative path for a given framework-relative path.
 //   templates/foo/bar.md         → foo/bar.md
 //   .claude/conventions/x.md     → .claude/conventions/x.md
-function toProjectRel(frameworkRel) {
-  const prefix = 'templates/';
-  if (frameworkRel.startsWith(prefix)) return frameworkRel.slice(prefix.length);
-  return frameworkRel;
+// Guard against the failure this file already shipped once: eight EXCLUDE paths
+// went stale when the v2 layout moved templates/, and nothing noticed because a
+// non-matching entry is silently inert. Returns the EXCLUDE entries that no
+// longer exist under FRAMEWORK_ROOT.
+async function staleExcludes() {
+  const stale = [];
+  for (const rel of EXCLUDE) {
+    if (!(await fileExists(join(FRAMEWORK_ROOT, rel)))) stale.push(rel);
+  }
+  return stale;
 }
+
+// toProjectRel and isNotInstalled now come from ../lib/template-map.js — see the
+// header there for why this file must not re-derive the mapping.
 
 // Recursively yield framework-relative file paths under `frameworkRel`.
 async function* walkFiles(frameworkRel) {
@@ -198,7 +216,7 @@ async function migrateLayout(target) {
   return touched;
 }
 
-export async function upgradeProject(target) {
+export async function upgradeProject(target, { withWiki = false } = {}) {
   if (await isFrameworkRepo(target)) {
     console.log('Refusing to run r2p init --upgrade against the framework repo itself.');
     console.log('  r2p init --upgrade is for target research projects, not research-to-policy.');
@@ -207,17 +225,43 @@ export async function upgradeProject(target) {
 
   console.log(`Upgrading research-to-policy framework files in: ${target}`);
 
+  // The wiki is opt-in (`r2p init --with-wiki`) because on the pilot engagement
+  // it produced zero pages in six months while costing two CLAUDE.md sections of
+  // every session's context. A project without research/wiki/ has *chosen* that,
+  // so upgrade must not quietly hand the subsystem back — absence here is a
+  // decision, not a gap for --upgrade to fill. Pass --with-wiki to opt in later.
+  const projectHasWiki = await fileExists(join(target, 'research/wiki'));
+  const includeWiki = projectHasWiki || withWiki;
+  if (withWiki && !projectHasWiki) {
+    console.log('  --with-wiki: scaffolding the optional wiki mechanism');
+  }
+
   // 0. One-shot layout migration (insights→evidence, raw→wiki/raw, sources→wiki/raw).
   const migrated = await migrateLayout(target);
   if (migrated > 0) {
     console.log('');
   }
 
+  // A stale EXCLUDE entry is silently inert, which is how eight of them survived
+  // the v2 layout move unnoticed. Warn rather than refuse: the researcher running
+  // this cannot fix a framework bug, but the line survives into bug reports.
+  const stale = await staleExcludes();
+  if (stale.length > 0) {
+    console.log(
+      `  ! ${stale.length} EXCLUDE path(s) no longer exist under templates/ — framework bug, not a problem with this project:`,
+    );
+    for (const rel of stale) console.log(`      ${rel}`);
+  }
+
   const candidates = [];
   for await (const rel of walkFiles('.claude/conventions')) candidates.push(rel);
   for await (const rel of walkFiles('.claude/hooks')) candidates.push(rel);
   for await (const rel of walkFiles('templates')) {
-    if (!EXCLUDE.has(rel)) candidates.push(rel);
+    if (EXCLUDE.has(rel)) continue;
+    // Paths r2p init never installs must not be introduced by --upgrade either.
+    if (isNotInstalled(rel)) continue;
+    if (!includeWiki && rel.startsWith('templates/research/wiki/')) continue;
+    candidates.push(rel);
   }
   // settings.template.json is a single tracked file — surface as sidecar so
   // users can diff against their runtime .claude/settings.json.
@@ -230,6 +274,8 @@ export async function upgradeProject(target) {
   for (const frameworkRel of candidates) {
     const srcPath = join(FRAMEWORK_ROOT, frameworkRel);
     const projectRel = toProjectRel(frameworkRel);
+    // null means "no project copy" — already filtered above, but never join(null).
+    if (projectRel === null) continue;
     const dstPath = join(target, projectRel);
 
     if (!(await fileExists(dstPath))) {

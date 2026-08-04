@@ -1,7 +1,7 @@
 # Methods index
 
 One file per methodological object. Each merges what earlier r2p versions split
-across `research/methods/` (why), `research/methods/` (the rule) and `research/methods/` (the traps).
+across `decisions/` (why), `methods/` (the rule) and `learnings/` (the traps).
 
 | Topic | Title | v1 records merged |
 |---|---|--:|

@@ -1,11 +1,19 @@
 # TODO — research-to-policy
 
-Project-development backlog for the framework itself. Researchers *using* the framework do not need this file — it tracks what could land in v1.1+ and beyond. v1 is the current scoped release, designed for the May 2026 Córdoba/Cambodia kickoff workshop and the two pilots' close-out periods (end-Aug and end-Sept 2026); see `plan/plan-v1-framework/plan.md` for the build history.
+Project-development backlog for the framework itself. Researchers *using* the framework do not need this file. **v2 is the current release** (merged to `main` 2026-08-04) — a consolidation promoted from the six-month Córdoba pilot audit, not a feature release. See `docs/v1-to-v2-migration.md` for the change table and `docs/v2-case-study-cordoba.md` for the audit behind it.
 
 ## Shipped
 
+- **v2** — consolidation (conventions 13 → 7 mandatory + 2 optional; layout 15 → 8 scaffolded dirs; `research/claims.md` as the curated layer above append-only evidence; `Measured`/`Reading` split + frontmatter scope keys + machine-readable status in evidence; methods merged by topic rather than genre; wiki gated behind `r2p init --with-wiki`; `lint-research.sh` with seven invariants; `docs/field-notes/` for framework bugs found in project repos; `templates/migration/` scripts). See `archive/plan-r2p-v2-consolidation.md`.
 - **v1.1** — cordoba-lessons (six small wins, theme-parallel opt-in, `brainstorming` skill, `learning-capture` skill + retrieve-learnings hook, plan archival via `archivist` agent + Stop hook tripwire, README rewrite for researcher audience). See `archive/plan-cordoba-lessons.md`.
 - **v1.2** — skill-independence (vendored `planning`, `implementation`, `agent-teams` skills from super-claudio-code; added `r2p plan init <slug>` CLI subcommand; rationale at `docs/skill-independence-mechanism.md`). See `archive/plan-skill-independence.md` after archival.
+
+## v2.1 — carried over from the v2 ship
+
+- **Prune the `docs/*-mechanism.md` set.** v2 kept them on v1 paths deliberately — they describe v1 accurately — but the live docs set now documents merged conventions. Present duplicates: `data-access-mechanism.md` + `data-sources-mechanism.md` (both → `sources.md`); `brainstorm-mechanism.md` + `handoff-mechanism.md` + `plan-structure-mechanism.md` (all → `plan-lifecycle.md`); `learning-capture-mechanism-v1.md` + `methods-mechanism-v1.md` (both → `methods.md`). Decide per file: fold into a v2 mechanism doc, move under a `docs/v1/` shelf, or delete. Flagged in `docs/v2-case-study-cordoba.md` §7.
+- **Re-scope `plan/plan-migrate-source-skill` + `plan-migrate-source-skill-fixes`.** Both are paused at Phase 2 and both are written against v1: `migrate-source/SKILL.md` hard-refuses unless `.claude/conventions/data-access.md` and `<donor>/data_sources/INDEX.md` exist, neither of which a v2 project has. Port the SKILL to `sources.md` + `research/sources/`, then rewrite Phase 2's pass-criteria before resuming. The old blocker (smoke test failing on a missing target venv) is real but secondary.
+- **Integration-test `--upgrade`, not just `init`.** v2's own lesson was that scaffolding changes get verified by running `r2p init` into a temp repo — but `--upgrade` is a second installer with its own path logic, and three v2 defects lived only there (stale `EXCLUDE`, unmapped `templates/plan_dir`+`claude_conventions_project`, ungated wiki). All three were invisible to an `init` test. Worth a script: init a temp project, dirty the append-only files, upgrade, and assert on sidecar count and root-dir list.
+- **A duplicate-path-per-line detector for migrations.** `02_repath.py`'s `EXCLUDE_PREFIXES` guard cannot catch a many-to-one collapse — when three v1 dirs map to one v2 dir, an enumerating sentence becomes the same *valid* path three times, so linkcheck passes. Two instances shipped in v2 and were fixed by hand. The check is three lines: flag any line where a path pattern matches 2+ times with fewer distinct values than matches. Belongs in `03_linkcheck.py`.
 
 ## v1.3 and beyond
 

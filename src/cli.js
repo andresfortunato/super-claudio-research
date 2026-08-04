@@ -15,7 +15,7 @@ program
   .command('init')
   .description('Scaffold a research project with framework conventions, hooks, and global skills/agents')
   .option('--upgrade', 'Refresh framework-tracked files; emit .framework-new sidecars on divergence')
-  .option('--with-wiki', 'Also scaffold the optional wiki + source-registry mechanism (off by default)')
+  .option('--with-wiki', 'Also scaffold the optional wiki + source-registry mechanism (off by default). With --upgrade, opts an existing project in; plain --upgrade never reintroduces it')
   .action(initCommand);
 
 const planCmd = program

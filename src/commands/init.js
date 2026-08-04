@@ -6,7 +6,7 @@ export async function initCommand(options = {}) {
   const target = process.cwd();
 
   if (options.upgrade) {
-    const ok = await upgradeProject(target);
+    const ok = await upgradeProject(target, { withWiki: !!options.withWiki });
     if (!ok) return;
     await installGlobals();
     return;

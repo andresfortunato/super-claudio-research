@@ -14,6 +14,7 @@ import {
 } from 'node:fs/promises';
 import { join, dirname, basename, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { TEMPLATE_DIR_MAP } from './template-map.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FRAMEWORK_ROOT = resolve(__dirname, '../..');
@@ -210,15 +211,10 @@ export async function installProject(target, { withWiki = false } = {}) {
   // with mkdir first therefore made the mirror skip it wholesale and shipped an
   // empty research/ tree. Mirror templates first, then mkdir whatever is still
   // missing.
-  const MIRRORS = [
-    ['templates/research', 'research'],
-    ['templates/deliverables', 'deliverables'],
-    ['templates/data', 'data'],
-    ['templates/reference', 'reference'],
-    ['templates/plan_dir', 'plan'],
-    ['templates/claude_conventions_project', '.claude/conventions/project'],
-  ];
-  for (const [from, to] of MIRRORS) {
+  // Shared with upgrade.js via lib/template-map.js — the two used to carry
+  // separate answers to "where does this template land", and upgrade's version
+  // was wrong. See that file's header.
+  for (const [from, to] of TEMPLATE_DIR_MAP) {
     // research/wiki ships inside templates/research; skip it unless requested.
     if (!withWiki && to === 'research') {
       await mirrorDir(join(FRAMEWORK_ROOT, from), join(target, to), target, {

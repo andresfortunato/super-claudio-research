@@ -1,5 +1,25 @@
 # Handoff — /r2p-migrate-source skill
 
+## ⛔ PAUSED — v2 invalidated the resumption recipe (added 2026-08-04)
+
+**Do not follow the "Re-validation steps" below as written.** r2p v2 shipped and
+merged to `main` on 2026-08-04, and it removed both preconditions this SKILL
+enforces:
+
+- `.claude/conventions/data-access.md` — **deleted**, merged into `sources.md`.
+  `SKILL.md:54-65` refuses when it is absent, at donor *and* target.
+- `<donor>/data_sources/INDEX.md` and `data_sources/<slug>*` — **moved** to
+  `research/sources/`. All of `SKILL.md`'s Glob patterns point at the old path.
+
+So the skill hard-refuses on any v2 project, and closing Phase 2 as specified
+would validate it against a layout that no longer ships. The remaining venv /
+`ATLAS_DB_*` work below is still accurate but secondary.
+
+**Correct next step:** port `SKILL.md` to the v2 `sources.md` convention and
+`research/sources/` layout, then rewrite Phase 2's pass-criteria against it.
+Tracked in `TODO.md` under "v2.1 — carried over from the v2 ship". Everything
+below is preserved as the v1-era record.
+
 ## Status
 
 | Phase | Status | Notes |
