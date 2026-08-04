@@ -2,7 +2,9 @@
 
 Input for a `/planning` session on follow-up fixes. The gaps below came
 out of dry-running the skill against `~/cambodia-growth` on 2026-05-19.
-Full validation transcript and rationale: `plan/plan-migrate-source-skill/handoff.md`.
+Full validation transcript and rationale: `archive/plan-migrate-source-skill.md`
+(the plan was archived as superseded on 2026-08-04; v2 removed the `data-access`
+convention and `data_sources/` layout these findings were written against).
 
 IMF migration validated end-to-end. Conflict-marker mechanic verified.
 Atlas migration blocked. The 5 findings below sit at different points
@@ -57,7 +59,7 @@ For most cases the answer leans SKILL-side because:
 
 ## Cross-references
 
-- `plan/plan-migrate-source-skill/handoff.md` — detailed findings + recommended SKILL edits per finding
+- `archive/plan-migrate-source-skill.md` — the findings and the decisions behind them, preserved at archival
 - `.claude/skills/migrate-source/SKILL.md` — current skill, 489 lines
 - `brainstorms/migrate-source-skill.md` — original brainstorm (pre-implementation)
 - `docs/migrate-source-mechanism.md` — design rationale doc
