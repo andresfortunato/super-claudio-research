@@ -114,6 +114,13 @@ bash    .claude/hooks/lint-research.sh
 project's primary input is a *stream* (news, filings, bulletins) rather than
 datasets and papers.
 
+## The full audit
+
+`docs/v2-case-study-cordoba.md` is the write-up of the engagement this
+version came out of: the measurements, the four evidence defects, the five genres
+hiding in one `learnings/` directory, and six lessons from running the migration
+itself.
+
 ## Field notes
 
 `docs/field-notes/` holds seven lessons recovered from the pilot's `learnings/`
