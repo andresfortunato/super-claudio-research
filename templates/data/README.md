@@ -5,11 +5,11 @@ this README is the committed inventory of what's expected to be here
 and where each file came from.
 
 This file documents *what's on disk*. For *how to fetch more*, see
-`data_sources/INDEX.md`. For *the methodology that decided what to
-fetch*, see `decisions/`. For *the code that does the fetching*, see
+`research/sources/INDEX.md`. For *the methodology that decided what to
+fetch*, see `research/methods/`. For *the code that does the fetching*, see
 `<project>_utils.py`.
 
-Full protocol: `.claude/conventions/data-access.md` (read on demand).
+Full protocol: `.claude/conventions/sources.md` (read on demand).
 
 ---
 
@@ -23,13 +23,13 @@ don't cache.)
 ### Atlas of Economic Complexity (PostgreSQL — `ATLAS_DB_*`)
 
 Live-queried via `atlas_query()` in `<project>_utils.py` — no local
-cache. Schema reference: `data_sources/atlas_postgres.md`.
+cache. Schema reference: `research/sources/atlas_postgres.md`.
 
 ### World Bank (public, no auth)
 
 - *(none cached yet — `wb_fetch()` pulls on demand)*
 
-Reference: `data_sources/world_bank_wbgapi.md` (or
+Reference: `research/sources/world_bank_wbgapi.md` (or
 `world_bank_data360_api.md`).
 
 ### IMF / BIS (SDMX APIs, no auth)
@@ -37,8 +37,8 @@ Reference: `data_sources/world_bank_wbgapi.md` (or
 - *(none cached yet — `imf_sdmx_fetch()` and `bis_sdmx_fetch()` pull
   on demand)*
 
-References: `data_sources/imf_sdmx_api.md`,
-`data_sources/bis_sdmx_api.md`.
+References: `research/sources/imf_sdmx_api.md`,
+`research/sources/bis_sdmx_api.md`.
 
 ### Manual / bulk downloads
 

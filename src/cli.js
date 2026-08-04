@@ -9,12 +9,13 @@ const program = new Command();
 program
   .name('r2p')
   .description('Research to Policy — research-engagement framework for Claude Code')
-  .version('0.1.0');
+  .version('0.2.0');
 
 program
   .command('init')
   .description('Scaffold a research project with framework conventions, hooks, and global skills/agents')
   .option('--upgrade', 'Refresh framework-tracked files; emit .framework-new sidecars on divergence')
+  .option('--with-wiki', 'Also scaffold the optional wiki + source-registry mechanism (off by default)')
   .action(initCommand);
 
 const planCmd = program

@@ -41,7 +41,7 @@ The user types one of:
 - The user wants to refresh an *already-migrated* source against a
   newer donor version. Not in v1; for now, re-run the skill and
   accept the conflict markers.
-- The source doesn't exist in the donor's `data_sources/INDEX.md`.
+- The source doesn't exist in the donor's `research/sources/INDEX.md`.
   Document it in the donor first, then migrate.
 - The target is the donor. No-op.
 
@@ -52,7 +52,7 @@ on any failure.
 
 1. **Donor exists and is a directory.** `--from <donor-path>` resolves.
 2. **Donor has the data-access convention.**
-   `<donor>/.claude/conventions/data-access.md` exists.
+   `<donor>/.claude/conventions/sources.md` exists.
 3. **Donor has an INDEX with a Helper-functions table.**
    `<donor>/data_sources/INDEX.md` exists and contains a section
    matching `^#+ +Helper functions` (case-insensitive).
@@ -61,7 +61,7 @@ on any failure.
    column mentions the slug, OR a file matching
    `<donor>/data_sources/<slug>*`.
 5. **Target has the data-access convention.**
-   `<target>/.claude/conventions/data-access.md` exists. If absent:
+   `<target>/.claude/conventions/sources.md` exists. If absent:
    stop with `"Target lacks data-access convention; run 'r2p init
    --upgrade' first."` Do **not** auto-install.
 6. **Target is a git repo.** `git -C <target> rev-parse --git-dir`
@@ -105,7 +105,7 @@ env-var prefixes as anchors.
    nothing, record "no ref doc found at donor" in the manifest and
    continue — the proposal will warn and Phase D will bootstrap a
    stub. The wrapper docstring back-link (`Full guide:
-   data_sources/<slug>.md`) is load-bearing for the INDEX bridge, so
+   research/sources/<slug>.md`) is load-bearing for the INDEX bridge, so
    even a pre-convention donor's bundle lands in convention-compliant
    shape at the target.
 2. **Companion files** — `Glob` `<donor>/data_sources/<slug>*` for
@@ -118,7 +118,7 @@ env-var prefixes as anchors.
    - **Name anchor.** `def` name begins with the slug
      (`atlas_query`, `atlas_get_country_year_data`).
    - **Docstring anchor.** Docstring contains `Full guide:
-     data_sources/<slug>`.
+     research/sources/<slug>`.
    - **Banner anchor.** `def` sits between a `# ── ` section banner
      whose text contains the slug (case-insensitive substring) and
      the next `# ── ` banner (or end of file). This catches
@@ -236,7 +236,7 @@ On explicit user approval:
      captured section.
 
 2. **Write reference docs and companion files.** For each captured
-   `data_sources/<slug>*` file:
+   `research/sources/<slug>*` file:
    - If the target path doesn't exist: write the donor's content,
      adapted — strip the `Status: verified <date>` line; replace
      headline-anchor values with
@@ -257,11 +257,11 @@ On explicit user approval:
    This file was created by /r2p-migrate-source because the donor
    (`<donor-path>`) did not ship a ref doc for `<slug>`. Populate
    the standard sections (Headline anchor, Endpoint shape, Worked
-   example, Gotchas) per `.claude/conventions/data-sources.md`.
+   example, Gotchas) per `.claude/conventions/sources.md`.
    ```
 
    Leave the leading `MIGRATION_TODO.md` step "write
-   `data_sources/<slug>.md` from scratch" to remind the receiving
+   `research/sources/<slug>.md` from scratch" to remind the receiving
    project.
 
 3. **Append wrapper(s) to the target utility module.** Add
@@ -269,7 +269,7 @@ On explicit user approval:
    file. Rewrite project-specific dependency references to
    `TODO(migrate)`-prefixed placeholders if the target's equivalents
    are unknown (e.g. `country_ids = TODO_TARGET_COUNTRY_IDS`).
-   Wrapper docstrings keep their `Full guide: data_sources/<slug>...`
+   Wrapper docstrings keep their `Full guide: research/sources/<slug>...`
    back-link.
 
 4. **Append env vars** to `<target>/.env.example` (do not edit
@@ -351,7 +351,7 @@ On explicit user approval:
   iterate sequentially. Don't batch proposals; each source needs its
   own user-review gate.
 - **Preserve donor wrapper docstrings.** The `Full guide:
-  data_sources/<file>.md` back-link is load-bearing for the
+  research/sources/<file>.md` back-link is load-bearing for the
   INDEX bridge — never strip it.
 
 ## Cost
@@ -383,7 +383,7 @@ heading is misleading).
 
 Emit each that applies; omit the section if none:
 
-- `⚠ Donor has no data_sources/<slug>*.md ref doc. Will bootstrap a
+- `⚠ Donor has no research/sources/<slug>*.md ref doc. Will bootstrap a
   stub at <target>/data_sources/<slug>.md — fill in before
   considering the source documented.`
 - `⚠ Banner '<text>' matched by multiple slugs (<list>). Defs in
@@ -394,10 +394,10 @@ Emit each that applies; omit the section if none:
 
 - **Slug**: `<slug>`
 - **Donor reference docs found**:
-  - `data_sources/<slug>_<thing>.md` (<line count> lines)
-  - `data_sources/<slug>_<other>.md` (...)
+  - `research/sources/<slug>_<thing>.md` (<line count> lines)
+  - `research/sources/<slug>_<other>.md` (...)
 - **Donor companion files found**:
-  - `data_sources/<slug>_openapi_X.yaml` (...) — OR `(none)`
+  - `research/sources/<slug>_openapi_X.yaml` (...) — OR `(none)`
 - **Donor wrappers found** (in `<donor>/<X>_utils.py`):
   - `<wrapper_1>(...)`
   - `<wrapper_2>(...)`
@@ -481,14 +481,14 @@ Write this to `<target>/MIGRATION_TODO.md` *after* apply succeeds.
 Migration of `<slug>` from `<donor-path>` landed at <ISO8601 UTC>.
 The receiving project owns these re-verification steps.
 
-## 0. Write `data_sources/<slug>.md` from scratch
+## 0. Write `research/sources/<slug>.md` from scratch
 
 **Include only if Phase D bootstrapped a stub (donor had no ref
 doc).** Omit this section otherwise.
 
 The migration created a 5-line stub at
-`data_sources/<slug>.md`. Populate the standard sections per
-`.claude/conventions/data-sources.md`:
+`research/sources/<slug>.md`. Populate the standard sections per
+`.claude/conventions/sources.md`:
 
 - Headline anchor (a concrete value the documented procedure
   produces)
@@ -498,7 +498,7 @@ The migration created a 5-line stub at
 - Gotchas (rate limits, vintage breaks, codelist quirks)
 
 Then set `Status: verified <today>`. The wrapper's docstring
-`Full guide: data_sources/<slug>.md` back-link will resolve once
+`Full guide: research/sources/<slug>.md` back-link will resolve once
 the file is real.
 
 ## 1. Fill `.env` secrets
@@ -516,7 +516,7 @@ If the source is a public API with no credentials, this section is
 
 ## 2. Re-run the headline anchor
 
-Open `data_sources/<slug>_thing.md`. The `TODO(migrate): verify
+Open `research/sources/<slug>_thing.md`. The `TODO(migrate): verify
 against <target-context>` line replaces the donor's headline anchor.
 
 1. Pick a target-context-appropriate concrete value (a country-year
@@ -542,7 +542,7 @@ Until these are filled, wrappers that reference them will raise
 ## 4. Real-fetch smoke test
 
 Run the wrapper(s) once with target parameters. Confirm the response
-shape matches what `data_sources/<slug>_thing.md` describes:
+shape matches what `research/sources/<slug>_thing.md` describes:
 
 ```python
 from <X>_utils import <wrapper>
@@ -558,7 +558,7 @@ verification — update the wrapper and the ref doc together.
 If `<slug>` is core to this project (a Claude session would waste
 time without knowing it exists), add a one-line mention in
 `CLAUDE.md`'s Data Sources section. Otherwise leave it discoverable
-via `data_sources/INDEX.md`.
+via `research/sources/INDEX.md`.
 
 ## 6. Resolve any merge conflicts
 
@@ -576,9 +576,9 @@ commit. The migration is complete.
 
 ## Cross-references
 
-- `.claude/conventions/data-access.md` — utility-module + env-var
+- `.claude/conventions/sources.md` — utility-module + env-var
   shape the skill writes against.
-- `.claude/conventions/data-sources.md` — reference-doc sections the
+- `.claude/conventions/sources.md` — reference-doc sections the
   skill preserves on transplant.
 - `docs/migrate-source-mechanism.md` — design rationale (why
   LLM-at-migration over donor-side discipline; why

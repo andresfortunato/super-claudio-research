@@ -34,7 +34,7 @@ A task can touch 10 files and not need a plan (mechanical transformation followi
 
 Don't include code snippets in plans — they're written against a snapshot that's stale by execution time, and the Edit tool requires reading the actual file anyway. A snippet creates two conflicting sources of truth that need reconciling, which is harder than working from intent alone.
 
-Instead of pasting 30 lines of regression code, write: "Modify `scripts/03_regress.R` to swap the city fixed-effects spec for the matched-pairs spec defined in `decisions/2026-05-08_identification.md`. Keep the existing diagnostic-counts block." The executing session reads `03_regress.R` and figures out the mechanical change. The snippet is at best redundant, at worst misleading.
+Instead of pasting 30 lines of regression code, write: "Modify `scripts/03_regress.R` to swap the city fixed-effects spec for the matched-pairs spec defined in `research/methods/2026-05-08_identification.md`. Keep the existing diagnostic-counts block." The executing session reads `03_regress.R` and figures out the mechanical change. The snippet is at best redundant, at worst misleading.
 
 ### Constraints over Instructions
 
@@ -46,7 +46,7 @@ Constraints are also more durable — they stay correct even as the codebase cha
 
 Things decided during brainstorming shouldn't be re-debated during execution. When a choice between approaches has been made, record it with enough context that the executing session understands why: "Use the WB GDP-deflator (not country-CPI) for cross-country wage panels — the brainstorm covered this; harmonization beats local accuracy here." This prevents re-derivation and keeps execution focused.
 
-When a brainstorm decision graduates to a peer-reviewable methodology call, file it at `decisions/YYYY-MM-DD_<slug>.md` (see `decision-records.md`) and reference it from the plan rather than restating the contents.
+When a brainstorm decision graduates to a peer-reviewable methodology call, file it at `research/methods/<topic>.md` (see `.claude/conventions/methods.md`) and reference it from the plan rather than restating the contents.
 
 ### Tasks as Checkpoints
 
@@ -58,7 +58,7 @@ Tasks should be independently verifiable milestones, not sequential instructions
 - Task 1.3: Save to `data/processed/`
 
 **Good** (checkpoints with intent):
-- Task 1.1: Apply working-age filter (15–64) to the EPH harmonized panel; save to `data/processed/eph_working_age.csv`. Verify: row count matches `methods/working-age-filter/rule.md` diagnostic counts; no NA in the age column; commit message has Run/Out lines.
+- Task 1.1: Apply working-age filter (15–64) to the EPH harmonized panel; save to `data/processed/eph_working_age.csv`. Verify: row count matches `research/methods/working-age-filter/rule.md` diagnostic counts; no NA in the age column; commit message has Run/Out lines.
 
 If a task can't be independently verified, it's too granular — merge it up. Good tasks create natural commit points and enable progress tracking across sessions.
 
@@ -81,7 +81,7 @@ If a task can't be independently verified, it's too granular — merge it up. Go
 
 ### The Pointer Principle
 
-A plan should be a pointer to the code, not a copy of it. "Modify `scripts/03_regress.R` to swap the city fixed-effects spec for the matched-pairs spec defined in `decisions/2026-05-08_identification.md`" lets the executing session read `03_regress.R` with full context. Pasting 30 lines of regression code means the session reads both the plan AND the file, spending tokens reconciling them.
+A plan should be a pointer to the code, not a copy of it. "Modify `scripts/03_regress.R` to swap the city fixed-effects spec for the matched-pairs spec defined in `research/methods/2026-05-08_identification.md`" lets the executing session read `03_regress.R` with full context. Pasting 30 lines of regression code means the session reads both the plan AND the file, spending tokens reconciling them.
 
 The test for every line: does this help the executing session do something it couldn't figure out from reading the code? If not, cut it.
 
@@ -114,7 +114,7 @@ A well-structured plan covers these elements, adapted to the project's needs:
 - Tasks: [checkpoints with intent]
 ```
 
-Research plans naturally cross-link `decisions/<date>_<slug>.md`, `methods/<slug>/rule.md`, and `data_sources/` — the structure above is a starting point, not a rigid template. Scale it to the task: a two-script change doesn't need phases; a complex methodology migration might need per-phase plan files.
+Research plans naturally cross-link `research/methods/<date>_<slug>.md`, `research/methods/<slug>/rule.md`, and `research/sources/` — the structure above is a starting point, not a rigid template. Scale it to the task: a two-script change doesn't need phases; a complex methodology migration might need per-phase plan files.
 
 ## Plan Setup
 
@@ -130,7 +130,7 @@ Then write to:
 
 ### Consuming brainstorming output
 
-If a brainstorming session preceded planning, read `brainstorms/<topic>.md` for decisions already made. Per `brainstorm-format.md`, every brainstorm carries a five-section handoff contract — **Problem**, **Decisions Made**, **Research Findings**, **Open Questions**, **Constraints Identified**. Lift the contents into `plan.md`:
+If a brainstorming session preceded planning, read `plan/brainstorms/<topic>.md` for decisions already made. Per `brainstorm-format.md`, every brainstorm carries a five-section handoff contract — **Problem**, **Decisions Made**, **Research Findings**, **Open Questions**, **Constraints Identified**. Lift the contents into `plan.md`:
 
 - "Decisions Made" → `plan.md`'s `## Decisions Made` (don't re-debate)
 - "Constraints Identified" → `plan.md`'s `## Constraints`
@@ -144,7 +144,7 @@ The brainstorming summary contains the reasoning; the plan records the conclusio
 
 When a phase touches complex systems that the implementer would otherwise spend significant context exploring, write decision-enabling context summaries in `context/`. These save 15-30% of execution context by replacing exploration with a 20-line summary.
 
-A context file might describe how `data_sources/world_bank_api.md` interacts with the project's deflator chain, or how `methods/age-cohort-definition/rule.md` evolves vN-to-vN+1.
+A context file might describe how `research/sources/world_bank_api.md` interacts with the project's deflator chain, or how `research/methods/age-cohort-definition/rule.md` evolves vN-to-vN+1.
 
 The test: would an implementer need to read 5+ files to understand this system well enough to make implementation decisions? If yes, write a context summary during planning.
 

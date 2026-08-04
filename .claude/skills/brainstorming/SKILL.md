@@ -58,14 +58,14 @@ C) [Approach] — [what it buys] / [what it costs]
 My lean is B because [reasoning], but A makes sense if [condition].
 ```
 
-When the researcher makes a choice, record it with the reasoning: "We chose B because X. A was rejected because Y." For methodology calls a peer reviewer would push on, the choice should also graduate to a `decisions/YYYY-MM-DD_<slug>.md` record (see `.claude/conventions/decision-records.md`) — the brainstorm captures the discussion; the decision record is the citable artifact.
+When the researcher makes a choice, record it with the reasoning: "We chose B because X. A was rejected because Y." For methodology calls a peer reviewer would push on, the choice should also graduate to a `research/methods/<topic>.md` record (see `.claude/conventions/methods.md`) — the brainstorm captures the discussion; the decision record is the citable artifact.
 
 ### Throughout — research on demand
 
 When the discussion reveals a knowledge gap — "I'm not sure how the PWT versions handle this", "what's the standard reference category in this literature", "did the EPH variable actually break in 2014" — use available tools to fill it:
 
-- **wiki**: Project-distilled knowledge in `wiki/` (concepts, entities, syntheses) — check first; the team may already have ingested the relevant source.
-- **data_sources**: How-to-access docs in `data_sources/` for endpoints, query shape, pitfalls.
+- **wiki**: Project-distilled knowledge in `research/wiki/` (concepts, entities, syntheses) — check first; the team may already have ingested the relevant source.
+- **data_sources**: How-to-access docs in `research/sources/` for endpoints, query shape, pitfalls.
 - **`/scan-sources` / web-scraping skill**: Pull a tracked source if the registry covers it; ad-hoc scrape otherwise.
 - **Web search / context7 MCP**: Standard practice in the literature, library/API patterns, comparative analysis.
 - **Codebase exploration**: How the current project handles the question (this knowledge may later become `context/*.md` files in the plan).
@@ -82,9 +82,9 @@ When the brainstorming was about a piece of analysis the researcher wants to bui
 
 **Example**: "I want to decompose Argentina's productivity slowdown by sector" → explore PWT rgdpe vs rgdpo → research how Diao-McMillan and other decompositions handle the comparable cases → decide on rgdpe with a one-paragraph robustness note → trigger the planning skill with decisions in hand.
 
-Write the summary to `brainstorms/<topic>.md` (directory created by `r2p init`), then trigger the planning skill. The summary becomes the decisions input — the planning skill reads it and incorporates the decisions rather than re-debating them.
+Write the summary to `plan/brainstorms/<topic>.md` (directory created by `r2p init`), then trigger the planning skill. The summary becomes the decisions input — the planning skill reads it and incorporates the decisions rather than re-debating them.
 
-For projects using the opt-in theme-parallel layout (see `.claude/conventions/evidence-logging.md`), brainstorms tied to a specific theme may live at `brainstorms/<theme>/<topic>.md`. Cross-cutting brainstorms stay flat. One sentence; don't over-engineer this.
+For projects using the opt-in theme-parallel layout (see `.claude/conventions/evidence.md`), brainstorms tied to a specific theme may live at `plan/brainstorms/<theme>/<topic>.md`. Cross-cutting brainstorms stay flat. One sentence; don't over-engineer this.
 
 **Summary format:**
 ```markdown
@@ -110,7 +110,7 @@ For projects using the opt-in theme-parallel layout (see `.claude/conventions/ev
   counterpart audience>.
 
 ## Decision records to file
-- <If a decision belongs in `decisions/YYYY-MM-DD_<slug>.md`, name it here so
+- <If a decision belongs in `research/methods/<topic>.md`, name it here so
   the planning skill or implementation flags it.>
 ```
 
@@ -120,13 +120,13 @@ When the brainstorming was about understanding a topic, comparing approaches con
 
 **Example**: "How do peers in the literature handle the EPH 2014 break?" → review three or four papers' approaches → compare imputation vs sample-window trim vs proxy variable → summary of findings; no plan yet.
 
-Write the summary to `brainstorms/<topic>.md` if the discussion was substantial enough to reference later. For quick explorations, presenting the summary in conversation is sufficient.
+Write the summary to `plan/brainstorms/<topic>.md` if the discussion was substantial enough to reference later. For quick explorations, presenting the summary in conversation is sufficient.
 
 ## What Brainstorming Does NOT Do
 
 - **Write plans.** That's the planning skill. Brainstorming produces decisions; planning produces plans.
 - **Make decisions for the researcher.** Present alternatives and trade-offs. Let the researcher choose. Record their reasoning.
-- **File decision records.** That's the researcher's call once the choice is settled — `decisions/YYYY-MM-DD_<slug>.md`. The brainstorm names which decisions deserve a record; the researcher writes them.
+- **File decision records.** That's the researcher's call once the choice is settled — `research/methods/<topic>.md`. The brainstorm names which decisions deserve a record; the researcher writes them.
 - **Sanity-check existing artifacts.** That's `/verify` (per-artifact, ≤2k tokens) or `/deliverable-review` (multi-lens, ≤12k).
 - **Follow a rigid structure.** The conversation flows naturally. The phases (listen → challenge → evaluate) are a guide, not a checklist.
 - **Research everything upfront.** Research fills specific knowledge gaps as they emerge, not as a mandatory first step.

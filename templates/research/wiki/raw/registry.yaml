@@ -1,0 +1,77 @@
+# research/wiki/raw/registry.yaml — the project's source watchlist.
+#
+# This file is the single authority for what /scan-sources fetches. Add
+# entries by hand; /scan-sources will only update `last_scraped`.
+#
+# Required fields per entry:
+#   slug             — short kebab-case id (also the directory name under research/wiki/raw/scraped/)
+#   url              — the page to fetch
+#   category         — one of: investment | company | innovation | infrastructure | policy | news | other
+#   freq             — one of: daily | weekly | monthly | adhoc
+#   last_scraped     — ISO8601 UTC; auto-updated by /scan-sources; start as null
+#   scrape_method    — one of: httpx | playwright | scrapegraph | crawl4ai
+#   content_selector — optional CSS selector or XPath; null means "use full page body"
+#   notes            — free-text rationale; null acceptable but discouraged
+#
+# See `.claude/conventions/source-registry.md` for the full protocol and
+# `research/wiki/raw/README.md` for how to register a new source.
+#
+# The four examples below are commented out. Uncomment and edit them, or
+# delete and start fresh. They are intentionally generic — replace with your
+# project's actual sources before running /scan-sources.
+
+sources: []
+
+# --- Example 1: investment news (daily, simple HTML) -------------------------
+# - slug: investment-news-example
+#   url: https://example-investment-news.com/country/cambodia
+#   category: investment
+#   freq: daily
+#   last_scraped: null
+#   scrape_method: httpx
+#   content_selector: "article.main-content"
+#   notes: |
+#     Daily wire of FDI deal announcements for the country. Articles are short;
+#     httpx + a tight selector is enough. Watch for paywall after ~5 articles
+#     per session — switch to playwright if it triggers.
+
+# --- Example 2: company filings index (weekly, JS-rendered) ------------------
+# - slug: exchange-disclosures-example
+#   url: https://example-exchange.org/disclosures/recent
+#   category: company
+#   freq: weekly
+#   last_scraped: null
+#   scrape_method: playwright
+#   content_selector: "table#disclosures"
+#   notes: |
+#     The disclosures index is rendered by JS after page load; httpx returns an
+#     empty shell. Playwright with a 2s wait works. We re-scrape weekly because
+#     filings batch on Fridays.
+
+# --- Example 3: infrastructure tracker (monthly, irregular structure) --------
+# - slug: portinfra-tracker-example
+#   url: https://example-portstats.gov/throughput
+#   category: infrastructure
+#   freq: monthly
+#   last_scraped: null
+#   scrape_method: scrapegraph
+#   content_selector: null
+#   notes: |
+#     Monthly throughput stats for the country's main port. Page layout
+#     changes across releases (new sections, renamed columns), so a CSS
+#     selector won't hold; LLM-extraction handles drift. Pricey per fetch —
+#     monthly is appropriate.
+
+# --- Example 4: policy news (weekly, content-heavy site) ---------------------
+# - slug: policy-news-example
+#   url: https://example-mef.gov/news
+#   category: policy
+#   freq: weekly
+#   last_scraped: null
+#   scrape_method: crawl4ai
+#   content_selector: null
+#   notes: |
+#     Ministry's news index. Content is long-form prose; crawl4ai produces
+#     clean markdown. Weekly cadence matches the ministry's posting rhythm.
+#     If a major policy announcement is rumored, force a fetch:
+#     /scan-sources --slug=policy-news-example --force

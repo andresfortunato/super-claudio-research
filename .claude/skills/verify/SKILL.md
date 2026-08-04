@@ -33,7 +33,7 @@ The user types one of:
   auto-fire on file writes.
 - The check would require re-running the analysis end-to-end. That's
   a reproduction job, not verification — point the user at the audit
-  ritual in `.claude/conventions/script-header.md` (the "Why this works"
+  ritual in `.claude/conventions/provenance.md` (the "Why this works"
   section).
 
 ## Preconditions
@@ -84,20 +84,20 @@ every check — the budget is ≤2k tokens. Choose by artifact:
    silently happen when joins are revised.
 4. **Source citation.** Does the deliverable referencing this chart
    actually cite a source line? Grep for the chart filename in
-   `deliverables/`, `evidence/`, and confirm a citation is nearby.
+   `deliverables/`, `research/evidence/`, and confirm a citation is nearby.
 5. **Provenance.** Same as A.5.
 
 ### C. Paragraph (a span inside a markdown deliverable)
 
 1. **Number-to-evidence trace.** For every numeric claim in the paragraph,
-   find the supporting `output/`, `evidence/`, or table cell. Flag any
+   find the supporting `output/`, `research/evidence/`, or table cell. Flag any
    number that has no traceable source.
 2. **Sign and magnitude consistency.** Do the numbers in the paragraph
    agree with the regression / chart they implicitly cite? If the
    regression says `+0.42` and the paragraph says "negative effect",
    that's the bug verify exists to catch.
 3. **Source citation discipline.** Every external claim (e.g. "the World
-   Bank reports...") must cite a source page in `wiki/sources/` or a
+   Bank reports...") must cite a source page in `research/wiki/sources/` or a
    file in `raw/`. Flag uncited claims.
 4. **Tense and scope honesty.** A paragraph claiming "we find that X
    causes Y" when the underlying analysis is correlational is the
@@ -105,7 +105,7 @@ every check — the budget is ≤2k tokens. Choose by artifact:
    `git log` on the cited output, read its identification strategy,
    flag mismatches.
 5. **Insight cross-check.** If the paragraph references a finding,
-   confirm the corresponding `evidence/NN_*.md` exists and the numbers
+   confirm the corresponding `research/evidence/NN_*.md` exists and the numbers
    match.
 
 ## Workflow
@@ -159,7 +159,7 @@ all three sections.
 - **Read-only.** Never edit the artifact.
 - **No re-running.** If a check would require re-executing the analysis,
   skip it and note that re-running is a separate step (point the user
-  at the audit ritual in `.claude/conventions/script-header.md`).
+  at the audit ritual in `.claude/conventions/provenance.md`).
 - **Three to five checks. Stop there.** A long verify report dilutes
   signal; a short one with a real flag is the goal.
 - **Prefer flags over passes.** False positives are cheap (researcher
@@ -181,7 +181,7 @@ Skill will:
    most recent commit → parse `Run:` line → script path.
 4. Read the script header; confirm this artifact is in `Outputs:`.
 5. Read the regression JSON; check coefficient signs against the
-   adjacent `evidence/NN_*.md` claim, check magnitudes, read N.
+   adjacent `research/evidence/NN_*.md` claim, check magnitudes, read N.
 6. Print the markdown report. Total cost ≈1.2k tokens.
 
 ```
@@ -194,15 +194,15 @@ Skill will:
    the most recent edit if no answer.
 2. Pick four checks from menu C: number-to-evidence trace, sign-magnitude
    consistency, source citation, insight cross-check.
-3. Grep numeric claims; for each, find the supporting `output/`, `evidence/`,
-   or `wiki/` page.
+3. Grep numeric claims; for each, find the supporting `output/`, `research/evidence/`,
+   or `research/wiki/` page.
 4. Print the report.
 
 ## Cross-references
 
-- `.claude/conventions/script-header.md` — script header schema verify reads against.
-- `.claude/conventions/analytical-commit-format.md` — commit-message format verify parses.
-- `.claude/conventions/evidence-logging.md` — paragraph checks may
+- `.claude/conventions/provenance.md` — script header schema verify reads against.
+- `.claude/conventions/provenance.md` — commit-message format verify parses.
+- `.claude/conventions/evidence.md` — paragraph checks may
   cross-reference evidence docs.
 - `docs/verification-architecture.md` — how /verify fits with the
   evidence Stop hook and `/deliverable-review`.

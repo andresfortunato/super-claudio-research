@@ -1,216 +1,107 @@
 # <PROJECT NAME> — CLAUDE.md
 
 <!--
-Replace this template's content with project-specific context. Keep CLAUDE.md
-SHORT — long protocols belong in .claude/conventions/<name>.md (read on demand)
-not here (loaded every session).
+r2p v2 template. Keep CLAUDE.md SHORT — it loads every session. Long protocols
+belong in .claude/conventions/<name>.md, read on demand.
 
-Recommended top-level sections:
-  - Project Overview (3-5 lines: what this project is, who it's for, current focus)
-  - Key Frameworks (the analytical lenses you'll keep returning to)
-  - Codebase Structure (one-glance directory tree)
-  - Convention pointers (one short section per .claude/conventions/ file)
+v2 collapsed v1's fourteen sections to seven. The rule that produced that:
+a mechanism gets a SECTION here only once it has artifacts in the repo.
+Mechanisms with zero artifacts get one line under "Where Things Go", or nothing.
+On the pilot engagement, the wiki and source registry held two full sections for
+six months while producing zero pages and zero scrapes — a per-session context
+tax for nothing.
 
-The convention pointers should be ~4 lines each — name + when-to-apply +
-"see .claude/conventions/<name>.md for protocol".
+Delete any section below that your project does not use.
 -->
 
 ## Project Overview
 
-<2-3 sentences on what this research project is about, who the counterpart is, and what the current phase of work is.>
-
-## Key Frameworks
-
-<List the 1-3 analytical lenses you'll repeatedly invoke. e.g. "Growth
-Diagnostics", "Economic Complexity", "McMillan-Rodrik decomposition".>
+<2–3 sentences: what this research project is, who the counterpart is, what the
+current phase of work is. Name the framework version: research-to-policy v2.>
 
 ## Codebase Structure
 
 ```
-project_root/
-├── data/                  # local cached datasets (large files gitignored; data/README.md is the inventory)
-├── notebooks/             # numbered analytical notebooks
-├── output/                # charts (PNG), metadata (JSON), reports (MD/CSV)
-│                          # opt-in: output/<theme>/ for theme-parallel projects
-├── wiki/                  # LLM-owned distilled knowledge + immutable raw layer
-│   ├── pages and types/   # sources/, concepts/, entities/, synthesis/
-│   └── raw/               # immutable archive: papers, scrapes, datasets
-│       ├── registry.yaml  # scrape watchlist
-│       └── scraped/       # /scan-sources output, per-slug subdirs
-├── evidence/              # chart-backed findings + INDEX (project-level)
-│                          # opt-in: evidence/<theme>/NN_*.md for theme-parallel
-├── data_sources/          # external API/dataset reference docs (INDEX + per-source)
-├── methods/               # operational methodology specs (one folder per method)
-├── project_conventions/   # project-bespoke style/process rules (visualization, etc.)
-├── deliverables/          # external memos, briefings, decks (per-profile templates)
-├── plan/                  # multi-phase implementation plans (gitignored)
-├── brainstorms/           # decisions-pre-planning, output of /brainstorming (gitignored)
-│                          # opt-in: brainstorms/<theme>/<topic>.md for theme-parallel
-├── learnings/             # tacit gotchas + tips, retrieval-keyed (project-wide)
-├── archive/               # permanent record of completed plans (one .md per plan + index.md)
-├── internal_docs/         # concept notes, workplans, mission plans, team notes (gitignored)
-├── literature/            # reference papers + PDFs (gitignored — copyrighted)
-├── slides/                # presentation decks (committed, less formal than deliverables)
-├── scripts/               # build scripts behind notebooks
-├── .claude/
-│   ├── conventions/       # full convention protocols (read on demand)
-│   ├── hooks/             # Stop nudges (silent unless tripped)
-│   ├── skills/            # invokable Anthropic-format skills (slash commands)
-│   └── settings.json      # project-shared Claude Code settings
-└── CLAUDE.md              # this file
+<project>/
+├── analysis/<theme>/       # analytical scripts
+├── data/                   # raw/<source>/ (immutable) · processed/<theme>/
+├── output/<theme>/         # charts, tables
+├── research/               # THE DURABLE RECORD
+│   ├── claims.md              # curated load-bearing claims ← read this first
+│   ├── evidence/              # NN_<slug>.md + INDEX.md (append-only)
+│   ├── methods/               # one <topic>.md per methodological object
+│   └── sources/               # one <source>.md per external API/dataset
+├── plan/                   # plan-<slug>/ · archive/ · brainstorms/
+├── deliverables/           # memos/ · decks/
+├── reference/              # literature/ · notes/ · internal/ · external/
+└── .claude/                # conventions/ (+ conventions/project/) · hooks/
 ```
 
-## Project Conventions
+**Root holds these directories, config, and nothing else.** Use `_inbox/`
+(gitignored) to stage loose files.
 
-Project-bespoke style and process rules in `project_conventions/`
-— visualization, writing voice, slide design, naming. One file
-per domain; `INDEX.md` for quick-nav. Read the relevant file on
-demand when work touches the domain. Full protocol:
-`.claude/conventions/project-conventions.md` (read on demand).
+## Research Record — claims, evidence, methods
 
-## Evidence Logging
+Three layers, and the order matters:
 
-After any substantive data analysis: write `evidence/NN_<slug>.md` and update
-`evidence/INDEX.md`. Projects with multiple parallel lines of inquiry may
-opt into `evidence/<theme>/NN_*.md` subfolders (flat layout stays default).
-Full protocol: `.claude/conventions/evidence-logging.md` (read on demand).
-A Stop hook nudges if analysis artifacts were produced without an evidence doc.
+1. **`research/claims.md`** — the load-bearing claims, each with unit, period,
+   one number, the evidence it rests on, and what contests it. **Editable and
+   deletable.** Start here when synthesizing or writing. Deliverables cite
+   claims; claims cite evidence. Mandatory once evidence passes 40 docs.
+2. **`research/evidence/NN_<slug>.md`** — **append-only**. Frontmatter carries
+   `status / unit / geography / period / confidence`. `## Measured` holds
+   numbers only; `## Reading` is the only place a verdict may appear.
+   `INDEX.md` headlines are capped at 120 chars.
+3. **`research/methods/<topic>.md`** — one file per methodological object: the
+   rule, why-not-the-alternatives, the traps, the diagnostic counts.
 
-## Wiki
+**Two findings only contradict each other if their `unit` and `period`
+overlap.** Check frontmatter before reconciling anything. Never silently
+reconcile a real conflict — put it in the claim's `Contested by:` field.
 
-Distilled, queryable project knowledge in `wiki/`, built from immutable
-sources in `wiki/raw/`. Schema and rules: `wiki/SCHEMA.md`. Use
-`/wiki-ingest <wiki/raw/path>` to add a source; `/wiki-lint` to audit.
-Claude owns the wiki; researchers may correct factual errors. See
-`wiki/README.md` for orientation.
+Protocols: `.claude/conventions/{claims,evidence,methods}.md`.
+Lint: `bash .claude/hooks/lint-research.sh`.
 
-## Script Headers
+## Sources & Data Access
 
-Every analytical script (R / Python / Stata) starts with a fixed-shape
-header comment listing Inputs / Outputs / Seed / Env. Format and examples:
-`.claude/conventions/script-header.md` (read on demand). The header is
-how `/verify` and future-you trace what produced any given output.
+`research/sources/<source>.md` documents one external API or dataset — what it
+gives you, how to call it, a re-fetchable headline anchor, and its gotchas. Its
+runtime half is a wrapper in `<project>_utils.py`, credentials in `.env` against
+the `.env.example` contract, and the local cache in `data/` inventoried by
+`data/README.md`. Protocol: `.claude/conventions/sources.md`.
 
-## Analytical Commit Format
+## Visualization
 
-Commits that produce or modify analytical artifacts under `output/`,
-`evidence/`, or `deliverables/<name>/charts/` include `Run:` and `Out:`
-lines in the message so `git log -- output/<file>` resolves to a script.
-Full protocol: `.claude/conventions/analytical-commit-format.md`
-(read on demand).
+<Your design system, the single source of truth file, and the language rule for
+on-chart text. Project-bespoke style rules live in
+`.claude/conventions/project/`.>
 
-## Handoff Format
+## Provenance
 
-End of any working session that touched a `plan/plan-<name>/`: rewrite
-that plan's `handoff.md` in place. Multi-time-scale (within-session,
-researcher↔researcher, year-later). Full protocol:
-`.claude/conventions/handoff-format.md` (read on demand).
+Every analytical script opens with a fixed `Script / Inputs / Outputs / Seed /
+Env` header. Every commit that writes an artifact carries `Run:` and `Out:`
+lines, so `git log -- output/<file>` traces any chart to the code that made it.
+Protocol: `.claude/conventions/provenance.md`.
 
-## Brainstorming
+## Plan Lifecycle
 
-Before writing a plan for a non-trivial methodology call, run the
-`brainstorming` skill — it produces `brainstorms/<topic>.md` with the
-decisions a plan needs (deflator, identification, reference category,
-sample restriction). Decisions a peer reviewer would push on graduate to
-`decisions/YYYY-MM-DD_<slug>.md`. Full protocol:
-`.claude/conventions/brainstorm-format.md` (read on demand).
+`plan/brainstorms/<topic>.md` → `plan/plan-<slug>/` → `handoff.md` →
+`plan/archive/`. Handoffs are **rewritten in place** every session, never
+appended. Phase verification is domain-shaped (sign, magnitude, breakpoint
+alignment, citation present, reproducibility), not code-shaped. Before a
+parallel fan-out, patch the phase files — a correction stored only in the handoff
+cannot reach a worker whose phase file is self-contained.
+Protocol: `.claude/conventions/plan-lifecycle.md`.
 
-## Plan Structure
+## Where Things Go
 
-Multi-session work lives at `plan/plan-<slug>/{plan.md, handoff.md, log.md}`.
-Verification is domain-shaped (sign-of-coefficients, magnitude sanity,
-breakpoint alignment), not code-shaped. Full protocol:
-`.claude/conventions/plan-structure.md` (read on demand). Cross-link
-methodology calls to `decisions/`.
-
-## Decision Records
-
-Methodology calls you'd defend in peer review (deflator choice,
-identification strategy, sample restriction): file once at
-`decisions/YYYY-MM-DD_<slug>.md`. Format: Decision / Alternatives /
-Why-rejected / Key-assumptions / What-would-invalidate. Full protocol:
-`.claude/conventions/decision-records.md` (read on demand).
-
-## Learning Capture
-
-Tacit gotchas and discoveries (survey-vintage breakage, deflator
-divergences, sample-restriction side effects) live at
-`learnings/<slug>.md` plus a `triggers:` row in `learnings/index.yaml`.
-The `retrieve-learnings.sh` UserPromptSubmit hook surfaces relevant
-learnings when ≥2 trigger keywords appear in a prompt; the
-`precompact-handoff.sh` hook nudges to capture surprises before
-context is compacted. Distinct from `evidence/` (formal findings)
-and `decisions/` (peer-reviewable methodology calls). Full protocol:
-`.claude/conventions/learning-capture.md` (read on demand).
-
-## Methods
-
-Operational, project-internal methodology specs in
-`methods/<method-slug>/rule.md` — what we decided to compute and
-why, with diagnostic counts that prove the rule is in force. Cross-link
-load-bearing changes to `decisions/`. Full protocol:
-`.claude/conventions/methods.md` (read on demand).
-
-## Source Registry
-
-Tracked-source watchlist in `wiki/raw/registry.yaml` plus dedup ledger
-`wiki/raw/seen.jsonl`. Use `/scan-sources` to refresh entries due for
-re-scrape; `/scan-sources --slug=<slug>` for one source;
-`/scan-sources --category=<cat>` to filter; `--force` to bypass the
-freq window. Scraped content lands in `wiki/raw/scraped/<slug>/...md` and
-requires explicit `/wiki-ingest` for wiki promotion. Full protocol:
-`.claude/conventions/source-registry.md` (read on demand).
-
-## Data Sources
-
-Reference docs for external APIs and datasets in `data_sources/` —
-one `<source>_<thing>.md` per source-and-purpose, plus `INDEX.md` for
-quick-nav. Each doc carries a `Status: verified <date>` line and at
-least one re-fetchable headline anchor. Full protocol:
-`.claude/conventions/data-sources.md` (read on demand).
-
-## Data Access
-
-Runtime layer of the data pipeline: `.env` (gitignored) + `.env.example`
-(committed contract) + `<project>_utils.py` at project root with one
-wrapper per source (`atlas_query`, `wb_fetch`, `imf_sdmx_fetch`, …),
-each docstring back-linking to its `data_sources/` doc. The
-`data_sources/INDEX.md` "Helper functions" table maps wrappers ↔ docs.
-Local cached files land in `data/` (gitignored except `data/README.md`,
-the on-disk inventory). Full protocol:
-`.claude/conventions/data-access.md` (read on demand).
-
-## Internal Docs
-
-Project-management documents that inform the work but should not be
-committed — concept notes, workplans, mission/stakeholder plans, and
-team-internal scoping notes — live in `internal_docs/` (gitignored by
-the framework). Distinct from `brainstorms/` (methodology
-deliberation) and `decisions/` (citable methodology calls). If
-something in here becomes citable, copy the extract to `decisions/`
-or `wiki/raw/` rather than linking the gitignored path. See
-`internal_docs/README.md` for orientation.
-
-## Literature
-
-Reference papers, articles, and book chapters in `literature/` —
-gitignored by the framework (large PDFs, often copyrighted). Pull a
-paper into the wiki with `/wiki-ingest literature/<file>.pdf`.
-Distinct from `wiki/raw/` (project-specific committed source materials).
-Bibliography files can be committed by exception (`!literature/refs.bib`).
-See `literature/README.md` for orientation.
-
-## Slides
-
-Presentation decks in `slides/` — kickoffs, working sessions,
-conference talks, internal updates. Committed by default. Distinct
-from `deliverables/`, which holds formal outputs with fixed profiles
-(memo, briefing, paper). Build decks with the `ppt-creator` skill.
-See `slides/README.md` for orientation.
-
-<!--
-Add one similar pointer block per additional convention you adopt. The
-research-to-policy framework will install more over time. Each
-convention ships with its own pointer template; copy the relevant
-block in here and trim to project specifics.
--->
+- **`reference/literature/`** — papers and third-party reports (gitignored).
+- **`reference/notes/`** — transcripts and working notes (**tracked**: they
+  cannot be re-downloaded).
+- **`reference/internal/`** — team-internal scoping (gitignored).
+- **`deliverables/memos/`**, **`deliverables/decks/`** — external outputs.
+- **Optional mechanisms** — the wiki (`research/wiki/`, `/wiki-ingest`,
+  `/wiki-lint`) and source registry (`/scan-sources`). Installed with
+  `r2p init --with-wiki`. Protocols: `.claude/conventions/source-registry.md`,
+  `research/wiki/SCHEMA.md`. Promote either to its own section here only once a
+  stream-type source line (news, filings, bulletins) actually starts.

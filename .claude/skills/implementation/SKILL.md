@@ -28,13 +28,13 @@ A plan exists in `plan/plan-[name]/` with `plan.md` and at least one phase file.
 
 ### The artifact is ground truth
 
-The plan captures the analysis intent; what landed in `output/` (charts, tables, .meta.json) and `evidence/` (evidence-based findings) is reality. When they diverge, the artifact wins for what was actually measured; the plan wins for intent and constraints. The plan tells you *which* artifacts and *why* — the artifact tells you *what the data actually showed*.
+The plan captures the analysis intent; what landed in `output/` (charts, tables, .meta.json) and `research/evidence/` (evidence-based findings) is reality. When they diverge, the artifact wins for what was actually measured; the plan wins for intent and constraints. The plan tells you *which* artifacts and *why* — the artifact tells you *what the data actually showed*.
 
 ### Verify with evidence
 
 Every task has a done state — the script runs end-to-end, sign-of-coefficients holds against the brainstorm prediction, the chart re-renders byte-identical (or sign-and-magnitude-identical for stochastic content), the source citation is present, the row count reconciles. Don't mark a task complete without running its verification. Unchecked tasks compound: if task 2 is subtly wrong and task 3 builds on it, you've wasted two tasks of context instead of catching it early.
 
-Default verification when the plan doesn't specify: does the script run end-to-end with the same seed? Do diagnostic counts in `methods/<slug>/rule.md` still match the rule? Do downstream evidence docs still cite the artifact correctly? For per-artifact sanity (one regression, one chart, one paragraph) use `/verify` (≤2k tokens). For last-mile multi-lens audit on advanced deliverable drafts use `/deliverable-review` (≤12k tokens).
+Default verification when the plan doesn't specify: does the script run end-to-end with the same seed? Do diagnostic counts in `research/methods/<slug>/rule.md` still match the rule? Do downstream evidence docs still cite the artifact correctly? For per-artifact sanity (one regression, one chart, one paragraph) use `/verify` (≤2k tokens). For last-mile multi-lens audit on advanced deliverable drafts use `/deliverable-review` (≤12k tokens).
 
 ### Escalate what matters, work around what doesn't
 
@@ -61,7 +61,7 @@ When an approach fails, record it so the next session or parallel agent doesn't 
 **Where it goes:**
 - `plan/plan-[name]/handoff.md` — tactical notes for the next session ("tried the matched-pairs spec, sample-size collapsed below the 200-obs floor")
 - `plan/plan-[name]/log.md` — permanent record of direction changes and dead ends within this plan
-- `learnings/<slug>.md` — only when the learning is reusable across plans ("PONDII didn't exist in 2014 EPH waves; the 2018Q3 survey vintage break invalidates pre-2018Q3 wage comparisons without a deflator-chain adjustment"). See `learning-capture.md`.
+- `research/methods/<slug>.md` — only when the learning is reusable across plans ("PONDII didn't exist in 2014 EPH waves; the 2018Q3 survey vintage break invalidates pre-2018Q3 wage comparisons without a deflator-chain adjustment"). See `learning-capture.md`.
 
 ## Session Start
 
@@ -145,7 +145,7 @@ The Stop hook enforces handoff writing — it blocks if `handoff.md` appears sta
 - **Surprises** in handoff.md: anything learned that the plan didn't anticipate
 - **What didn't work** in handoff.md: approaches tried and abandoned
 - **Direction changes** in `log.md`: decisions made that modified the plan
-- **Learnings** in `learnings/<slug>.md`: only if something is reusable beyond this plan (see `learning-capture.md`)
+- **Learnings** in `research/methods/<slug>.md`: only if something is reusable beyond this plan (see `learning-capture.md`)
 
 Write the handoff while your context is still fresh — not at the last moment when context is degraded.
 
@@ -167,8 +167,8 @@ After writing the marker, the next Stop event fires `check-evidence.sh` Tripwire
 
 The archivist:
 - Reads `plan.md`, `phases/phase-*.md`, `handoff.md`, `log.md`
-- Synthesizes `archive/plan-[name].md` (60–150 lines)
-- Appends a one-line entry to `archive/index.md`
+- Synthesizes `plan/archive/plan-[name].md` (60–150 lines)
+- Appends a one-line entry to `plan/archive/index.md`
 - Optionally edits `CLAUDE.md` if the plan changed scaffolding architecturally
 - Deletes the plan directory
 

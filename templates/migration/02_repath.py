@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+"""
+Inputs:  every tracked text file (md, R, py, sh, yaml, yml, txt, json, qmd)
+Outputs: the same files, with v1 paths rewritten to the v2 layout
+         plan/plan-r2p-v2-consolidation/mapping/repath_report.md
+Seed:    none
+Env:     python3 stdlib only
+
+Phase 2b of plan-r2p-v2-consolidation. Rewrites references to moved
+directories. `decisions/` and `learnings/` are deliberately NOT rewritten here
+— their targets are method topics that Phase 3 creates, so rewriting them now
+would only have to be redone.
+
+Safety: a path token only matches when preceded by start-of-line or one of
+`\\s ( [ ` " ' : , = |` — never by another path segment. That is what stops
+`research/evidence/` becoming `research/research/evidence/` and stops
+`.claude/conventions/methods.md` being mangled into a directory reference.
+
+Run with --check to report what would change without writing.
+"""
+from __future__ import annotations
+
+import re
+import subprocess
+import sys
+from collections import Counter
+from pathlib import Path
+
+ROOT = Path(subprocess.run(
+    ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True
+).stdout.strip())
+
+EXTS = {".md", ".R", ".r", ".py", ".sh", ".yaml", ".yml", ".txt", ".json", ".qmd", ".Rmd"}
+
+# A mechanical repath will rewrite the documentation ABOUT the repath — the one
+# place old paths are supposed to survive. On the pilot it turned this script's
+# own RULES table into ("research/sources/", "research/sources/") and mangled the
+# v1-vs-v2 comparison tables inside the new conventions. Both were caught by
+# reading the diff, not by any test. Exclude those paths.
+EXCLUDE_PREFIXES = (
+    ".claude/conventions/",                  # v1-vs-v2 contrast tables live here
+    "templates/migration/",                  # this script and its siblings
+    "plan/plan-r2p-v2-consolidation/",       # the migration plan itself
+    "docs/v1-to-v2-migration.md",
+)
+
+# ordered: longest / most specific first
+RULES: list[tuple[str, str]] = [
+    # wiki/raw/literature/ left the wiki entirely — must precede the wiki/ rule
+    ("wiki/raw/literature/", "reference/literature/"),
+    # the four v1 method folders go straight to their final flat v2 slugs, so
+    # these 100+ references are rewritten once instead of twice
+    ("methods/pizza_chart/rule.md", "research/methods/pizza-chart.md"),
+    ("methods/city_growth_models/rule.md", "research/methods/city-growth-models.md"),
+    ("methods/structural_transformation/rule.md",
+     "research/methods/structural-transformation.md"),
+    ("methods/cordoba_shift_share_bartik/rule.md",
+     "research/methods/shift-share-bartik.md"),
+    ("methods/spatial_equilibrium_mincer/rule.md",
+     "research/methods/spatial-equilibrium-mincer.md"),
+    ("methods/cordoba_shift_share_bartik/",
+     "research/methods/_adjuncts/shift-share-bartik/"),
+    ("data_sources/", "research/sources/"),
+    ("project_conventions/", ".claude/conventions/project/"),
+    ("internal_docs/", "reference/internal/"),
+    ("brainstorms/", "plan/brainstorms/"),
+    ("evidence/", "research/evidence/"),
+    ("wiki/", "research/wiki/"),
+    ("slides/", "deliverables/decks/"),
+    ("archive/", "plan/archive/"),
+    # `methods/` must not touch `conventions/methods.md`; the trailing slash and
+    # the left-boundary class together guarantee that.
+    ("methods/", "research/methods/"),
+]
+
+LEFT = r"(?<![\w./-])"
+COMPILED = [(re.compile(LEFT + re.escape(src)), src, dst) for src, dst in RULES]
+
+
+def tracked_text_files() -> list[Path]:
+    out = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z"],
+                         capture_output=True, text=True, check=True).stdout
+    files = []
+    for rel in out.split("\0"):
+        if not rel:
+            continue
+        p = ROOT / rel
+        if rel.startswith(EXCLUDE_PREFIXES):
+            continue
+        if p.suffix in EXTS and p.is_file():
+            files.append(p)
+    return files
+
+
+def main() -> int:
+    check = "--check" in sys.argv
+    counts: Counter[str] = Counter()
+    touched: dict[str, Counter[str]] = {}
+
+    for p in tracked_text_files():
+        try:
+            orig = p.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        text = orig
+        per_file: Counter[str] = Counter()
+        for rx, src, dst in COMPILED:
+            text, n = rx.subn(dst, text)
+            if n:
+                per_file[f"{src} -> {dst}"] += n
+                counts[f"{src} -> {dst}"] += n
+        if text != orig:
+            touched[str(p.relative_to(ROOT))] = per_file
+            if not check:
+                p.write_text(text, encoding="utf-8")
+
+    # guard: no double prefixes anywhere
+    bad = []
+    for p in tracked_text_files():
+        try:
+            t = p.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        for pat in ("research/research/", "plan/plan/archive", "reference/reference/",
+                    ".claude/conventions/project/project/"):
+            if pat in t:
+                bad.append(f"{p.relative_to(ROOT)}: {pat}")
+
+    lines = ["# Repath report", "", f"mode: {'check' if check else 'write'}", "",
+             "| rewrite | occurrences |", "|---|--:|"]
+    for k, v in counts.most_common():
+        lines.append(f"| `{k}` | {v} |")
+    lines += ["", f"files touched: **{len(touched)}**", "",
+              "## Double-prefix guard", ""]
+    lines.append("clean" if not bad else "\n".join(f"- ⚠ {b}" for b in bad))
+    report = "\n".join(lines) + "\n"
+    (ROOT / "plan/plan-r2p-v2-consolidation/mapping/repath_report.md").write_text(
+        report, encoding="utf-8")
+    print(report)
+    return 1 if bad else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

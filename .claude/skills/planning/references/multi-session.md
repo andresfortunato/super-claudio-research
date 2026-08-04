@@ -42,13 +42,13 @@ When a session ends, write/overwrite `plan/plan-<slug>/handoff.md`. The framewor
 ### Handoff (2026-05-08)
 
 **Status**: Phase 1 complete. Tasks 1.1–1.3 done.
-**State**: Committed as abc123. Diagnostic counts match `methods/eph-harmonization/rule.md`; no NA in age, region, or wage columns.
+**State**: Committed as abc123. Diagnostic counts match `research/methods/eph-harmonization/rule.md`; no NA in age, region, or wage columns.
 **Next**: Phase 2, Task 2.1 — apply working-age + sample-construction filters.
 
 **Surprises:**
-- 2018 EPH wave dropped the household-id column for two trimesters; reconstructed via composite key (per `decisions/2026-05-07_eph_panel_id.md`).
+- 2018 EPH wave dropped the household-id column for two trimesters; reconstructed via composite key (per `research/methods/2026-05-07_eph_panel_id.md`).
 - Coefficient on regional FE flipped sign vs the brainstorm prediction — sample now restricted to >50k-pop cities, magnitude reconciles to literature. Logged in `log.md` and noted in the next regression's commit.
-- Deflator chain needed an extra splice point at 2017 (CPI methodology break) — added to `methods/deflator-chain/rule.md` v3.
+- Deflator chain needed an extra splice point at 2017 (CPI methodology break) — added to `research/methods/deflator-chain/rule.md` v3.
 
 **What didn't work:**
 - Tried using `data.table::rbindlist(fill=TRUE)` to stack vintages — silently coerced factor levels. Switched to explicit per-wave `mutate()` + `bind_rows()` after.
@@ -56,7 +56,7 @@ When a session ends, write/overwrite `plan/plan-<slug>/handoff.md`. The framewor
 
 The "Surprises" section is the most valuable part — it captures knowledge that the plan didn't anticipate and the code doesn't make obvious. Without it, the next session re-discovers each surprise independently.
 
-Significant learnings that apply beyond this plan go to `learnings/` (see `learning-capture.md`). The framework's UserPromptSubmit hook (`retrieve-learnings.sh`) automatically injects relevant learnings when future prompts match their trigger keywords.
+Significant learnings that apply beyond this plan go to `research/methods/` (see `learning-capture.md`). The framework's UserPromptSubmit hook (`retrieve-learnings.sh`) automatically injects relevant learnings when future prompts match their trigger keywords.
 
 ## Start-of-Session Protocol
 
@@ -76,7 +76,7 @@ Progress tracking in `handoff.md` should carry one-line annotations, not just ch
 ```
 | Task | Status | Note |
 |------|--------|------|
-| 1.1 Harmonize 2014–2017 vintages | Done | wage-field rename in 2016 wave; documented in methods/eph-harmonization |
+| 1.1 Harmonize 2014–2017 vintages | Done | wage-field rename in 2016 wave; documented in research/methods/eph-harmonization |
 | 1.2 Harmonize 2018–2023 vintages | Done | 2018 hh-id reconstructed via composite key |
 | 1.3 Verify diagnostic counts      | Done | Row counts within ±0.5% of published EPH totals; no NA in age/wage |
 | 2.1 Apply working-age filter      | Pending | |

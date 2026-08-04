@@ -23,13 +23,13 @@ Static audit of a research project's working tree. Identifies likely-deletable a
 
 ## Preconditions
 
-- Run from the project root. The skill assumes the standard layout: `data/raw/`, `data/`, `output/` (or `figures/`, `charts/`), `scripts/` (or `src/`, `code/`, `analysis/`), `notebooks/`, `evidence/`, optionally `deliverables/` and `wiki/`.
+- Run from the project root. The skill assumes the standard layout: `data/raw/`, `data/`, `output/` (or `figures/`, `charts/`), `scripts/` (or `src/`, `code/`, `analysis/`), `notebooks/`, `research/evidence/`, optionally `deliverables/` and `research/wiki/`.
 - If `data/raw/` does not exist, note it in the proposal but continue — staleness checks against `data/raw/` mtime simply won't fire.
-- If `evidence/` and `deliverables/` are both absent, the chart-orphan check has nothing to cross-reference; report that limitation in the proposal rather than silently degrading.
+- If `research/evidence/` and `deliverables/` are both absent, the chart-orphan check has nothing to cross-reference; report that limitation in the proposal rather than silently degrading.
 
 ## Workflow
 
-1. **Locate working directories.** Glob the project for `scripts/`, `src/`, `code/`, `analysis/`, `notebooks/`, `output/`, `figures/`, `charts/`, `data/`, `data/raw/`, `evidence/`, `deliverables/`, `wiki/`. Record which exist; the audit adapts to what's present.
+1. **Locate working directories.** Glob the project for `scripts/`, `src/`, `code/`, `analysis/`, `notebooks/`, `output/`, `figures/`, `charts/`, `data/`, `data/raw/`, `research/evidence/`, `deliverables/`, `research/wiki/`. Record which exist; the audit adapts to what's present.
 2. **Compute the `data/raw/` watermark.** Get the most recent mtime under `data/raw/` (recursively). This is the staleness reference for intermediate data: any derived CSV/Parquet older than the latest raw input is suspect — the raw it depends on may have been updated and the derivative not regenerated.
 3. **Run the four audits below.** Each populates a section of the proposal.
 4. **Write `cleanup-proposal.md`** at the project root. Overwrite if it exists; the previous proposal is presumed to have been acted on or discarded.
@@ -42,7 +42,7 @@ Static audit of a research project's working tree. Identifies likely-deletable a
 A script is an orphan candidate if **all** hold:
 - Lives in `scripts/`, `src/`, `code/`, `analysis/`, or project root with extension `.R`, `.py`, `.do`, `.sh`, `.jl`.
 - Last modified >30 days ago (use `find -mtime +30` or equivalent `stat`).
-- Not referenced by any other tracked file in the repo: `grep -r` its filename across `scripts/`, `notebooks/`, `evidence/`, `deliverables/`, `plan/`, `wiki/`, `Makefile`, `*.yml`, `*.yaml`. Zero non-self hits → orphan candidate.
+- Not referenced by any other tracked file in the repo: `grep -r` its filename across `scripts/`, `notebooks/`, `research/evidence/`, `deliverables/`, `plan/`, `research/wiki/`, `Makefile`, `*.yml`, `*.yaml`. Zero non-self hits → orphan candidate.
 - Optional strengthener: `git log --grep="Run: <script>"` returns no commits in the last 30 days. Per the analytical-commit-format convention, every analytical run is recorded in a commit message; absence of recent `Run:` commits is suggestive (but not dispositive — the convention may not have been adopted from day one).
 
 Each finding records: path, last-modified date, age in days, what was searched (so the researcher can verify the negative).
@@ -62,7 +62,7 @@ Each finding records: path, mtime, raw-watermark date, age delta in days, the mo
 A chart file is an orphan candidate if **all** hold:
 - Lives in `output/`, `figures/`, `charts/`, or any directory with `>5` image files.
 - Extension is `.png`, `.pdf`, `.svg`, `.jpg`, `.jpeg`, or `.html` (for plotly/leaflet exports).
-- **Not referenced by any file in `evidence/`, `deliverables/`, or `wiki/`** — grep the basename across those trees.
+- **Not referenced by any file in `research/evidence/`, `deliverables/`, or `research/wiki/`** — grep the basename across those trees.
 - Optional weak signal: not referenced from any markdown file in the repo (broader sweep). Use only if the strict check produced too few hits to be useful.
 
 Each finding records: path, last-modified date, what was searched. Charts that fail the strict check but pass the broader sweep get a `(maybe — referenced from non-canonical location)` annotation rather than being omitted.
@@ -96,7 +96,7 @@ finished, delete this file (or leave it as an audit log — your call).
 
 ## 1. Orphan scripts (>30 days, no inbound references)
 
-- `scripts/old_exploration.R` — modified 2026-01-04 (121 days ago); searched scripts/, notebooks/, evidence/, deliverables/, plan/, wiki/, Makefile, *.yml — zero hits. No recent `Run:` commits. **Likely safe to delete.**
+- `scripts/old_exploration.R` — modified 2026-01-04 (121 days ago); searched scripts/, notebooks/, research/evidence/, deliverables/, plan/, research/wiki/, Makefile, *.yml — zero hits. No recent `Run:` commits. **Likely safe to delete.**
 - `scripts/munge_v2.py` — modified 2026-02-15 (79 days); zero hits in tracked files; one hit in `.gitignore` (excluded output dir). **Probably safe; double-check the v3 superseded it.**
 
 (If zero findings: write `(none)` under this header.)
@@ -107,7 +107,7 @@ finished, delete this file (or leave it as an audit log — your call).
 
 ## 3. Orphan charts (not referenced by insight, deliverable, or wiki)
 
-- `output/explore_07.png` — modified 2026-03-10; not referenced in evidence/, deliverables/, or wiki/. **Likely safe to delete.**
+- `output/explore_07.png` — modified 2026-03-10; not referenced in research/evidence/, deliverables/, or research/wiki/. **Likely safe to delete.**
 - `output/fdi_ratio_v3.png` — modified 2026-04-22; referenced from a non-canonical README.md but not from any insight or deliverable. **Decide whether the README usage is load-bearing.**
 
 ## 4. Scratch-marked notebook cells
@@ -117,7 +117,7 @@ finished, delete this file (or leave it as an audit log — your call).
 
 ## Audits skipped (preconditions not met)
 
-(List any audits the skill couldn't run because expected directories were missing — e.g. "chart audit skipped: no evidence/ or deliverables/ to cross-reference.")
+(List any audits the skill couldn't run because expected directories were missing — e.g. "chart audit skipped: no research/evidence/ or deliverables/ to cross-reference.")
 ```
 
 If every audit returned zero findings, still write the file with `(none)` under each section and a Summary saying so — the researcher can confirm the audit ran.
@@ -146,13 +146,13 @@ Skill walks the project, runs four audits, writes `cleanup-proposal.md`, and rep
 - Does not delete, move, or rename anything.
 - Does not modify notebooks, scripts, charts, or data files.
 - Does not commit. The proposal is uncommitted markdown; the researcher decides whether to commit it as an audit record or discard it after acting.
-- Does not cross into `wiki/` for content checks. `/wiki-lint` handles wiki-internal cleanup.
+- Does not cross into `research/wiki/` for content checks. `/wiki-lint` handles wiki-internal cleanup.
 - Does not lint code style, fix bugs, or refactor. Cleanup is about removal, not improvement.
 
 ## Boundary with the archivist agent
 
-Per-plan archival — synthesizing `archive/plan-<slug>.md` from a completed plan, deleting the plan directory, updating `CLAUDE.md` if architecture changed — is the **archivist** agent's job (`~/.claude/agents/archivist.md`), invoked automatically by the Stop hook when a `plan/plan-<slug>/.completed` marker appears. This skill does **not** look inside active or completed `plan/` directories, does **not** propose archiving plans, and does **not** delete or modify `archive/` entries.
+Per-plan archival — synthesizing `plan/archive/plan-<slug>.md` from a completed plan, deleting the plan directory, updating `CLAUDE.md` if architecture changed — is the **archivist** agent's job (`~/.claude/agents/archivist.md`), invoked automatically by the Stop hook when a `plan/plan-<slug>/.completed` marker appears. This skill does **not** look inside active or completed `plan/` directories, does **not** propose archiving plans, and does **not** delete or modify `plan/archive/` entries.
 
-Conversely, the archivist is scope-bounded: it touches only the plan being archived, `archive/`, and `CLAUDE.md`. Project-wide cruft — orphan scripts under `scripts/`, stale intermediates under `data/`, unreferenced charts under `output/`, scratch notebook cells — is out of its scope. After the archivist finishes a plan that materially touched source files, it recommends the user run `/research-cleanup` to sweep the rest.
+Conversely, the archivist is scope-bounded: it touches only the plan being archived, `plan/archive/`, and `CLAUDE.md`. Project-wide cruft — orphan scripts under `scripts/`, stale intermediates under `data/`, unreferenced charts under `output/`, scratch notebook cells — is out of its scope. After the archivist finishes a plan that materially touched source files, it recommends the user run `/research-cleanup` to sweep the rest.
 
 The split is deliberate: per-plan archival is automated (Stop hook → agent → done) and bounded; project-wide cleanup is user-invoked (you read `cleanup-proposal.md` and act manually) and decision-laden. Mixing them would either overreach (the archivist deletes a script that *looked* orphaned) or underreach (this skill skips a plan-shaped cleanup that needed plan context). Each side defers to the other; no logic is duplicated.

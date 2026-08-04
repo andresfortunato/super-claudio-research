@@ -27,7 +27,7 @@ Something you discover directly contradicts a decision in plan.md.
 
 A single task has consumed 3+ debugging cycles without resolution.
 
-**Example**: Row counts in the harmonized panel don't reconcile against `methods/working-age/rule.md`; you adjust the filter, a different country's count breaks; you re-adjust, the original fails again.
+**Example**: Row counts in the harmonized panel don't reconcile against `research/methods/working-age/rule.md`; you adjust the filter, a different country's count breaks; you re-adjust, the original fails again.
 
 **Why**: Diminishing returns. You're burning context on a blocker that might need a fundamentally different approach (different deflator chain, different identification spec), or the user might know something that unblocks it immediately.
 
@@ -87,4 +87,4 @@ A pattern in the data — concentrated missingness, outliers, top-coding, unit c
 
 **Why**: Data quality issues that aren't surfaced become artifact integrity issues downstream — the chart says one thing, the data says another, and the deliverable is built on sand.
 
-**Include**: The pattern's shape (which observations, which periods), magnitude (% of sample), and a default suggestion if the pattern has canonical handling in the project's `methods/` rules.
+**Include**: The pattern's shape (which observations, which periods), magnitude (% of sample), and a default suggestion if the pattern has canonical handling in the project's `research/methods/` rules.

@@ -21,11 +21,11 @@ cd /path/to/your/research-project
 r2p init
 ```
 
-`r2p init` is idempotent — safe to re-run. It seeds the project with `.claude/{conventions,hooks}/`, `.claude/settings.json`, scaffolding directories (`evidence/`, `wiki/`, `methods/`, `decisions/`, `learnings/`, `archive/`, `deliverables/`, etc.), `CLAUDE.md`, and a framework block in `.gitignore`. Skills and agents are global — symlinked into `~/.claude/{skills,agents}/` so an upgrade lands everywhere automatically. Existing files are never overwritten — in particular, if `CLAUDE.md` already exists, `r2p init` leaves it untouched and drops the framework template at `CLAUDE_TEMPLATE.md` alongside it so you can diff and merge.
+`r2p init` is idempotent — safe to re-run. It seeds the project with `.claude/{conventions,hooks}/`, `.claude/settings.json`, scaffolding directories (`research/evidence/`, `research/wiki/`, `research/methods/`, `research/methods/`, `research/methods/`, `plan/archive/`, `deliverables/`, etc.), `CLAUDE.md`, and a framework block in `.gitignore`. Skills and agents are global — symlinked into `~/.claude/{skills,agents}/` so an upgrade lands everywhere automatically. Existing files are never overwritten — in particular, if `CLAUDE.md` already exists, `r2p init` leaves it untouched and drops the framework template at `CLAUDE_TEMPLATE.md` alongside it so you can diff and merge.
 
 ### Adopting r2p in an existing, disorganized project
 
-If the project predates r2p — random scripts at the root, charts mixed with data, methodology buried in `README.md` and script docstrings, prior `CLAUDE.md` or `.cursorrules` content — run the adoption audit after `r2p init`. The audit walks the tree, classifies pre-existing files against framework slots (`wiki/raw/`, `output/`, `data/processed/`, `decisions/`, `evidence/`, `project_conventions/`), reconciles any prior AI config, surfaces methodology calls hidden in unstructured locations as candidate `decisions/` records, and flags orphan analysis. Output is `ADOPTION_PROPOSAL.md` at project root. **Nothing is moved automatically** — you review the proposal section by section, execute the moves by hand, and commit after each. Run once per project, at adoption; for ongoing maintenance use `/research-cleanup`.
+If the project predates r2p — random scripts at the root, charts mixed with data, methodology buried in `README.md` and script docstrings, prior `CLAUDE.md` or `.cursorrules` content — run the adoption audit after `r2p init`. The audit walks the tree, classifies pre-existing files against framework slots (`research/wiki/raw/`, `output/`, `data/processed/`, `research/methods/`, `research/evidence/`, `.claude/conventions/project/`), reconciles any prior AI config, surfaces methodology calls hidden in unstructured locations as candidate `research/methods/` records, and flags orphan analysis. Output is `ADOPTION_PROPOSAL.md` at project root. **Nothing is moved automatically** — you review the proposal section by section, execute the moves by hand, and commit after each. Run once per project, at adoption; for ongoing maintenance use `/research-cleanup`.
 
 The audit is shipped as a plain instruction document (`docs/r2p-adopt.md` in the framework), **not as an installed skill** — it's only useful once per project, so the framework keeps it out of Claude's context until you explicitly ask for it. To run it, paste a prompt like this in a Claude Code session at the project root:
 
@@ -42,13 +42,13 @@ Once installed, a typical first session:
 
 ```text
 /brainstorming  What deflator should we use for cross-city wage comparisons?
-   → discussion lands at brainstorms/wage-deflator.md
-   → settled call cited at decisions/2026-05-08_deflator-choice.md
+   → discussion lands at plan/brainstorms/wage-deflator.md
+   → settled call cited at research/methods/2026-05-08_deflator-choice.md
 /planning       Build out the wage-gaps analysis from this brainstorm
    → produces plan/plan-wage-gaps/{plan.md, phases/phase-N.md, handoff.md}
 /implementation Pick up plan-wage-gaps from the handoff
    → run scripts (with header), commit with Run:/Out: lines
-   → write evidence/01_wage-gaps-by-city.md after the chart drops
+   → write research/evidence/01_wage-gaps-by-city.md after the chart drops
    → handoff.md is rewritten at session end
 ```
 
@@ -71,48 +71,69 @@ When the plan is verified end-to-end, `touch plan/plan-wage-gaps/.completed` tri
 
 Research is not a march from spec to ship. It's iteration with branches: a methodology call you couldn't predict before staring at the data, a robustness check that opens a new sub-question, a deliverable that needs a different framing for a different audience. The framework names four lifecycle moments and equips each:
 
-1. **Brainstorming.** Before a plan, methodology calls deserve deliberation: which deflator, which identification strategy, which reference category, how to handle a survey-vintage break. `/brainstorming` runs a three-phase exchange (listen → challenge → propose alternatives), capturing the conversation in `brainstorms/<topic>.md`. When the call is settled, the choices a peer reviewer would push on graduate to `decisions/YYYY-MM-DD_<slug>.md` (Decision / Alternatives / Why / Invalidate). The brainstorm is gitignored working state; the decision record is the citable artifact.
+1. **Brainstorming.** Before a plan, methodology calls deserve deliberation: which deflator, which identification strategy, which reference category, how to handle a survey-vintage break. `/brainstorming` runs a three-phase exchange (listen → challenge → propose alternatives), capturing the conversation in `plan/brainstorms/<topic>.md`. When the call is settled, the choices a peer reviewer would push on graduate to `research/methods/<topic>.md` (Rule / Why-not-the-alternatives / Traps / Diagnostic counts). The brainstorm is gitignored working state; the decision record is the citable artifact.
 
-2. **Planning.** With methodology settled, `/planning` produces a multi-phase plan at `plan/plan-<slug>/{plan.md, phases/phase-N.md, handoff.md}`. Verification is **domain-shaped** — sign-of-coefficients, magnitude sanity, source-citation present, breakpoint alignment — not unit tests. Methodology cross-links to the relevant `decisions/` records.
+2. **Planning.** With methodology settled, `/planning` produces a multi-phase plan at `plan/plan-<slug>/{plan.md, phases/phase-N.md, handoff.md}`. Verification is **domain-shaped** — sign-of-coefficients, magnitude sanity, source-citation present, breakpoint alignment — not unit tests. Methodology cross-links to the relevant `research/methods/` records.
 
-3. **Implementation.** `/implementation` reads `plan.md` + `handoff.md` and works through phases. Every analytical script gets a fixed-shape header (Inputs / Outputs / Seed / Env); every analytical commit carries `Run:` and `Out:` lines so `git log -- output/06_chart.png` resolves to the script that made it. After substantive analysis, write `evidence/NN_<slug>.md` (3–8 evidence-based findings with concrete numbers) and append a row to `evidence/INDEX.md`. The Stop hook nudges if uncommitted analysis exists without a fresh evidence doc. At session end, rewrite `handoff.md` — the bridge to the next session, the next collaborator, or future-you a year later.
+3. **Implementation.** `/implementation` reads `plan.md` + `handoff.md` and works through phases. Every analytical script gets a fixed-shape header (Inputs / Outputs / Seed / Env); every analytical commit carries `Run:` and `Out:` lines so `git log -- output/06_chart.png` resolves to the script that made it. After substantive analysis, write `research/evidence/NN_<slug>.md` (3–8 evidence-based findings with concrete numbers) and append a row to `research/evidence/INDEX.md`. The Stop hook nudges if uncommitted analysis exists without a fresh evidence doc. At session end, rewrite `handoff.md` — the bridge to the next session, the next collaborator, or future-you a year later.
 
-4. **Archival.** When every phase verifies and the researcher confirms the plan is done, `touch plan/plan-<slug>/.completed`. The Stop hook's archival tripwire emits a blocking instruction; Claude launches the **archivist** subagent, which synthesizes `archive/plan-<slug>.md` (What was built / Key decisions / Methods landed / Files modified / Learnings / Metrics), appends a one-liner to `archive/index.md`, optionally updates `CLAUDE.md` if architecture changed, and deletes the plan directory. Per-plan; project-wide cleanup is the user-invoked `/research-cleanup`.
+4. **Archival.** When every phase verifies and the researcher confirms the plan is done, `touch plan/plan-<slug>/.completed`. The Stop hook's archival tripwire emits a blocking instruction; Claude launches the **archivist** subagent, which synthesizes `plan/archive/plan-<slug>.md` (What was built / Key decisions / Methods landed / Files modified / Learnings / Metrics), appends a one-liner to `plan/archive/index.md`, optionally updates `CLAUDE.md` if architecture changed, and deletes the plan directory. Per-plan; project-wide cleanup is the user-invoked `/research-cleanup`.
 
-Two cross-cutting affordances run alongside the workflow. **Learnings** — gotchas and tacit findings worth remembering across plans — get filed at `learnings/<slug>.md` with trigger keywords; the `retrieve-learnings.sh` hook surfaces matches when the user's prompt contains ≥2 keywords from a given learning. **Pre-compaction handoff** — the `precompact-handoff.sh` hook fires before auto-compaction and nudges a handoff refresh plus a sweep for session surprises worth preserving as learnings.
+Two cross-cutting affordances run alongside the workflow. **Learnings** — gotchas and tacit findings worth remembering across plans — get filed at `research/methods/<slug>.md` with trigger keywords; the `retrieve-learnings.sh` hook surfaces matches when the user's prompt contains ≥2 keywords from a given learning. **Pre-compaction handoff** — the `precompact-handoff.sh` hook fires before auto-compaction and nudges a handoff refresh plus a sweep for session surprises worth preserving as learnings.
 
 ### Scaffolding and project structure
 
-What `r2p init` lays down in your research project:
+What `r2p init` lays down in your research project — **eight top-level
+directories**, down from fifteen in v1:
 
 ```text
 your-research-project/
 ├── .claude/                   ← framework conventions, hooks, settings (committed)
-├── CLAUDE.md                  ← short scaffold pointing at conventions
-├── plan/                      ← multi-session work: plan-<slug>/{plan,handoff,log}.md (gitignored)
-├── brainstorms/               ← decisions-pre-planning conversation (gitignored)
-├── decisions/                 ← methodology calls you'd defend in peer review
-├── evidence/                  ← chart-backed findings from your data (+ INDEX.md)
-├── output/                    ← charts, tables, .meta.json (analytical artifacts)
-├── methods/                   ← project-internal rules with diagnostic counts
-├── data_sources/              ← API/dataset reference docs (anchor-as-smoke-test)
-├── project_conventions/       ← project-bespoke style/process rules
-├── learnings/                 ← operational gotchas + tips, retrieval-keyed (index.yaml)
-├── archive/                   ← per-plan synthesis after .completed
-├── wiki/                      ← Karpathy-style distilled knowledge (LLM-owned)
-│   ├── pages by type/         ← sources/, concepts/, entities/, synthesis/
-│   └── raw/                   ← immutable archive: papers, scrapes, datasets
-│       ├── registry.yaml      ← URL watchlist for /scan-sources
-│       └── scraped/           ← per-slug scraped content
-├── deliverables/              ← memos, briefings, papers (3 profiles)
-├── slides/                    ← presentation decks (less formal than deliverables)
-├── literature/                ← reference papers + PDFs (gitignored — copyrighted)
-└── internal_docs/             ← concept notes, workplans, mission plans, team notes (gitignored)
+│   └── conventions/project/   ← project-bespoke style/process rules
+├── CLAUDE.md                  ← short scaffold pointing at conventions (7 sections)
+├── research/                  ← THE DURABLE RECORD
+│   ├── claims.md              ← curated load-bearing claims; read this first
+│   ├── evidence/              ← NN_<slug>.md + INDEX.md + .next-id (append-only)
+│   ├── methods/               ← one <topic>.md per methodological object + _craft.md
+│   ├── sources/               ← API/dataset reference docs (anchor-as-smoke-test)
+│   └── wiki/                  ← OPTIONAL (r2p init --with-wiki)
+├── analysis/<theme>/          ← analytical scripts
+├── data/                      ← raw/<source>/ (immutable) · processed/<theme>/
+├── output/<theme>/            ← charts, tables, .meta.json
+├── plan/                      ← plan-<slug>/{plan,handoff,log}.md · archive/ · brainstorms/
+├── deliverables/              ← memos/ (3 profiles) · decks/
+└── reference/                 ← inputs we did not produce
+    ├── literature/            ← papers, third-party reports (gitignored)
+    ├── notes/                 ← transcripts, working notes (TRACKED — unrecoverable)
+    ├── internal/              ← team-internal scoping (gitignored)
+    └── external/              ← commissioned consultant reports (gitignored)
 ```
 
-`plan/`, `brainstorms/`, `internal_docs/`, and `literature/` are gitignored — local working state, project-management docs, and copyrighted reference material. `decisions/`, `evidence/`, `methods/`, `archive/`, and `slides/` commit. `output/` is your call (typically committed for small artifacts; large binaries excluded).
+**Root holds these eight directories, config, and nothing else.** `_inbox/` is a
+gitignored staging spot so loose files stop accumulating at the root.
 
-Projects carrying multiple parallel lines of inquiry — each with its own audience and deliverable target — may opt into a one-level subfolder layout: `evidence/<theme>/NN_*.md` and `output/<theme>/NN_*`. Flat is the default; hooks and skills accept both shapes; no `themes.md` declaration is required.
+Gitignored: `plan/`, `plan/brainstorms/`, `plan/_scratch/`, `reference/internal/`,
+`reference/literature/`, `reference/external/`, `_inbox/`. Committed:
+`research/**`, `plan/archive/`, `reference/notes/`, `deliverables/**`. `output/`
+is your call (typically committed for small artifacts).
+
+Projects carrying multiple parallel lines of inquiry may opt into a one-level
+subfolder layout: `research/evidence/<theme>/NN_*.md` and `output/<theme>/NN_*`.
+Flat is the default; hooks and skills accept both shapes.
+
+#### The three research layers, and their opposite mutability rules
+
+| Layer | What it is | Mutability |
+|---|---|---|
+| `research/claims.md` | the load-bearing claims a narrative rests on | **editable + deletable** — a curated view |
+| `research/evidence/` | one doc per analysis, chart-backed | **append-only** — never edited or deleted |
+| `research/methods/` | one file per methodological object | living, versioned in place via `## Changelog` |
+
+Evidence preserves; claims curate. An append-only corpus is the audit trail and
+has to survive being wrong — but at 150 docs it cannot be read, so the curated
+layer on top is what deliverables actually cite. **`claims.md` is mandatory once
+evidence passes 40 docs.** See `docs/v1-to-v2-migration.md` for the measurements
+behind that number.
 
 ### Tools and skills
 
@@ -120,16 +141,16 @@ User-invoked skills (`/<name>` in Claude Code):
 
 | Skill | When | What it does |
 |---|---|---|
-| `/brainstorming` | Before planning a methodology call | Three-phase exchange to settle a research-design decision; output → `brainstorms/<topic>.md` |
+| `/brainstorming` | Before planning a methodology call | Three-phase exchange to settle a research-design decision; output → `plan/brainstorms/<topic>.md` |
 | `/planning` | After brainstorm | Produces `plan/plan-<slug>/{plan.md, phases/phase-N.md}`; pairs with the `r2p plan init <slug>` CLI subcommand for scaffolding |
 | `/implementation` | Executing a plan | Reads plan + handoff, works the phases, rewrites handoff at session end, drives `.completed`-driven archival |
 | `/agent-teams` | Parallelizing 2+ independent units | Orchestrates teammate scope, isolation, output collection — methodology comparisons, robustness sweeps, multi-source ingest |
-| `/learning-capture` | Captured a gotcha or insight | Files `learnings/<slug>.md` + adds a row to `learnings/index.yaml` |
+| `/learning-capture` | Captured a gotcha or insight | Files `research/methods/<slug>.md` + adds a row to `the `triggers:` frontmatter of the topic or source file` |
 | `/verify` | Before publishing one artifact | 3–5 domain-shaped checks on a regression / chart / paragraph (≤2k tokens) |
 | `/deliverable-review` | Last-mile draft of a deliverable | Forked parallel seven-lens review (≤12k tokens total) |
-| `/wiki-ingest` | Adding a raw source to the wiki | Distills `wiki/raw/<path>` into one or more `wiki/` pages |
+| `/wiki-ingest` | Adding a raw source to the wiki | Distills `research/wiki/raw/<path>` into one or more `research/wiki/` pages |
 | `/wiki-lint` | After a batch of ingests | Flags orphans, contradictions, stale pages, page-budget violations |
-| `/scan-sources` | Refreshing tracked sources | Re-scrapes `wiki/raw/registry.yaml` entries due for refetch (delegates to `web-scraping`) |
+| `/scan-sources` | Refreshing tracked sources | Re-scrapes `research/wiki/raw/registry.yaml` entries due for refetch (delegates to `web-scraping`) |
 | `/r2p-migrate-source` | Importing a source from another r2p project | Transplants one source's full data layer (ref doc + wrapper + env vars + INDEX + cache entry) via `MIGRATION_PROPOSAL.md` → user approves → apply + import smoke test |
 | `/research-cleanup` | Before a milestone or handoff | Project-wide orphan + intermediate proposal at `cleanup-proposal.md` (never deletes) |
 
@@ -145,25 +166,26 @@ Subagent (auto-launched):
 
 | Agent | Trigger | What it does |
 |---|---|---|
-| `archivist` | Stop hook T1 emits the instruction on `.completed` | Synthesizes `archive/plan-<slug>.md`, updates `archive/index.md`, optionally edits `CLAUDE.md`, deletes the plan directory |
+| `archivist` | Stop hook T1 emits the instruction on `.completed` | Synthesizes `plan/archive/plan-<slug>.md`, updates `plan/archive/index.md`, optionally edits `CLAUDE.md`, deletes the plan directory |
 
 Conventions installed (long-form rules read on demand from `.claude/conventions/`):
 
 | Convention | Purpose |
 |---|---|
-| `evidence-logging` | `evidence/NN_<slug>.md` after substantive analysis; flat or `<theme>/` subfolder |
-| `script-header` | Fixed header on every analytical script: Script / Inputs / Outputs / Seed / Env. Includes `Supersedes:`, project-relative paths, shared utilities, one-project-one-env |
-| `analytical-commit-format` | `Run:` and `Out:` lines in commit messages for analytical changes |
-| `handoff-format` | Multi-time-scale session-end handoff (within-session / branch / project→follow-up) |
-| `plan-structure` | `plan/plan-<slug>/{plan,handoff,log}.md`; `.completed` marker triggers archival |
-| `decision-records` | Pre-registration analog: 5-section file at `decisions/YYYY-MM-DD_<slug>.md` |
-| `brainstorm-format` | `brainstorms/<topic>.md` 5-section shape; planning-skill handoff |
-| `learning-capture` | Gotcha vs. insight; frontmatter + 3-section body; `index.yaml` triggers schema |
-| `methods` | `methods/<slug>/rule.md` with 7 sections incl. diagnostic counts; `vN` evolution preserved in-doc |
-| `project-conventions` | `project_conventions/<domain>.md` flat folder + `INDEX.md`; "Use this whenever ..." opener |
-| `source-registry` | `wiki/raw/registry.yaml` watchlist + dedup via `seen.jsonl` |
-| `data-sources` | `data_sources/<source>_<thing>.md` with anchor-as-smoke-test pattern |
-| `data-access` | `.env` + `.env.example` contract, `<project>_utils.py` wrappers, `data/README.md` inventory, INDEX bridge to `data_sources/` |
+| `evidence` | `research/evidence/NN_<slug>.md`: frontmatter scope keys, `## Measured` vs `## Reading`, 120-char index cap, `status` supersession |
+| `claims` | `research/claims.md`: the curated ledger above an append-only corpus. Mandatory past 40 evidence docs |
+| `methods` | `research/methods/<topic>.md`: one file per methodological object — the rule, why-not-the-alternatives, the traps, diagnostic counts. Merges v1's `decisions` + `methods` + `learning-capture` |
+| `sources` | `research/sources/<source>.md` + the runtime half (`<project>_utils.py`, `.env`/`.env.example`, `data/README.md`). Merges v1's `data-sources` + `data-access` |
+| `plan-lifecycle` | brainstorm → plan → handoff → archive in one file. Merges v1's `brainstorm-format` + `plan-structure` + `handoff-format` + plan archival |
+| `provenance` | Script header (Script / Inputs / Outputs / Seed / Env) + commit `Run:`/`Out:` lines. Merges v1's `script-header` + `analytical-commit-format` |
+| `project-conventions` | `.claude/conventions/project/<domain>.md` flat folder + `INDEX.md` |
+
+Optional, shipped but not promoted into `CLAUDE.md`:
+
+| Convention | Purpose |
+|---|---|
+| `source-registry` | `research/wiki/raw/registry.yaml` watchlist + dedup via `seen.jsonl`. Needs `r2p init --with-wiki` |
+| `research/wiki/SCHEMA.md` | Distilled-knowledge page types. Adopt only when the project's primary input is a *stream* (news, filings, bulletins), not datasets and papers |
 
 Each convention file is the single source of truth for its rule. Pointer blocks in `templates/CLAUDE.md.template` and the README link to it; they don't duplicate prose.
 
@@ -190,7 +212,7 @@ The framework's own internals — useful if you're proposing a new convention, h
 │   ├── learning-capture/              ← gotchas + tips, retrieval-keyed
 │   ├── verify/                        ← per-artifact sanity check
 │   ├── deliverable-review/            ← seven-lens forked review
-│   ├── wiki-ingest/                   ← wiki/raw/ → wiki/{sources,concepts,...} distillation
+│   ├── wiki-ingest/                   ← research/wiki/raw/ → research/wiki/{sources,concepts,...} distillation
 │   ├── wiki-lint/                     ← orphans, contradictions, stale, budget
 │   ├── research-cleanup/              ← orphan + intermediate proposal
 │   ├── scan-sources/                  ← registry-driven targeted scraping
@@ -219,22 +241,22 @@ docs/
 
 templates/                              ← seeds installed by `r2p init`
 ├── CLAUDE.md.template                 ← short CLAUDE.md scaffold with v1.1 pointer blocks
-├── evidence/INDEX.md                  ← empty INDEX seed
-├── wiki/                              ← SCHEMA.md + README.md + index.md + log.md
-├── wiki/raw/                          ← README.md + registry.yaml + seen.jsonl + scraped/
-├── data_sources/                      ← INDEX.md + README.md + EXAMPLE_world_bank_api.md
+├── research/evidence/INDEX.md                  ← empty INDEX seed
+├── research/wiki/                              ← SCHEMA.md + README.md + index.md + log.md
+├── research/wiki/raw/                          ← README.md + registry.yaml + seen.jsonl + scraped/
+├── research/sources/                      ← INDEX.md + README.md + EXAMPLE_world_bank_api.md
 ├── data/README.md                     ← on-disk inventory template (data/ otherwise gitignored)
 ├── .env.example                       ← committed env-var contract (.env stays local)
-├── methods/                           ← README.md + EXAMPLE_method/rule.md
-├── project_conventions/               ← INDEX.md + README.md + EXAMPLE_visualization.md
+├── research/methods/                           ← README.md + EXAMPLE_method/rule.md
+├── .claude/conventions/project/               ← INDEX.md + README.md + EXAMPLE_visualization.md
 ├── handoff.md                         ← session-end handoff template
 ├── decision-record.md                 ← decision-record fillable template
-├── brainstorms/README.md              ← orientation for the gitignored brainstorms/ directory
-├── learnings/                         ← README.md + index.yaml (empty seed)
-├── archive/                           ← README.md + index.md (empty rollup seed)
-├── internal_docs/README.md            ← orientation for the gitignored internal_docs/ directory
+├── plan/brainstorms/README.md              ← orientation for the gitignored plan/brainstorms/ directory
+├── research/methods/                         ← README.md + index.yaml (empty seed)
+├── plan/archive/                           ← README.md + index.md (empty rollup seed)
+├── reference/internal/README.md            ← orientation for the gitignored reference/internal/ directory
 ├── literature/README.md               ← orientation for the gitignored literature/ directory
-├── slides/README.md                   ← orientation for the slides/ directory
+├── deliverables/decks/README.md                   ← orientation for the deliverables/decks/ directory
 └── deliverables/                      ← three profiles, each PROFILE.md + template.md
 ```
 
@@ -257,7 +279,7 @@ r2p plan init <slug>      # creates plan/plan-<slug>/{plan.md, handoff.md, log.m
 
 `r2p plan init` is idempotent — re-running on an existing slug skips files that already exist. The planning skill recommends running it before drafting `plan.md`.
 
-For each framework convention or template seed, `--upgrade` either copies it in (if absent), silently skips it (if byte-identical), or writes a `<file>.framework-new` sidecar (if divergent — your version stays put). Review sidecars with your preferred diff tool and merge manually. `CLAUDE.md`, `evidence/INDEX.md`, `wiki/index.md`, `wiki/log.md`, `wiki/raw/registry.yaml`, `archive/index.md`, and other user-curated seeds are left alone. New gitignored slots that ship with the framework (e.g. `internal_docs/`, `literature/`) are appended to your existing `.gitignore` framework block on upgrade.
+For each framework convention or template seed, `--upgrade` either copies it in (if absent), silently skips it (if byte-identical), or writes a `<file>.framework-new` sidecar (if divergent — your version stays put). Review sidecars with your preferred diff tool and merge manually. `CLAUDE.md`, `research/evidence/INDEX.md`, `research/wiki/index.md`, `research/wiki/log.md`, `research/wiki/raw/registry.yaml`, `plan/archive/index.md`, and other user-curated seeds are left alone. New gitignored slots that ship with the framework (e.g. `reference/internal/`, `literature/`) are appended to your existing `.gitignore` framework block on upgrade.
 
 ### Updating `CLAUDE.md` from the template sidecar
 
@@ -268,7 +290,7 @@ For each framework convention or template seed, `--upgrade` either copies it in 
 1. **Open both files side-by-side** in your editor: `CLAUDE.md` (your live file) and `CLAUDE_TEMPLATE.md` (the framework's current shape).
 2. **Compare the `##` section headers.** Anything in `CLAUDE_TEMPLATE.md` that's missing from your `CLAUDE.md` is a candidate to add. `grep -E "^## " CLAUDE.md CLAUDE_TEMPLATE.md` gives you the diff in seconds.
 3. **Copy the relevant pointer blocks** verbatim from the template into your `CLAUDE.md`. Order in the template is a suggestion, not a constraint — append at the bottom or insert thematically as you prefer.
-4. **Edit the copied sections to fit your project.** Drop slots you don't use, tighten language to your project's voice, swap framework examples for project-specific ones, add cross-references to your real decisions/methods/data sources. The template is a *starting point*; `CLAUDE.md` is yours to curate.
+4. **Edit the copied sections to fit your project.** Drop slots you don't use, tighten language to your project's voice, swap framework examples for project-specific ones, add cross-references to your real research/methods/methods/data sources. The template is a *starting point*; `CLAUDE.md` is yours to curate.
 5. **Commit.** The next `r2p init --upgrade` will refresh `CLAUDE_TEMPLATE.md` again without touching your edits, so you can repeat this loop whenever the framework ships new sections.
 
 Asking Claude to "read the framework's `templates/CLAUDE.md.template` and update my file" round-trips through the source repo unnecessarily — the sidecar at `CLAUDE_TEMPLATE.md` is already the right diff target, local to your project.

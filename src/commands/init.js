@@ -12,7 +12,7 @@ export async function initCommand(options = {}) {
     return;
   }
 
-  const ok = await installProject(target);
+  const ok = await installProject(target, { withWiki: !!options.withWiki });
   if (!ok) return;
 
   await installGlobals();

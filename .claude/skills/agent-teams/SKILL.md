@@ -15,7 +15,7 @@ Work decomposes into 2+ CONFLICTING units that the researcher and/or the lead wa
 - Multiple independent tasks touch different scripts or methods rules
 - Methodology comparisons: 2+ valid approaches to weigh against each other
 - Robustness sweeps: re-run a regression spec across 3+ alternative samples / weights / fixed-effects structures
-- Multi-source ingest: 4+ raw documents to distill into `wiki/` pages in parallel
+- Multi-source ingest: 4+ raw documents to distill into `research/wiki/` pages in parallel
 - Plan execution: independent phases or tasks (delegated by implementation skill)
 
 **Don't use when:**
@@ -40,7 +40,7 @@ Stop and ask only the questions that materially affect orchestration. Not implem
 
 - **What are the independent units of work?** The user may already have a decomposition (one teammate per country, one per identification spec), or may need help identifying where the natural splits are.
 - **Do any units need file isolation?** Worktrees are needed when teammates would modify overlapping files (experimental branches comparing alternative specs in the same regression script). Otherwise, shared repo with non-overlapping file ownership.
-- **What does "done" look like for each unit?** A regression that converges with sign-of-coefficients holding, a chart in `output/` that re-renders byte-identical, a row count that reconciles to the methodology rule, a `wiki/` page with provenance citations. Each teammate needs a clear finish line.
+- **What does "done" look like for each unit?** A regression that converges with sign-of-coefficients holding, a chart in `output/` that re-renders byte-identical, a row count that reconciles to the methodology rule, a `research/wiki/` page with provenance citations. Each teammate needs a clear finish line.
 - **For comparisons: what criteria pick the winner?** Coefficient magnitude? Sign stability across robustness checks? Sample-size preserved? Without this, you can't compare results meaningfully.
 - **Are there ordering constraints?** Some units may need to finish before others can start (partial parallelism — harmonize the panel first, then split into per-country analyses).
 
@@ -101,7 +101,7 @@ Teammates can message each other and the lead. This matters when:
 
 ### Quality gates
 
-Each teammate verifies their own work before reporting results: scripts run end-to-end with the same seed, diagnostic counts match the relevant `methods/<slug>/rule.md` rule, source citations are present, charts re-render byte-identical (or sign-and-magnitude-identical for stochastic content). The lead reviews results before consolidating.
+Each teammate verifies their own work before reporting results: scripts run end-to-end with the same seed, diagnostic counts match the relevant `research/methods/<slug>/rule.md` rule, source citations are present, charts re-render byte-identical (or sign-and-magnitude-identical for stochastic content). The lead reviews results before consolidating.
 
 ## Output Collection
 

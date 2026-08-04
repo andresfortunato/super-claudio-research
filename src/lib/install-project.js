@@ -18,23 +18,35 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FRAMEWORK_ROOT = resolve(__dirname, '../..');
 
+// v2 layout: eight top-level directories, not fifteen. The durable research
+// record lives under research/; plans carry their own pre- and post-history;
+// reference/ holds inputs we did not produce. `--with-wiki` adds the wiki and
+// source-registry scaffolding, which stays OFF by default: on the pilot
+// engagement it produced zero pages and zero scrapes in six months while
+// costing two CLAUDE.md sections of every session's context.
 const SCAFFOLDING_DIRS = [
-  'evidence',
-  'wiki',
-  'wiki/raw',
-  'wiki/raw/scraped',
+  'research',
+  'research/evidence',
+  'research/methods',
+  'research/methods/_adjuncts',
+  'research/sources',
   'deliverables',
+  'deliverables/memos',
+  'deliverables/decks',
+  'reference',
+  'reference/literature',
+  'reference/notes',
+  'reference/internal',
+  'reference/external',
+  'plan',
+  'plan/archive',
+  'plan/brainstorms',
   'data',
-  'data_sources',
-  'methods',
-  'project_conventions',
-  'brainstorms',
-  'learnings',
-  'archive',
-  'internal_docs',
-  'literature',
-  'slides',
+  'analysis',
+  'output',
 ];
+
+const WIKI_DIRS = ['research/wiki', 'research/wiki/raw', 'research/wiki/raw/scraped'];
 
 // Gitignore block emitted into target projects. Diverges from install.sh's
 // version: no !.claude/skills/ or !.claude/skills/** entries — those are
@@ -53,10 +65,20 @@ brainstorms/
 .scc/
 
 # Project-management docs (concept notes, workplans, mission plans, team notes)
-internal_docs/
+reference/internal/
 
-# Reference literature (large PDFs, often copyrighted)
-literature/
+# Reference literature and third-party reports (large, often copyrighted).
+# reference/notes/ is deliberately NOT ignored: transcripts and hand-written
+# source libraries cannot be re-downloaded.
+reference/literature/
+reference/external/
+
+# Root staging spot, so files stop accumulating at the repo root.
+_inbox/
+
+# Parallel-agent scratch: process state, never a research artifact.
+plan/_scratch/
+plan/*/output/
 
 # Secrets and per-machine config (see .env.example for the contract)
 .env
@@ -109,12 +131,14 @@ async function copyIfAbsent(src, dst, target) {
   console.log(`  + ${rel}`);
 }
 
-async function mirrorDir(srcDir, dstDir, target) {
+async function mirrorDir(srcDir, dstDir, target, opts = {}) {
   if (!(await fileExists(srcDir))) return;
+  const skip = new Set(opts.skip ?? []);
   await mkdir(dstDir, { recursive: true });
   const entries = await readdir(srcDir, { withFileTypes: true });
   for (const entry of entries) {
     if (entry.name === '.gitkeep') continue;
+    if (skip.has(entry.name)) continue;
     await copyIfAbsent(join(srcDir, entry.name), join(dstDir, entry.name), target);
   }
 }
@@ -130,7 +154,9 @@ async function isFrameworkRepo(target) {
   }
 }
 
-export async function installProject(target) {
+// `withWiki` gates the optional wiki + source-registry mechanism. Default OFF:
+// see the SCAFFOLDING_DIRS comment for why.
+export async function installProject(target, { withWiki = false } = {}) {
   if (await isFrameworkRepo(target)) {
     console.log('Refusing to run r2p init against the framework repo itself.');
     console.log('  r2p init is for target research projects, not research-to-policy.');
@@ -177,79 +203,50 @@ export async function installProject(target) {
     );
   }
 
-  // 3. Project-level scaffolding
+  // 3. Project-level scaffolding.
+  //
+  // ORDER MATTERS. mirrorDir delegates to copyIfAbsent, which skips any path
+  // that already exists — including directories. Creating research/evidence/
+  // with mkdir first therefore made the mirror skip it wholesale and shipped an
+  // empty research/ tree. Mirror templates first, then mkdir whatever is still
+  // missing.
+  const MIRRORS = [
+    ['templates/research', 'research'],
+    ['templates/deliverables', 'deliverables'],
+    ['templates/data', 'data'],
+    ['templates/reference', 'reference'],
+    ['templates/plan_dir', 'plan'],
+    ['templates/claude_conventions_project', '.claude/conventions/project'],
+  ];
+  for (const [from, to] of MIRRORS) {
+    // research/wiki ships inside templates/research; skip it unless requested.
+    if (!withWiki && to === 'research') {
+      await mirrorDir(join(FRAMEWORK_ROOT, from), join(target, to), target, {
+        skip: ['wiki'],
+      });
+      continue;
+    }
+    await mirrorDir(join(FRAMEWORK_ROOT, from), join(target, to), target);
+  }
+
   for (const dir of SCAFFOLDING_DIRS) {
     await mkdir(join(target, dir), { recursive: true });
   }
-  await copyIfAbsent(
-    join(FRAMEWORK_ROOT, 'templates/evidence/INDEX.md'),
-    join(target, 'evidence/INDEX.md'),
-    target,
-  );
-  await mirrorDir(join(FRAMEWORK_ROOT, 'templates/wiki'), join(target, 'wiki'), target);
-  await mirrorDir(
-    join(FRAMEWORK_ROOT, 'templates/deliverables'),
-    join(target, 'deliverables'),
-    target,
-  );
-  await mirrorDir(
-    join(FRAMEWORK_ROOT, 'templates/data_sources'),
-    join(target, 'data_sources'),
-    target,
-  );
-  await mirrorDir(
-    join(FRAMEWORK_ROOT, 'templates/data'),
-    join(target, 'data'),
-    target,
-  );
-  await mirrorDir(
-    join(FRAMEWORK_ROOT, 'templates/methods'),
-    join(target, 'methods'),
-    target,
-  );
-  await mirrorDir(
-    join(FRAMEWORK_ROOT, 'templates/project_conventions'),
-    join(target, 'project_conventions'),
-    target,
-  );
-  await mirrorDir(
-    join(FRAMEWORK_ROOT, 'templates/brainstorms'),
-    join(target, 'brainstorms'),
-    target,
-  );
-  await mirrorDir(
-    join(FRAMEWORK_ROOT, 'templates/learnings'),
-    join(target, 'learnings'),
-    target,
-  );
-  await mirrorDir(
-    join(FRAMEWORK_ROOT, 'templates/archive'),
-    join(target, 'archive'),
-    target,
-  );
-  await mirrorDir(
-    join(FRAMEWORK_ROOT, 'templates/internal_docs'),
-    join(target, 'internal_docs'),
-    target,
-  );
-  await mirrorDir(
-    join(FRAMEWORK_ROOT, 'templates/literature'),
-    join(target, 'literature'),
-    target,
-  );
-  await mirrorDir(
-    join(FRAMEWORK_ROOT, 'templates/slides'),
-    join(target, 'slides'),
-    target,
-  );
+  if (withWiki) {
+    for (const dir of WIKI_DIRS) {
+      await mkdir(join(target, dir), { recursive: true });
+    }
+  }
 
-  // 4. wiki/raw/seen.jsonl (empty seed — append-only dedup log)
-  const seenPath = join(target, 'wiki/raw/seen.jsonl');
-  if (!(await fileExists(seenPath))) {
-    await writeFile(seenPath, '');
-    console.log('  + wiki/raw/seen.jsonl (empty seed)');
-  } else {
-    console.log('  ~ wiki/raw/seen.jsonl (exists, leaving as-is)');
+  // 4. wiki/raw/seen.jsonl (empty seed — append-only dedup log). Optional.
+  if (withWiki) {
+    const seenPath = join(target, 'research/wiki/raw/seen.jsonl');
+    if (!(await fileExists(seenPath))) {
+      await writeFile(seenPath, '');
+      console.log('  + research/wiki/raw/seen.jsonl (empty seed)');
+    } else {
+      console.log('  ~ research/wiki/raw/seen.jsonl (exists, leaving as-is)');
+    }
   }
 
   // 5. CLAUDE.md (only if absent — never overwrite). If one exists, drop the

@@ -12,7 +12,7 @@
 
 ## Decisions Made
 
-[Methodology calls already settled (typically from a brainstorm at `brainstorms/<slug>.md`). Don't re-debate during execution. Cross-link `decisions/<date>_<slug>.md` for peer-reviewable methodology calls.]
+[Methodology calls already settled (typically from a brainstorm at `plan/brainstorms/<slug>.md`). Don't re-debate during execution. Cross-link `research/methods/<date>_<slug>.md` for peer-reviewable methodology calls.]
 
 ## File Manifest
 
@@ -20,7 +20,7 @@
 
 ## Repo Context
 
-[How this plan fits into the project — relevant scripts (`scripts/NN_*.R` or `scripts/NN_*.py`), methods rules (`methods/<slug>/rule.md`), decision records (`decisions/<date>_<slug>.md`), data sources (`data_sources/<source>.md`).]
+[How this plan fits into the project — relevant scripts (`scripts/NN_*.R` or `scripts/NN_*.py`), methods rules (`research/methods/<slug>/rule.md`), decision records (`research/methods/<date>_<slug>.md`), data sources (`research/sources/<source>.md`).]
 
 ## Phases
 

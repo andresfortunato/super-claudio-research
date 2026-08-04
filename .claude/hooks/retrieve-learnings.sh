@@ -1,90 +1,84 @@
 #!/usr/bin/env bash
-# UserPromptSubmit hook: retrieve relevant learnings from learnings/index.yaml
-# by matching trigger keywords against the user's prompt.
+# UserPromptSubmit hook (r2p v2): surface relevant methods and source docs by
+# matching their frontmatter `triggers:` against the user's prompt.
 #
-# SILENT by default. Only emits additionalContext when:
-#   1. learnings/index.yaml exists and contains entries, AND
-#   2. At least one entry has ≥2 trigger keywords matching prompt words.
+# v1 read a separate learnings/index.yaml, which made every learning a two-file
+# write — the .md plus an index row — and a learning whose row was forgotten was
+# invisible to retrieval. v2 reads the trigger line out of the document itself,
+# so a doc can no longer be silently unreachable.
 #
-# Up to 3 learnings are surfaced per prompt (highest match count first).
-# See .claude/conventions/learning-capture.md for index format and contract.
+# SILENT by default. Emits additionalContext only when some doc has ≥2 trigger
+# keywords matching prompt words. Up to 3 docs, highest match count first, and
+# each is truncated so a 50 KB merged topic file cannot flood the context.
+#
+# See .claude/conventions/methods.md (Retrieval) and sources.md.
 
 set -euo pipefail
 
 ROOT="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 cd "$ROOT" 2>/dev/null || exit 0
 
-INDEX="learnings/index.yaml"
-[[ -f "$INDEX" ]] || exit 0
-
-# Need jq for JSON in/out (it's the framework constitution's runtime ceiling).
 command -v jq >/dev/null 2>&1 || exit 0
 
-# Read prompt from stdin JSON.
 input=$(cat)
 prompt=$(printf '%s' "$input" | jq -r '.prompt // empty' 2>/dev/null || true)
 [[ -z "$prompt" ]] && exit 0
 
-# Tokenize prompt: lowercase, split on non-alphanumeric/underscore, dedup.
 prompt_words=$(printf '%s' "$prompt" \
   | tr '[:upper:]' '[:lower:]' \
   | tr -cs 'a-z0-9_' '\n' \
   | sort -u)
 [[ -z "$prompt_words" ]] && exit 0
 
-# Parse index.yaml into (file, triggers) pairs. Format:
-#   learnings:
-#     - file: <name>.md
-#       triggers: "kw1 kw2 kw3"
 matches_file=$(mktemp)
 trap 'rm -f "$matches_file"' EXIT
 
-current_file=""
-while IFS= read -r line; do
-  if [[ "$line" =~ ^[[:space:]]*-[[:space:]]*file:[[:space:]]*(.+)$ ]]; then
-    current_file="${BASH_REMATCH[1]}"
-    # Strip optional surrounding quotes / trailing whitespace.
-    current_file="${current_file%[[:space:]]}"
-    current_file="${current_file%\"}"; current_file="${current_file#\"}"
-    current_file="${current_file%\'}"; current_file="${current_file#\'}"
-  elif [[ "$line" =~ ^[[:space:]]*triggers:[[:space:]]*\"(.+)\"[[:space:]]*$ ]] \
-    || [[ "$line" =~ ^[[:space:]]*triggers:[[:space:]]*\'(.+)\'[[:space:]]*$ ]]; then
-    triggers="${BASH_REMATCH[1]}"
-    if [[ -n "$current_file" ]]; then
-      hits=0
-      for t in $(printf '%s' "$triggers" | tr '[:upper:]' '[:lower:]'); do
-        [[ -z "$t" ]] && continue
-        if grep -qFx "$t" <<< "$prompt_words"; then
-          hits=$((hits + 1))
-        fi
-      done
-      if [[ $hits -ge 2 ]]; then
-        printf '%d\t%s\n' "$hits" "$current_file" >> "$matches_file"
-      fi
+# Scan the first 12 lines of each doc — the frontmatter block — for `triggers:`.
+shopt -s nullglob
+for path in research/methods/*.md research/sources/*.md; do
+  case "$(basename "$path")" in INDEX.md) continue ;; esac
+  triggers=$(head -12 "$path" \
+    | sed -n 's/^triggers:[[:space:]]*"\(.*\)"[[:space:]]*$/\1/p;s/^triggers:[[:space:]]*'"'"'\(.*\)'"'"'[[:space:]]*$/\1/p' \
+    | head -1)
+  [[ -z "$triggers" ]] && continue
+  hits=0
+  for t in $(printf '%s' "$triggers" | tr '[:upper:]' '[:lower:]'); do
+    [[ -z "$t" ]] && continue
+    if grep -qFx "$t" <<< "$prompt_words"; then
+      hits=$((hits + 1))
     fi
-    current_file=""
+  done
+  if [[ $hits -ge 2 ]]; then
+    printf '%d\t%s\n' "$hits" "$path" >> "$matches_file"
   fi
-done < "$INDEX"
+done
 
 [[ -s "$matches_file" ]] || exit 0
 
-# Top 3 by match count desc.
 top=$(sort -t$'\t' -k1,1 -nr "$matches_file" | head -3 | cut -f2)
+
+# Per-doc line cap. v2 topic files merge several v1 records and can run past
+# 40 KB; injecting three of those whole would cost more context than the
+# retrieval saves. Head the doc (frontmatter + Rule) and point at the rest.
+MAX_LINES=120
 
 combined=""
 sep=""
-while IFS= read -r f; do
-  [[ -z "$f" ]] && continue
-  path="learnings/$f"
+while IFS= read -r path; do
+  [[ -z "$path" ]] && continue
   [[ -f "$path" ]] || continue
-  content=$(<"$path")
+  total=$(wc -l < "$path")
+  content=$(head -"$MAX_LINES" "$path")
+  if (( total > MAX_LINES )); then
+    content="${content}"$'\n\n'"*[truncated at ${MAX_LINES} of ${total} lines — read \`${path}\` for Traps, Diagnostic counts and Scope.]*"
+  fi
   combined="${combined}${sep}${content}"
   sep=$'\n\n---\n\n'
 done <<< "$top"
 
 [[ -z "$combined" ]] && exit 0
 
-body=$(printf '## Relevant Learnings\n\n%s' "$combined")
+body=$(printf '## Relevant methods and sources\n\n%s' "$combined")
 
 jq -n --arg ctx "$body" '{
   hookSpecificOutput: {
