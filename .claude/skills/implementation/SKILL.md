@@ -163,7 +163,7 @@ touch plan/plan-[name]/.completed
 
 Do NOT skip this step. Do NOT stop the session before writing the marker. The `.completed` file is what triggers archival — without it, the plan sits in `plan/` forever.
 
-After writing the marker, the next Stop event fires `check-evidence.sh` Tripwire 1 (BLOCKING). The hook writes a `.archival-triggered` sentinel for loop-protection and instructs you to launch the **archivist** subagent (defined in `.claude/agents/archivist.md`). The archivist is the **only** post-`.completed` agent — there is no separate cleanup pass; user-invoked `/research-cleanup` covers that boundary.
+After writing the marker, the next Stop event fires `check-archival.sh` (BLOCKING). The hook writes a `.archival-triggered` sentinel for loop-protection and instructs you to launch the **archivist** subagent (defined in `.claude/agents/archivist.md`). The archivist is the **only** post-`.completed` agent — there is no separate cleanup pass; user-invoked `/research-cleanup` covers that boundary.
 
 The archivist:
 - Reads `plan.md`, `phases/phase-*.md`, `handoff.md`, `log.md`

@@ -42,8 +42,7 @@ A four-step lifecycle:
    line in `handoff.md` (which would mis-fire on intermediate
    phase-completion summaries).
 2. **Stop hook detects the marker.** On the next Stop event, the
-   `check-evidence.sh` hook (Tripwire 1, before the existing evidence
-   tripwire) finds `plan/plan-*/.completed`, writes a
+   `check-archival.sh` hook finds `plan/plan-*/.completed`, writes a
    `.archival-triggered` sentinel inside the plan directory, and
    emits a `decision: block` JSON to stdout with `reason` text
    instructing Claude to launch the archivist subagent.

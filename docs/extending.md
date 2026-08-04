@@ -81,7 +81,7 @@ Wire it into `.claude/settings.json`:
       {
         "matcher": "",
         "hooks": [
-          { "type": "command", "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/check-evidence.sh" },
+          { "type": "command", "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/check-archival.sh" },
           { "type": "command", "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/check-<name>.sh" }
         ]
       }

@@ -169,10 +169,17 @@ async function safeRename(target, oldRel, newRel, label) {
 //   raw/sources/<slug>/                    → wiki/raw/scraped/<slug>/  (via the move above)
 //   sources/registry.yaml                  → wiki/raw/registry.yaml
 //   sources/seen.jsonl                     → wiki/raw/seen.jsonl
-//   .claude/hooks/check-insights.sh        → .claude/hooks/check-evidence.sh
-//   .claude/conventions/insights-logging.md → .claude/conventions/evidence-logging.md
-//   docs/insights-mechanism.md (if vendored) → docs/evidence-mechanism.md
 // Each rename is skipped if both old and new exist (user resolves manually).
+//
+// Two renames were dropped when v2 removed their destinations: check-insights.sh
+// → check-evidence.sh (the evidence Stop hook is gone entirely; its invariants
+// moved to lint-research.sh) and insights-logging.md → evidence-logging.md (that
+// convention merged into evidence.md). Renaming a v1 file onto a path the
+// framework no longer ships just relocates the orphan. Both are left in place for
+// the researcher to delete; a project's own settings.json is never rewritten by
+// --upgrade, so an old hook reference has to be cleared by hand regardless.
+//
+// This is the pre-v2 path. The v1→v2 layout move is templates/migration/.
 async function migrateLayout(target) {
   let touched = 0;
   const renames = [
@@ -180,12 +187,6 @@ async function migrateLayout(target) {
     ['raw', 'wiki/raw', 'raw archive folder'],
     ['sources/registry.yaml', 'wiki/raw/registry.yaml', 'scrape registry'],
     ['sources/seen.jsonl', 'wiki/raw/seen.jsonl', 'dedup ledger'],
-    ['.claude/hooks/check-insights.sh', '.claude/hooks/check-evidence.sh', 'evidence hook'],
-    [
-      '.claude/conventions/insights-logging.md',
-      '.claude/conventions/evidence-logging.md',
-      'evidence convention',
-    ],
   ];
   for (const [oldRel, newRel, label] of renames) {
     const result = await safeRename(target, oldRel, newRel, label);

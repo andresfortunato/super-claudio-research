@@ -295,10 +295,8 @@ export function printNextSteps() {
   console.log('Done. Next steps:');
   console.log('  1. Edit CLAUDE.md to fit your project.');
   console.log('  2. Verify .claude/settings.json hooks list matches what you want enabled.');
-  console.log('  3. Test the evidence hook:');
-  console.log('       touch output/06_test_chart.png   # simulate analysis');
-  console.log('       bash .claude/hooks/check-evidence.sh   # should print JSON');
-  console.log('       rm output/06_test_chart.png');
+  console.log('  3. Check the research record lints clean:');
+  console.log('       bash .claude/hooks/lint-research.sh   # should print PASS');
   console.log('');
   console.log('  Adopting a pre-framework project? See docs/r2p-adopt.md in the');
   console.log('  framework repo. It is a plain instruction doc, not an installed');

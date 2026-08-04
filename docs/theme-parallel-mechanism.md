@@ -38,9 +38,10 @@ evidence/
     └── 01_eph_panel_attrition.md
 ```
 
-The same opt-in extends to `output/<theme>/0[0-9]_*` artifacts. The
-`check-evidence.sh` Stop hook globs both flat and subfolder paths;
-the `INDEX.md` template includes an optional `Theme` column.
+The same opt-in extends to `output/<theme>/0[0-9]_*` artifacts, and the
+`INDEX.md` template includes an optional `Theme` column. (The
+`check-evidence.sh` Stop hook used to glob both flat and subfolder paths; it
+was removed in v2 — see `docs/evidence-and-claims-mechanism.md`.)
 
 ## Why opt-in, not required
 

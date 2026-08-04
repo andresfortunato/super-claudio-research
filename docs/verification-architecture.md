@@ -88,11 +88,14 @@ flags missing headers when it can't trace an artifact.
 
 **Existing — covered in `docs/evidence-mechanism.md`.**
 
-A bash Stop hook (`check-evidence.sh`) that runs at every turn-end
-and silently exits unless: (a) uncommitted analysis artifacts are
-present in `output/0*` or `methods/`, AND (b) no new
-`evidence/NN_*.md` is staged. When both fire, it emits a one-shot
-`additionalContext` reminder.
+**Removed in v2.** A bash Stop hook (`check-evidence.sh`) ran at every
+turn-end and exited silently unless (a) uncommitted analysis artifacts
+were present and (b) no new evidence doc was staged. Condition (b)
+globbed the v1 `evidence/` path, so after v2 moved the corpus under
+`research/` it could never be satisfied and the hook nudged on every
+turn. Replaced by `.claude/hooks/lint-research.sh`, which checks seven
+real invariants of the research record and runs manually or from CI
+rather than on every Stop.
 
 Cost: ~100 tokens per turn (and zero on most turns).
 

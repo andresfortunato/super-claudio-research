@@ -26,7 +26,9 @@ It does *not* target: software engineering teams (Claude Code's defaults already
 
 Every hook script must be silent unless the condition it checks for actually trips. A hook that fires on every Stop, every PostToolUse — even with friendly text — degrades into noise within days. Researchers stop reading it; Claude stops adapting to it.
 
-Concretely: `check-evidence.sh` returns nothing if no analytical artifacts are uncommitted. The hook is the only one shipping in v1 — earlier drafts had a PostToolUse manifest hook and PreCompact/SessionStart hooks; all were removed because the install footprint exceeded their value.
+Concretely: `check-archival.sh` returns nothing unless a plan is marked `.completed` and not yet archived. Earlier drafts had a PostToolUse manifest hook and PreCompact/SessionStart hooks; all were removed because the install footprint exceeded their value.
+
+v2 removed a second hook for failing this test in the worst way. `check-evidence.sh` nudged when analysis artifacts were uncommitted without an evidence doc — but its "did you already write one?" check globbed the v1 path, so once v2 moved evidence under `research/`, the condition could never be satisfied and the nudge fired *unconditionally*. **A silent-by-default hook whose silence depends on a path is one refactor away from firing every turn.** Its invariants now live in `lint-research.sh`, run manually or from CI.
 
 If you can't make a hook silent-by-default, it probably belongs as a user-invoked skill (`/verify`, `/wiki-lint`, `/scan-sources`, `/research-cleanup`) instead.
 
@@ -62,7 +64,7 @@ The ten pointer blocks shipped in v1: Evidence Logging, Wiki, Script Headers, An
 
 The framework's substrate is markdown — convention docs, wiki pages, evidence, handoffs, decision records, deliverable templates. Claude reads markdown natively, researchers can edit markdown in any tool (VS Code, Obsidian, plain text), and markdown survives format migrations.
 
-Language-specific concerns (R vs. Python vs. Stata) live inside scripts and surface in the script-header `Env:` line. The single hook (`check-evidence.sh`) is pure bash + standard Unix tools — no external dependencies. Adding a new analytical language is mostly a script-header convention update; no framework rewrite needed.
+Language-specific concerns (R vs. Python vs. Stata) live inside scripts and surface in the script-header `Env:` line. Every hook is pure bash + standard Unix tools — no external dependencies. Adding a new analytical language is mostly a script-header convention update; no framework rewrite needed.
 
 LaTeX/Beamer add-ons are deferred to v1.1+ (Pedro / Hugo Sant'Anna patterns), and only as opt-in extensions — never as the default deliverable substrate.
 

@@ -158,7 +158,8 @@ Background hooks (silent unless their condition holds):
 
 | Hook | Event | What it does |
 |---|---|---|
-| `check-evidence.sh` | Stop | T1: BLOCKING archival nudge when `plan/<slug>/.completed` exists. T2: silent nudge when uncommitted analysis exists without a fresh evidence doc |
+| `check-archival.sh` | Stop | BLOCKING nudge to launch the archivist when `plan/plan-<slug>/.completed` exists and the plan is not yet archived |
+| `lint-research.sh` | *(not wired)* | Seven invariants on the research record — index headline cap, duplicate evidence ids, frontmatter completeness, verdicts in `## Measured`, claims staleness, retrieval triggers. Run manually or from CI |
 | `retrieve-learnings.sh` | UserPromptSubmit | Surfaces ≤3 matched learnings as `additionalContext` when ≥2 trigger keywords appear in the prompt |
 | `precompact-handoff.sh` | PreCompact | Nudges handoff refresh and prompts for session surprises worth saving as learnings |
 
@@ -197,9 +198,10 @@ The framework's own internals — useful if you're proposing a new convention, h
 
 ```text
 .claude/
-├── conventions/                       ← 13 convention files (long-form rules, on-demand reads)
+├── conventions/                       ← 8 convention files (long-form rules, on-demand reads)
 ├── hooks/
-│   ├── check-evidence.sh              ← Stop hook: archival tripwire + evidence tripwire
+│   ├── check-archival.sh              ← Stop hook: archival tripwire
+│   ├── lint-research.sh               ← research-record invariants; manual / CI, not wired
 │   ├── retrieve-learnings.sh          ← UserPromptSubmit: trigger-keyword learning retrieval
 │   └── precompact-handoff.sh          ← PreCompact: handoff refresh nudge
 ├── agents/                            ← symlinked into ~/.claude/agents/ globally by `r2p init`
