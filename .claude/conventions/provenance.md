@@ -132,4 +132,12 @@ sha256sum output/.../06c_wage_gradient.png
 - `.claude/skills/verify/SKILL.md` — `/verify` walks `git log` → commit message
   → script header to locate any artifact's provenance.
 - `.claude/conventions/evidence.md` — the evidence doc's `## Provenance`
-  section is this convention applied at the finding level.
+  section is this convention applied at the finding level. Its `artifacts:` key
+  is the **complement, not a duplicate**: this convention answers *how* an
+  artifact was made, `artifacts:` answers *which finding it carries*. Neither
+  subsumes the other, and collapsing them re-opens the `manifest.jsonl` question
+  v1 settled — git plus a script header already gives the *how* at zero install
+  cost, which is exactly why the missing piece was the *which*.
+- `.claude/conventions/citation-discipline.md` — the full
+  `deliverable → claim → evidence → artifact → script → source` chain, of which
+  `Run:`/`Out:` is the artifact → script link.
