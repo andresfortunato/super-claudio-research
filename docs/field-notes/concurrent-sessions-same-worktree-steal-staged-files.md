@@ -1,5 +1,7 @@
 # Two agents in the SAME worktree share one git index — `git add` then `git commit` lets the other session's commit swallow your staged files under its message; commit by pathspec instead
 
+**Encoded in:** `.claude/conventions/provenance.md` § Half 2 → *Commit by pathspec, never stage-then-commit*
+
 ## What
 
 Multiple Claude sessions can be working in the **same** worktree at the same time (not

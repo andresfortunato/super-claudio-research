@@ -76,6 +76,28 @@ Out: output/06c_fdi_at_entry.png (renamed; no script re-run)
   conventions, framework scaffolding — `Run:`/`Out:` would be noise.
 - Pure environment changes (`renv.lock`, `uv.lock`).
 
+### Commit by pathspec, never stage-then-commit
+
+The git index is **per-worktree, not per-session**. When two sessions share a
+worktree, `git add` then `git commit` hands your staged files to whichever
+session commits first, **under its message** — so `git log -- output/<file>`
+resolves to a stranger's rationale, which is the one thing this convention
+exists to prevent. Nothing is lost; provenance is.
+
+```bash
+git commit -F - -- output/06c.png research/evidence/125_foo.md  # SAFE — index-independent
+git add output/06c.png && git commit -F -                       # UNSAFE — shared-index race
+```
+
+- **New files**: `git add <paths> && git commit -F - -- <paths>`, which still
+  scopes the commit to those paths even if the index is polluted. Skip the
+  pathspec form only when you deliberately staged partial hunks.
+- **`no changes added to commit` right after staging is the tripwire.** Run
+  `git diff --stat HEAD -- <your paths>`; empty means your files are already
+  committed under someone else's message. Record the misattribution in a
+  follow-up commit — **never** rewrite pushed history while another session is
+  live on the branch.
+
 ## Using the trail
 
 ```bash
