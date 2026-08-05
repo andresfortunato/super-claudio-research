@@ -1,6 +1,9 @@
 # Handoff — plan-r2p-v3
 
-**Session:** 2026-08-05 (first execution session) · **Last commit:** `785113f`
+**Session:** 2026-08-05 (first execution session)
+**Last content commit:** `785113f` — **this handoff is committed on top of it**, so
+`HEAD` is the handoff commit, not `785113f`. (A handoff cannot name its own commit;
+the convention forbids fabricating it. Verify with `git log --oneline -2`.)
 **Branch:** `main` · **Working tree:** clean except untracked `CLAUDE.md`
 (untracked *before* this session — see Surprises 5).
 
@@ -85,6 +88,39 @@ stated", never "no charts exist".
 A new *hook invariant* is inside an existing file, so it also needs none. Phase
 3.6's `r2p evidence new` **does** touch `src/cli.js` — read
 `context/installer-map.md` first.
+
+## Case-study compliance — audited, not assumed
+
+Each lesson `plan.md` says binds this plan, checked against
+`docs/v2-case-study-cordoba.md` itself:
+
+| Lesson | Status |
+|---|---|
+| §6.5 size rules as ranks/shares, never absolute counts | **held** — grepped: zero absolute-count thresholds in `citation-discipline.md` |
+| §6.7 zero-artifact mechanism gets one line, not a section | **held** — one line under *Where Things Go*, promotion explicitly gated on `deliverables/` carrying citations |
+| §6.6 codify what survives contact | **held, and load-bearing** — it is the argument that killed the ≤120-line rule (D1) |
+| §5.3 never infer a field whose wrongness beats its absence | **held** — `artifacts:` is hand-authored or absent, no-inference rule stated with the 24-province `metro \| 1960–2026` reason |
+| §6.8 a mechanism filed where it cannot act | **held** — this is Phase 1's entire premise, and Phase 2 obeyed it too (a convention with no CLAUDE.md pointer would have repeated it) |
+| §5.5 structural merge beats re-prosing | **partial — see below** |
+| §5.2 measure a baseline · §5.6 print the heading tree | **not yet — Phase 6 owns both** |
+
+**§5.5, honestly.** Phase 1 said "move prose, don't re-write it… verbatim, compressed
+only where the destination's format demands it." The rules were **rewritten into the
+prescriptive register**, not moved verbatim — conventions are documents an agent acts
+on, field notes are narrative, and the two registers don't overlap. What §5.5 is
+actually protecting was preserved: every precision-carrying element moved intact
+(22–96% and the 42% mean, the ~50% full-read threshold, `grep -c '^### '`, the four
+shared append-targets, the 135/136/137 block allocation, the exact safe/unsafe git
+forms). What was dropped was engagement-specific narrative — the 2,758-page PDF, the
+1 May 2026 legal date, `cordoba_utils.py` — which `CLAUDE.md` requires dropping.
+**A future session re-checking §5.5 compliance should judge it on preserved numbers,
+not preserved sentences.**
+
+**Not started, and named here so it isn't lost:** `plan.md`'s closing note says
+running v3's lint against the pilot repo is the cheapest validation that invariant 9
+is real, because invariant 9 is precisely the check that finds the case study's
+**three claims with no evidence doc** (§7's "highest-value follow-up"). That is a
+Phase 3 verification step, not pilot-repo work.
 
 ## Surprises
 
