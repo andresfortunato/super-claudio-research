@@ -157,7 +157,7 @@ plan/plan-r2p-v3/
 ├── claims.md                                   ✎ Rests on: must resolve; deliverable-cites-claims made checkable
 ├── provenance.md                               ✎ commit by pathspec (field note); artifact→evidence binding
 ├── plan-lifecycle.md                           ✎ point fan-out rules at agent-teams; gap-check breadth
-├── citation-discipline.md                      ✚ the chain, stated once, ≤120 lines
+├── citation-discipline.md                      ✚ the chain, stated once (no line cap — log.md D1)
 └── project-conventions.md                      ✎ fix dangling refs to deleted v1 conventions
 
 .claude/hooks/

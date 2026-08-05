@@ -68,10 +68,14 @@ again — stop and reconcile before continuing.
 - **No new convention file.** All four routes land in files that already exist.
 - **No new hook.** v2 removed `check-evidence.sh` for firing unconditionally
   after a path refactor; every check in v3 goes to `lint-research.sh` (Phase 3).
-- **`.claude/conventions/*.md` stay ≤120 lines** (principle 5, short protocols).
-  Current: `provenance.md` 4.0 KB, `evidence.md` 6.5 KB, `plan-lifecycle.md`
-  7.6 KB. If a route would push one past the limit, the destination is wrong —
-  say so in the handoff rather than trimming something else to fit.
+- ⚠ CORRECTED 2026-08-05 — **this constraint is void and was wrong when written.**
+  It read: *"`.claude/conventions/*.md` stay ≤120 lines (principle 5, short
+  protocols)"*, quoting destination sizes in KB while stating the limit in lines.
+  Measured in lines, 5 of 8 conventions already breached it before Phase 1 ran.
+  The researcher dropped principle 5's line budgets outright on 2026-08-05
+  (`docs/audience-and-philosophy.md`, and `log.md` Decision 1). Judge a route on
+  whether the destination is where an agent reads at the moment the lesson
+  applies — not on the destination's length.
 - **Do not touch** `templates/migration/*`, `.claude/skills/migrate-source/`,
   `test/` — Phase 6 owns those, possibly concurrently.
 

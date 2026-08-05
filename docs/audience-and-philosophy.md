@@ -54,7 +54,9 @@ This is the inverse of the Claude Code default, where most config lives in `~/.c
 
 ### 5. Short CLAUDE.md, with pointers
 
-CLAUDE.md is loaded into every session. Long-form rules in CLAUDE.md cost tokens forever and crowd out the project-specific framing that matters more (data sources, key frameworks, current focus). So CLAUDE.md stays around 80–120 lines: project overview, key frameworks, codebase structure, data sources, and one ~4-line pointer block per installed convention.
+CLAUDE.md is loaded into every session. Long-form rules in CLAUDE.md cost tokens forever and crowd out the project-specific framing that matters more (data sources, key frameworks, current focus). So CLAUDE.md holds **pointers, not protocols**: project overview, key frameworks, codebase structure, data sources, and one short pointer block per installed convention.
+
+**Revised 2026-08-05 — the line budgets are gone.** This principle used to prescribe 80–120 lines for CLAUDE.md, and the questions table below extended that same number to convention files as a "protocol ≤120 lines" cap. Both are removed. **How long a project's CLAUDE.md runs is the researcher's call** — it is their file, and the framework has no standing to budget it. The protocol cap was never in this principle's body at all: it existed only in the table, applied the CLAUDE.md number to a different object, was enforced by nothing, and sat at 3-of-8 compliance in r2p's own repo through an entire release. By the framework's own codification test — *a prescribed format with 10% compliance is wrong, not disobeyed* (`docs/v2-case-study-cordoba.md` §6.6) — that makes the rule wrong, not the five files. What survives is the mechanism, which never needed a number: pointers in CLAUDE.md, protocols read on demand.
 
 The pointer block names the convention, says when it applies, and points at `.claude/conventions/<name>.md` for the protocol. Claude reads the full protocol on demand when the situation matches the trigger. This pattern is the single biggest token-cost lever in the framework.
 
@@ -109,7 +111,7 @@ Before proposing a new convention, hook, skill, or template, run it past the con
 | Conditional | Is the trigger an actual filesystem / git / tool-call check, or just a clock? |
 | Composable | Can it be one file (or one dir) without touching others? |
 | Project-shared | Is anything in here user-personal that should be in `settings.local.json`? |
-| Short CLAUDE.md | Does the pointer block stay ≤4 lines? Does the protocol stay ≤120 lines? |
+| Short CLAUDE.md | Does the rule itself live in `.claude/conventions/<name>.md`, with only a pointer block in CLAUDE.md? (No line budgets — see the 2026-08-05 revision.) |
 | Markdown-first | Does it work without a specific language toolchain? |
 | Stakes-graded | Does it fit the cost tier (zero / ≤2k / ≤12k tokens)? Or invent a new one with reason? |
 | Open-source | Is anything here engagement-specific? |

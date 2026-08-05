@@ -27,7 +27,7 @@ Plus a 2–4 line pointer in the project's `CLAUDE.md`.
 - **What counts as a good vs bad instance** (avoid trivial compliance)
 - **Discipline rules** (commit cadence, immutability, indexing)
 
-Length target: 50–120 lines. Anything longer is probably two conventions.
+No length target — see principle 5's 2026-08-05 revision in `docs/audience-and-philosophy.md`. The useful signal behind the old one still holds, but test it on shape rather than lines: if a convention is long **because it is covering two triggers**, that is two conventions. Split on the trigger, not on a line count.
 
 ### 2. (Optional) Write the Stop hook
 

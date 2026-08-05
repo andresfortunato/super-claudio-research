@@ -28,7 +28,11 @@ State the chain, what each link obliges, and what a broken link looks like. Ever
 rule either names the Phase 3 invariant that checks it or is explicitly marked
 advisory — an unenforced rule in a new convention is how `learnings/index.yaml`
 got to 7-of-71 compliance.
-*Done when:* ≤120 lines (principle 5); zero absolute-count thresholds (§1 — ranks
+*Done when:* ⚠ CORRECTED 2026-08-05 — **the ≤120-line requirement is void.** The
+researcher dropped principle 5's line budgets outright; the cap was never in the
+principle's body, was enforced by nothing, and sat at 3-of-8 compliance. Judge
+`citation-discipline.md` on shape instead: every section a rule an agent can act
+on, no narrative that belongs in `docs/`. Also: zero absolute-count thresholds (§1 — ranks
 or shares only); a reader can state from this file alone what `Rests on: #71`
 obliges and who checks it.
 
@@ -61,8 +65,9 @@ settled.
 
 ## Verification
 
-- `citation-discipline.md` ≤120 lines, no absolute counts, every rule mapped to
-  an invariant or marked advisory.
+- `citation-discipline.md` — ⚠ CORRECTED 2026-08-05: the ≤120-line criterion is
+  void (see *Done when* above). Still required: no absolute counts, and every
+  rule mapped to an invariant or explicitly marked advisory.
 - The claim-reference regex, run against a hand-written three-claim fixture memo,
   extracts exactly three references and no false positives from prose numbers.
 - No new *directory* anywhere. v3 adds keys and checks, never layout.
