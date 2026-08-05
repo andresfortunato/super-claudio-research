@@ -82,6 +82,33 @@ Launch agent teams in **tmux mode** for visual monitoring of all teammates.
 
 Teammates don't inherit the lead's conversation history — they start fresh. Give them everything they need upfront.
 
+#### Patch the phase files as the LAST step before launching
+
+**A parallel agent obeys its phase file, not the handoff.** Self-contained phase files are what make a fan-out safe, and the corollary is the trap: a correction stored anywhere else cannot land. On the pilot engagement, three load-bearing findings sat in `handoff.md` while all three phase files still carried the stale version — which would have produced two evidence docs conditioning a live legal schedule on an expired risk, and a session burned re-parsing a 2,758-page PDF that had already been extracted.
+
+Before launching: inline the measured values into each phase file so nobody re-derives them, and mark corrections visibly (`⚠ CORRECTED <date>`) so a reader can tell the patch from the original. Any phase that conditions a number on an external legal or policy state gets re-checked at the top of the session that uses it — **a plan written days ago can carry a stale fact about the outside world** with nothing in the repo having changed.
+
+#### Shared append-targets are lead-only
+
+**Concurrent appends to a shared index are silent lost writes.** A number clash is at least visible afterwards; a lost append is not — the row simply is not there and nothing errors. The append-targets every teammate will want to touch are `research/evidence/INDEX.md`, `research/sources/INDEX.md`, `data/README.md`, and any shared utils module.
+
+Teammates write `proposed_<thing>.md` (or a standalone function into `proposed_wrapper.py`) inside their own scratch folder; **the lead applies all of them after the fan-out.** This costs nothing and removes the entire failure class. Teammates are likewise barred from `git add`/`git commit` — see the shared-index hazard in `.claude/conventions/provenance.md`.
+
+#### When one coordinator can see every writer, ASSIGN the evidence numbers
+
+`evidence.md` says to claim ids from `.next-id` at write time. That rule is written for **sequential** sessions, where the only threat is a parallel plan landing a number between two sessions. With three agents writing inside the same minute, "check then write" *is* the race it was meant to prevent.
+
+**Keep claim-at-write-time for sequential work; override it whenever a lead can see all writers.** The lead allocates a block up front (135 / 136 / 137), tells each teammate to use its number rather than derive one, and verifies uniqueness before committing. Each teammate still reports how it verified — the check is relocated to where it can be conclusive, not dropped.
+
+#### Under stream instability, invert the work order
+
+Teammates die to mid-stream API errors. **CSVs are durable; interpretation is not** — it exists only in agent context. Instruct teammates to work **script → CSV → evidence doc → charts → report**, on the principle that a complete doc with three stated gaps beats a perfect one never written. Two corollaries: prefer many small `Edit`s to one large `Write` (a stall mid-`Write` loses a file that was already finished), and keep tool calls bounded — the watchdog fires on **output silence**, not compute, so chaining many silent operations into one long call is what trips it.
+
+A dead teammate is recoverable when its scripts carry the fixed-shape `provenance.md` header *plus* a comment explaining **why** (why the baseline had to be tariff-inclusive, why the chart is log-log). On the pilot engagement a fresh agent reconstructed an entire write-up from artifacts alone, without re-running anything. Two things to carry when you do that:
+
+- **Label the reconstruction.** A recovery agent inferring intent from artifacts can miss a judgment the original never wrote down. Flag that doc in `handoff.md` as one step further from the data than its siblings.
+- **Recovery can find what the original missed** — and re-running would destroy the evidence. The recovery agent noticed a script writing a CSV absent from disk and undeclared in its header, and sibling mtimes that differed, i.e. the outputs were **not** all from one run of the version on disk.
+
 **Permissions**: Teammates need all permissions and MCP access required for their work. The lead can only grant permissions it already has. If teammates need permissions the lead lacks (specific MCP servers, tool approvals), ask the user to update `.claude/settings.json` or pre-approve before launching. Discovering missing permissions mid-execution wastes teammate context.
 
 ## How Teammates Work
@@ -115,6 +142,8 @@ Teammates write to a visible directory agreed upon in the orchestration plan. Th
 
 ### Output format per teammate
 
+**Teammates cannot write `report.md`.** The harness blocks it — subagents return findings as text, not written report files. Teammates return this block as their **final message**, and **the lead transcribes each one to disk**. Budget context for that transcription: a lead that skips it loses the reports entirely, and they are the artifact the next session reads. Data files a teammate produces (CSVs, charts, evidence docs) are written normally; it is the report that must come back as text.
+
 ```markdown
 # [Teammate Name] — [Scope Summary]
 
@@ -137,7 +166,7 @@ Teammates write to a visible directory agreed upon in the orchestration plan. Th
 ### Lead consolidation
 
 After all teammates finish:
-1. Read each teammate's output file
+1. Transcribe each teammate's returned report to disk, then read them
 2. Review for conflicts or contradictions between teammates
 3. For comparisons: compare results against the criteria from the orchestration plan
 4. Synthesize into a summary for the user

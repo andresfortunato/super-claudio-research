@@ -1,5 +1,7 @@
 # A parallel agent obeys its phase file, not the handoff — so patch the phase files as the LAST step before a fan-out, and route every shared append-target through the lead
 
+**Encoded in:** `.claude/skills/agent-teams/SKILL.md` — §§ *Patch the phase files as the LAST step before launching* (§1), *Shared append-targets are lead-only* (§2), *When one coordinator can see every writer, ASSIGN the evidence numbers* (§3), *Under stream instability, invert the work order* (§§4–5), and *Output format per teammate* (§6).
+
 **Discovered:** 2026-07-29, running Phases 2, 3 and 4 of `plan-agri-potential`
 concurrently via `agent-teams`. Five distinct failure modes, four of them caught
 before launch and one only mitigated afterwards. All three agents still produced a
