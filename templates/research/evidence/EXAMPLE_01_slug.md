@@ -12,6 +12,11 @@ kind: measurement            # measurement | comparison | decomposition | scenar
 confidence: high             # high | medium | low
 data: []                     # research/sources/ stems
 methods: []                  # research/methods/ slugs this rests on
+artifacts:                    # OPTIONAL — the charts/tables THIS doc writes up.
+  - output/<theme>/<chart>.png #   Hand-authored or absent. NEVER inferred: a
+  - output/<theme>/<table>.csv #   wrong binding is worse than a missing one.
+# artifacts:                  # ...or omit the key entirely. Absent is normal and
+#                             #   means "not stated", never "no charts exist".
 ---
 
 # <Headline measurement — the same text as the frontmatter headline>

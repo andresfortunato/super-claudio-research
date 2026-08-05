@@ -64,6 +64,8 @@ kind: measurement            # measurement | comparison | decomposition | scenar
 confidence: high             # high | medium | low
 data: [eph_microdata, cep_sipa]     # research/sources/ stems
 methods: [real-wage-measurement]    # research/methods/ slugs this rests on
+artifacts:                          # OPTIONAL. Charts/tables this doc explains.
+  - output/labour/emp_rate.png      # Hand-authored or absent — never inferred.
 ---
 
 # <Headline measurement — ≤120 chars, no verdict>
@@ -127,6 +129,31 @@ from this one missing field.
 
 `confidence` is `low` when the doc rests on a proxy, a modelled input, a single
 thin cell, or a period the source does not cleanly cover. Say which in `Scope`.
+
+### `artifacts:` — which finding a chart carries
+
+Optional list of the chart and table paths **this doc is the written-up finding
+for**. `git log` already records how an artifact was produced; what nothing
+recorded was *which finding it carries*, so a chart could sit in a deliverable
+with no evidence doc behind it and nothing could see the absence. On the pilot
+that happened to a headline exhibit for six months. With the key, "chart exists
+with no evidence doc" becomes a `test -f` rather than a judgement call.
+
+- **Hand-authored or absent. No heuristic may ever populate it**, and no script
+  may back-fill it by matching filenames, directories or mtimes. The reason is
+  measured: v2's scope-key inference tagged a 24-province panel as
+  `metro | 1960–2026` because a year regex swept every number in the first 6 KB
+  of the doc. **A confidently wrong field manufactures the exact false
+  contradiction the field exists to prevent.** A blank makes a reader open the
+  doc; a wrong one makes them trust it.
+- **Absent is a legitimate, common state** — a doc that measures something with
+  no chart has nothing to bind. Absent means "not stated", never "none exist".
+- Paths are repo-relative, exactly as they appear on disk. Lint checks both
+  directions: a deliverable's chart with no doc listing it (invariant 9) and a
+  listed path that does not exist (invariant 12).
+
+See `.claude/conventions/citation-discipline.md` for the full chain this key is
+one link of.
 
 ## The INDEX is a triage table, not a summary
 
