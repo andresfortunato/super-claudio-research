@@ -1,5 +1,7 @@
 # Before declaring an evidence gap, search the DATA LAYER, the WIKI, and non-checked-out BRANCHES — "no research/evidence/ doc exists" ≠ "no evidence exists" in this multi-worktree project
 
+**Encoded in:** `.claude/conventions/evidence.md` § Where evidence lives → *Before declaring a gap, search wider than `research/evidence/`*
+
 ## What
 
 Fact-checking the growth-diagnostics narrative, a parallel research fan-out declared two

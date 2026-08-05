@@ -1,5 +1,7 @@
 # Evidence-doc digesting is 22–96% lossy per doc, and the loss tracks the doc's Findings-header style
 
+**Encoded in:** `.claude/conventions/evidence.md` § The `Measured` / `Reading` split is the load-bearing rule — as the machine-readability argument for *why* the headers are fixed, plus the measure-retention-per-doc rule.
+
 **Discovered:** 2026-07-31, `plan-narrativa-final-memo` Phase 1, sub-phase 1a.
 
 ## The gotcha

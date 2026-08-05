@@ -24,6 +24,30 @@ docs.
   setting `status` on both. The corpus is append-only; `claims.md` is the
   editable layer.
 
+### Before declaring a gap, search wider than `research/evidence/`
+
+**"No evidence doc exists" ≠ "no evidence exists."** Findings live in four
+places: evidence docs, `data/processed/` tables (often ahead of any write-up),
+the wiki plus `reference/literature/`, and **branches not checked out anywhere**.
+An agent scoped to `research/evidence/` in the current worktree can be seeing a
+quarter of the corpus. On the pilot, two claims were declared gaps needing new
+analysis when one was already answered by a `data/processed/` CSV that had no
+doc, and the other by two evidence docs on a branch no worktree had checked out.
+
+Before writing "gap / needs new analysis" for any claim:
+
+1. `grep -ril "<topic>" data/processed/` — and scan the directory listing; a
+   table whose name answers the claim often exists with no write-up.
+2. Check the wiki and `reference/literature/`.
+3. `git branch -a`, not just `git worktree list` — the latter shows only
+   checked-out branches. Read a non-checked-out branch with
+   `git show <branch>:<path>`: all worktrees share one object store, so this
+   needs no checkout and is safe against locks. A `.~lock.<name>#` file means
+   the file is **open**, not empty.
+
+Once you pull a number off another branch, **cite it by branch + path**, never
+by bare `#NN` — ids collide across branches.
+
 ## Required shape
 
 ```markdown
@@ -73,6 +97,23 @@ differently-scoped number elsewhere is not a contradiction.>
 - A synthesizing session reads `## Measured` across docs and writes the reading
   **once**, at narrative level. That is the whole point: it stops inheriting
   151 pre-baked verdicts that were never reconciled with each other.
+- **The fixed headers are also what keeps the corpus machine-readable.** Any
+  digester that scrapes findings by `line.startswith("**")` under a
+  `## Findings`-style header keeps only the **first physical line** of a
+  hard-wrapped paragraph — headline retained, every number dropped — and a doc
+  with no `###` children comes back **empty**. On the pilot, measured per-doc
+  digest retention ranged **22–96%** around a 42% mean, and the low end was
+  concentrated in the docs carrying the most numbers. A `## Measured` table row
+  is immune because it is one line.
+
+**Never plan a reading strategy against a corpus-wide mean.** Before
+digest-reading a set of docs, measure retention per doc and full-read everything
+under ~50%; `grep -c '^### ' <doc>` is the cheap structural proxy, and zero
+means the findings will be lost wholesale. Do **not** "fix" the digester
+mid-phase — a parallel sub-phase reading the same corpus through a changed
+digest produces fragments that are not comparable, and because
+`research/evidence/` is append-only the docs cannot be reformatted to suit it
+either. Measure and route instead.
 
 ### Frontmatter scope keys make contradictions checkable
 
