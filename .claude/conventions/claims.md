@@ -72,6 +72,16 @@ decks cited 122 evidence ids directly, so every evidence revision threatened
 every deliverable. One indirection fixes it: a retired evidence leg updates one
 claim, and the claim's consumers keep working.
 
+The deliverable side of that indirection needs a syntax, or it cannot be
+followed: **a deliverable cites a claim as `[C12]`** — square bracket, capital
+`C`, digits, no `#`, no ranges. Extractable with `\[C[0-9]+\]`, narrow enough that
+prose numbers and `[1]`-style footnote markers cannot match it. Because `C<n>` is
+stable forever and never renumbered, the reference survives copy-paste into a Word
+draft or a slide deck. A number in a deliverable with **no `[C<n>]` and no named
+external source is not publishable yet** — write the claim, which forces the
+evidence doc. Full rules, and what each broken link looks like:
+`.claude/conventions/citation-discipline.md`.
+
 ## Size and maintenance
 
 - **~30–50 claims** for a 6-month multi-theme engagement, ~6 KB. If it passes
