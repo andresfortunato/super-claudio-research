@@ -1,5 +1,7 @@
 # Porting a chart to a new toolchain forces a data re-read — and that is when you find out the source published a new wave
 
+**Encoded in:** `.claude/conventions/provenance.md` § Discipline — *"A chart that porting forced you to re-read data for is a new artifact."* Encoded in v2; this stamp records that no further edit was needed.
+
 **Discovered:** 2026-08-01, closing F22 in `plan-narrativa-final-memo`. The task was
 filed as a *production* debt with "a cheap mechanical path": one matplotlib chart at
 208 effective dpi had to become a `theme_gl()` ggplot at 300. Same numbers, new

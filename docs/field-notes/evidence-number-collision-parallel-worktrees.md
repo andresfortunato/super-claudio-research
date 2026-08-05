@@ -1,5 +1,7 @@
 # Evidence-number collisions across parallel worktrees/branches
 
+**Encoded in:** `.claude/conventions/evidence.md` § Where evidence lives — the `research/evidence/.next-id` counter, lead-allocated, with parallel workers requesting a block up front. Deriving the next id from `ls` is explicitly forbidden there. Duplicate of [[evidence-number-collisions-parallel-teams]]; both notes stamp this one target.
+
 **Gotcha.** `research/evidence/INDEX.md`'s rule is "numbering is sequential — append, never
 renumber," but that assumes a single linear history. This project runs **parallel
 worktrees / branches** (e.g. `worktree-urban-industries-demand`, the agent-teams skill).

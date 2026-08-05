@@ -1,3 +1,7 @@
+# Evidence-number collisions across parallel agent teams
+
+**Encoded in:** `.claude/conventions/evidence.md` § Where evidence lives — the `research/evidence/.next-id` counter, lead-allocated, with parallel workers requesting a block up front. Deriving the next id from `ls` is explicitly forbidden there. Duplicate of [[evidence-number-collision-parallel-worktrees]]; both notes stamp this one target.
+
 ## Problem
 
 Evidence docs are numbered `NN_<slug>.md` and the lead assigns the "next free"
