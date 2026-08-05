@@ -105,3 +105,7 @@ Protocol: `.claude/conventions/plan-lifecycle.md`.
   `r2p init --with-wiki`. Protocols: `.claude/conventions/source-registry.md`,
   `research/wiki/SCHEMA.md`. Promote either to its own section here only once a
   stream-type source line (news, filings, bulletins) actually starts.
+- **Citations** — a deliverable cites claims as `[C12]`, never evidence ids; an
+  evidence doc binds its charts with the `artifacts:` key. Protocol:
+  `.claude/conventions/citation-discipline.md`. Promote to its own section only
+  once `deliverables/` actually carries citations.
