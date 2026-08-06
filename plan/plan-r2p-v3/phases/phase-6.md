@@ -113,6 +113,39 @@ empty.
 in a scratch commit, watch it go red, restore. A green test that has never been
 red proves nothing. Pure bash, no new runtime dependency.
 
+### ⚠ ADDED 2026-08-05 — a fourth upgrade defect, measured on the pilot
+
+`~/cordoba-growth-narrative` **still has `check-evidence.sh`, and its
+`settings.json` still fires it.** `check-archival.sh` — the v2 replacement — is
+absent. So the hook v2 deleted *for firing unconditionally after a path refactor*
+is still firing, months later, in the framework's own proving ground.
+
+This is documented behaviour, not an accident: `upgrade.js:174–180` explains that
+the orphan is "left in place for the researcher to delete" and that "a project's
+own settings.json is never rewritten by `--upgrade`." Never auto-deleting is the
+right call — clobbering a researcher's config would be worse.
+
+**The defect is that it warns about everything except this.** `--upgrade` prints
+a warning for an obsolete `.claude/skills/` directory (`upgrade.js:351–360`) and
+for stale `EXCLUDE` paths (`:246–254`), but emits **nothing** for a hook the
+framework no longer ships that the project is still wired to run. Grepping its
+`console.log` calls for hook-related output returns zero matches. Silent
+deprecation is how a removed hook survives a full release cycle in production.
+
+**Add to 6d:**
+
+1. **`upgrade.js` gains an orphaned-hook warning** — for each `.claude/hooks/*.sh`
+   the framework no longer ships, name it, say it is obsolete, and say whether the
+   project's `settings.json` still references it. Still never auto-delete.
+2. **The test asserts the warning fires** — plant a `check-evidence.sh` and a
+   `settings.json` referencing it in the throwaway repo, run `--upgrade`, assert
+   both the file and the wiring are called out by name.
+3. **Related but out of scope, and stated so it is not lost:** a project's own
+   `CLAUDE.md` also goes stale — the pilot's still lists `.claude/skills/` (skills
+   are global now) and still describes "a Stop hook" that no longer exists.
+   `--upgrade` does not touch project CLAUDE.md and probably should not. A
+   *warning* is the same cheap fix as (1) if the researcher wants it.
+
 ## Constraints
 
 - **Migration scripts are read-and-adapt artifacts, not a library.** They are

@@ -34,6 +34,38 @@ a data re-read while the evidence doc kept asserting the old numbers. The
 deeper input-level walk (artifact → `Run:` → script → header `Inputs:`) needs
 provenance traversal and belongs to `/pipeline-check` in Phase 5.
 
+## ⚠ ADDED 2026-08-05 — measured against the pilot repo, read before 3.1
+
+A review of `~/cordoba-growth-narrative` (v2 layout, 173 evidence docs, 42 claims)
+found three things that change how these invariants must be written. All are
+measurements, not guesses.
+
+**1. Claims sit at `###`, not `##`.** The ledger groups its 42 claims under six
+`## §N` narrative sections, so every claim heading is `### C<n>`. A checker
+anchored to `^## C[0-9]+` finds **zero claims in a full 42-claim ledger** — a
+false all-clear, the worst failure mode a linter has. **Match `^#{2,3} C[0-9]+`.**
+`claims.md` and `citation-discipline.md` were corrected on 2026-08-05; the earlier
+convention specified `## C<n>` *and* `##` narrative sections, which cannot both
+hold.
+
+**2. Invariant 8 has almost nothing to bite on yet, and invariant 13 has 573
+targets.** The pilot's deliverables carry **573 bare `#nn` references and zero
+claim references** across three drafts of one memo (334 / 148 / 91). So:
+
+- Invariant 13, if written as FAIL, makes the linter unusable on any real project
+  mid-adoption. **Write it WARN**, with the count printed — same reasoning that
+  made invariant 10 a WARN, and `check-evidence.sh` died of exactly this.
+- **No silent caps.** If output is bounded, print the dropped count.
+
+**3. Invariant 11 already passes on the pilot** (highest id 173, `.next-id` 174),
+so it will not self-demonstrate there. Its value is prospective; do not treat a
+green result as evidence the check is wrong.
+
+**Still true and worth doing:** `plan.md`'s note that running the lint against the
+pilot validates invariant 9 stands — the three claims with no evidence doc are
+`docs/v2-case-study-cordoba.md` §7's highest-value follow-up, and invariant 9 is
+the check that finds them.
+
 ## Tasks
 
 **3.1 — Invariant 8: `Rests on:` resolves.** Every id in every claim's `Rests on:`

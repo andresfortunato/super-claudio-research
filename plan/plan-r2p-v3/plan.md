@@ -140,6 +140,17 @@ proceed on the recommendation if unanswered; each is reversible within its phase
 - **C. Should `pipeline-check` ever run a script, or only ever report what is
   stale and hand the researcher the command?** *Recommend: report-and-hand-over
   by default, execute only on an explicit second confirmation.* Blocks Phase 5.
+- **D. ✚ ADDED 2026-08-05 — does v3 ship a `#nn → [C<n>]` conversion aid?**
+  Measured on the pilot: **573 bare evidence references and zero claim references**
+  across three drafts of one memo, against a ledger that already holds 42 claims.
+  So `[C<n>]` has a real adoption gap, and every existing deliverable in every
+  installed project is in the old form by construction. Each claim's `Rests on:`
+  makes `#71 → C12` a derivable lookup, but an id can support several claims and
+  the right one depends on what the sentence asserts — so a script can only ever
+  *propose*. *Recommend: no script in v3.* `citation-discipline.md` now carries a
+  **convert-on-touch** rule, which is the version that survives contact; a
+  bulk-rewrite tool would produce one unreviewable diff against the ledger. Revisit
+  in v4 if convert-on-touch measurably stalls. Blocks nothing; would extend Phase 6.
 
 ## File Manifest
 
