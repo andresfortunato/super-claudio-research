@@ -152,20 +152,24 @@ proceed on the recommendation if unanswered; each is reversible within its phase
   bulk-rewrite tool would produce one unreviewable diff against the ledger. Revisit
   in v4 if convert-on-touch measurably stalls. Blocks nothing; would extend Phase 6.
 
-- **E. ✚ ADDED 2026-08-05 — are thematic subfolders allowed inside
-  `research/evidence/`?** The pilot has one (`access_to_finance/`, tracked, 3
-  evidence docs + a `charts/` dir + a memo), and it is **already broken**: its ids
-  20/21/22 collide with three root-level docs, all three are absent from
-  `INDEX.md`, and `lint-research.sh` cannot see any of it because its uniqueness
-  check globs `"$EV"/[0-9]*_*.md` — non-recursive. `evidence.md:17` gives the flat
-  path but never forbids subdirectories, and at 173 docs the pressure to group is
-  real, so this will recur. *Recommend: forbid, and check it.* A subfolder gives a
-  doc a second numbering namespace, and `NN` is the project-wide key that
-  `claims.md`, every deliverable and `.next-id` all resolve against; thematic
-  grouping is what `unit`/`geography` frontmatter and `claims.md` sections are
-  already for. Whichever way it goes, **Phase 3 must make the existing invariant 1
-  recursive** — a check that silently ignores a whole directory is worse than no
-  check. Blocks nothing; extends Phase 3.
+- **E. ✚ ADDED 2026-08-05, ⚠ CORRECTED same day — are thematic subfolders allowed
+  inside `research/evidence/`?** The pilot has one, `access_to_finance/`: 3
+  evidence docs, a `charts/` dir and a memo, tracked. **It is deliberate and
+  documented, not a defect** — its README explains that the docs came from another
+  branch whose ids 20/21/22 were already taken here, and that renumbering would
+  break the byte-identical diff against their source. The subfolder is a
+  namespace, chosen on purpose. *(An earlier version of this entry called it
+  "already broken" on a ninety-second read. It wasn't.)*
+  **The real finding is narrower and still live:** `lint-research.sh` globs
+  `"$EV"/[0-9]*_*.md` (`:49`, `:80`) — non-recursive — so it returns a confident
+  PASS over three documents it never opened, and those three are absent from
+  `INDEX.md`. *Recommend: permit subfolders, and make invariant 1 recursive so
+  they are actually checked.* `evidence.md:17` gives the flat path without
+  forbidding subdirectories, and at 177 docs the pressure to group is real. What
+  must not break is `NN` staying unique project-wide — it is the key `claims.md`,
+  every deliverable and `.next-id` resolve against. Whichever way E lands,
+  **Phase 3 must make invariant 1 recursive**; a check that silently skips a
+  directory is worse than no check. Blocks nothing; extends Phase 3.
 
 ## File Manifest
 

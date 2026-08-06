@@ -217,6 +217,19 @@ Nothing abandoned. Two checks were authored wrong and corrected:
   passes Phase 2's wording loosely. Rewritten to 3 distinct claims so the
   criterion is met unambiguously.
 
+## Queued, ahead of the remaining phases
+
+**Deep-dive the Córdoba r2p fixes and graduate what works** —
+`context/cordoba-graduation.md`. The pilot repeatedly fixed r2p under deadline and
+the fixes stuck; most never came back to the framework. That note carries what
+this session already confirmed, the commits and directories to read, and one
+explicit negative decision (`mapa_evidencia.md` was examined and rejected — do not
+re-propose it). **Study only. Produce candidate graduations, ask before editing
+the plan.**
+
+Read the diffs, not the current tree — reading the tree is what made this session
+call a deliberate, documented evidence subfolder a defect.
+
 ## Next
 
 **Phase 3** (lint the chain) is the critical path and is unblocked. Its named split

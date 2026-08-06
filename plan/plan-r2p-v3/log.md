@@ -117,14 +117,19 @@ dirs. `claims.md`, `wiki/` as specified. The v2 layout survived six months of
 contact without drifting.
 
 **The one divergence is `research/evidence/access_to_finance/`** — a tracked
-thematic subfolder holding three evidence docs, a `charts/` dir and a memo. It is
-broken in three ways at once, and none of them is visible:
+thematic subfolder holding three evidence docs, a `charts/` dir and a memo.
 
-1. Its ids **20, 21, 22 collide** with three root-level evidence docs.
-2. All three are **absent from `INDEX.md`** (0 matching rows).
-3. `lint-research.sh` **cannot see them** — its uniqueness check globs
-   `"$EV"/[0-9]*_*.md` (`:49`, same shape `:80`), which is non-recursive, so it
-   returns a confident PASS over a directory it never opened.
+⚠ **CORRECTED 2026-08-05, same day.** This entry first called it "broken in three
+ways." That was wrong, and written before reading the folder's own README. The
+subfolder is **deliberate and documented**: the docs came from another branch
+whose ids 20/21/22 were already taken here, and renumbering them would have
+broken the byte-identical diff against their source. The ids are namespaced on
+purpose.
+
+What survives the correction is one real defect: `lint-research.sh` **cannot see
+them** — its uniqueness check globs `"$EV"/[0-9]*_*.md` (`:49`, same shape `:80`),
+which is non-recursive, so it returns a confident PASS over a directory it never
+opened. The three docs are also absent from `INDEX.md`.
 
 `evidence.md:17` gives the flat path but never forbids subdirectories, and at 173
 docs the pressure to group is real — so this recurs unless it is decided. **New
