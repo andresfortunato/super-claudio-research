@@ -72,7 +72,7 @@ convention, the lint and the INDEX all disagree with. → **task 7.3b**.
 caps, 1 root duplicate id (162), 15 docs missing frontmatter keys, all predating
 v3. Diff against it; do not read a v3 run cold.
 
-## What landed — 9 commits
+## What landed
 
 **Phase 1** (`520c66c`, `8f3daab`, `06eadb6`, `1b8a85d`)
 
@@ -105,7 +105,8 @@ specs invariants 8–12. Mapped against the chain:
 
 Decision 2 in `plan.md` says *"No mechanism ships only its expensive half."* As
 specced, link 1 does exactly that. The missing check is one grep — every `[C<n>]`
-in `deliverables/` resolves to a `## C<n>` heading in `research/claims.md` — and
+in `deliverables/` resolves to a `#{2,3} C<n>` heading in `research/claims.md`
+(**not** `## C<n>` — see the pilot review above) — and
 `citation-discipline.md` already forward-references it as **invariant 13
 (proposed)**, in a *Gaps* section, so shipping without it leaves a written promise
 unkept. **Recommend adding it as task 3.4b.** Verified regex, tested below.
