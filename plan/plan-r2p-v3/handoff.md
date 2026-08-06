@@ -21,7 +21,7 @@ the convention forbids fabricating it. Verify with `git log --oneline -2`.)
 
 **Decisions made in-session:** principle 5's line budgets dropped (`log.md` **D1**);
 pilot-repo review corrected the claim-heading anchor and fed phases 3 and 6
-(`log.md` **D2**). Decisions **A**, **B**, **C**, **D** remain open.
+(`log.md` **D2**). Decisions **A**, **B**, **C**, **D**, **E** remain open.
 
 ## Pilot-repo review (2026-08-05) — what it changed
 
@@ -46,6 +46,31 @@ worktrees. Full account in `log.md` **D2**. The three that bind future phases:
 fully on v2 layout; its CLAUDE.md convention pointers all resolve; project-local
 `.claude/skills/` correctly absent — `~/.claude/skills/` **symlinks into this
 repo**, so framework skill edits reach installed projects immediately.
+
+### Folder grouping inside `research/` (`log.md` **D3**)
+
+**The v2 layout held.** `methods/` is 37 flat `<topic-slug>.md` + `_adjuncts/`,
+exactly per `methods.md:35,46`; `sources/` is flat files + per-source companion
+dirs. Six months of contact, no drift. That is the result worth knowing.
+
+**One divergence, broken three ways silently** —
+`research/evidence/access_to_finance/` (tracked): ids **20/21/22 collide** with
+root-level docs, all three are **absent from `INDEX.md`**, and
+`lint-research.sh` **cannot see them** (`:49` and `:80` glob `"$EV"/[0-9]*_*.md`,
+non-recursive → confident PASS over an unopened directory). Fourth recurrence of
+the evidence-id collision, via a vector `.next-id` cannot defend: a second
+numbering namespace, not parallel allocation. → **decision E**; Phase 3 must make
+invariant 1 recursive regardless of how E lands.
+
+**The v1 methods path is live in eight files** an agent acts on
+(`planning/SKILL.md` ×3, `implementation/SKILL.md:37` contradicting its own `:64`
+and `:148`, `templates/plan/plan.md:23`, …). It instructs an agent to *create*
+`research/methods/<slug>/rule.md`, which succeeds and produces a layout the
+convention, the lint and the INDEX all disagree with. → **task 7.3b**.
+
+**Pilot lint baseline recorded** in `phase-3.md` per case-study §5.2 — 6 headline
+caps, 1 root duplicate id (162), 15 docs missing frontmatter keys, all predating
+v3. Diff against it; do not read a v3 run cold.
 
 ## What landed — 9 commits
 
