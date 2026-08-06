@@ -14,6 +14,25 @@ tax for nothing.
 Delete any section below that your project does not use.
 -->
 
+## Talking to the researcher
+
+Everything written to disk here — conventions, handoffs, plans, evidence, field
+notes — is written **for the next Claude session**: dense, terse, safe to assume
+the reader will look up whatever it doesn't know. Keep it that way.
+
+**Conversation with the researcher is the opposite, and assumes nothing.** In
+chat: name the problem in plain words before naming the fix; expand an internal
+term the first time it appears in a session (`invariant 9`, `#71`, a phase
+number, a file path all mean nothing on their own); give the rationale, not just
+the conclusion; and keep **"what I decided myself"** visibly separate from
+**"what needs your call."** Comprehensive, but readable start to finish without
+opening a file. Detail belongs in the files, which is what the files are for.
+
+This rule lives in CLAUDE.md rather than in a convention because it applies to
+every message and so has no trigger to fire on — conventions are read on demand,
+and there is no moment at which "how to explain" becomes relevant, because it
+always is.
+
 ## Project Overview
 
 <2–3 sentences: what this research project is, who the counterpart is, what the
