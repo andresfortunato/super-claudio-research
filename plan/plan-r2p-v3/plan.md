@@ -152,6 +152,21 @@ proceed on the recommendation if unanswered; each is reversible within its phase
   bulk-rewrite tool would produce one unreviewable diff against the ledger. Revisit
   in v4 if convert-on-touch measurably stalls. Blocks nothing; would extend Phase 6.
 
+- **E. ✚ ADDED 2026-08-05 — are thematic subfolders allowed inside
+  `research/evidence/`?** The pilot has one (`access_to_finance/`, tracked, 3
+  evidence docs + a `charts/` dir + a memo), and it is **already broken**: its ids
+  20/21/22 collide with three root-level docs, all three are absent from
+  `INDEX.md`, and `lint-research.sh` cannot see any of it because its uniqueness
+  check globs `"$EV"/[0-9]*_*.md` — non-recursive. `evidence.md:17` gives the flat
+  path but never forbids subdirectories, and at 173 docs the pressure to group is
+  real, so this will recur. *Recommend: forbid, and check it.* A subfolder gives a
+  doc a second numbering namespace, and `NN` is the project-wide key that
+  `claims.md`, every deliverable and `.next-id` all resolve against; thematic
+  grouping is what `unit`/`geography` frontmatter and `claims.md` sections are
+  already for. Whichever way it goes, **Phase 3 must make the existing invariant 1
+  recursive** — a check that silently ignores a whole directory is worse than no
+  check. Blocks nothing; extends Phase 3.
+
 ## File Manifest
 
 ```

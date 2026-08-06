@@ -47,6 +47,34 @@ know why `save_fig(findings={...})` was rejected will propose it again.
 **7.3 — Fix the dangling references.** `project-conventions.md` first: it is live
 and an agent acts on it. Then `r2p-adopt.md` and `verification-architecture.md`.
 
+**7.3b — ⚠ ADDED 2026-08-05: the v1 methods path is still live in eight files.**
+`methods.md:35` specifies `research/methods/<topic-slug>.md` — one **flat** file
+per object, with `_adjuncts/<topic>/` for companions — and the pilot matches it
+exactly (37 flat files + `_adjuncts/`). But the v1 directory form
+`research/methods/<slug>/rule.md` still appears in files an agent acts on:
+
+```
+.claude/skills/planning/SKILL.md                       ×3 (incl. 2 worked examples)
+.claude/skills/planning/references/multi-session.md    ×2
+.claude/skills/implementation/SKILL.md                 :37
+.claude/skills/implementation/references/escalation-reference.md
+templates/plan/plan.md                                 :23
+templates/plan_dir/archive/README.md                   :21 (and :25/:43 use the flat form)
+```
+
+**This is worse than a dangling reference.** A dangling ref fails visibly when
+followed; this one instructs an agent to *create* `research/methods/<slug>/rule.md`,
+which succeeds, and silently produces a layout the convention, the lint
+(`lint-research.sh:96` globs `research/methods/*.md`) and every INDEX row disagree
+with. `implementation/SKILL.md` contradicts itself in one file — `:37` directory,
+`:64` and `:148` flat.
+
+Leave the two occurrences in `docs/v2-case-study-cordoba.md` and
+`docs/v1-to-v2-migration.md` alone: those describe the v1 shape as history and are
+correct. *Verification:* after the fix,
+`grep -rn 'methods/<slug>/rule\.md\|methods/[a-z-]*/rule\.md' .claude/ templates/`
+returns nothing.
+
 **7.4 — Revise the constitution.** Three edits: generalize principle 9 to cover
 evidence `## Measured` blocks as anchors; add the compute-graded tier to the
 stakes-graded table in principle 7 (and to `verification-architecture.md`); fix

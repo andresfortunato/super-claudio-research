@@ -102,3 +102,49 @@ immediately).
 **Deliberately not done.** The pilot's own remediation — converting 573 references,
 filing the three missing evidence docs — remains out of scope per *Open Items
 Deferred*. This entry changes the framework, not the pilot.
+
+---
+
+## D3 — 2026-08-05 · `research/` folder grouping: what the pilot proves
+
+**Raised by:** a follow-up review of how `~/cordoba-growth-narrative` groups
+folders inside `research/`.
+
+**Mostly the convention is being followed, and that is the finding.** `methods/`
+is 37 flat `<topic-slug>.md` files plus `_adjuncts/<topic>/` — exactly
+`methods.md:35` and `:46`. `sources/` is flat files plus per-source companion
+dirs. `claims.md`, `wiki/` as specified. The v2 layout survived six months of
+contact without drifting.
+
+**The one divergence is `research/evidence/access_to_finance/`** — a tracked
+thematic subfolder holding three evidence docs, a `charts/` dir and a memo. It is
+broken in three ways at once, and none of them is visible:
+
+1. Its ids **20, 21, 22 collide** with three root-level evidence docs.
+2. All three are **absent from `INDEX.md`** (0 matching rows).
+3. `lint-research.sh` **cannot see them** — its uniqueness check globs
+   `"$EV"/[0-9]*_*.md` (`:49`, same shape `:80`), which is non-recursive, so it
+   returns a confident PASS over a directory it never opened.
+
+`evidence.md:17` gives the flat path but never forbids subdirectories, and at 173
+docs the pressure to group is real — so this recurs unless it is decided. **New
+decision E** in `plan.md`: *recommend forbidding subfolders and making invariant 1
+recursive*, because `NN` is the project-wide key `claims.md`, every deliverable and
+`.next-id` all resolve against, and a subfolder hands a doc a second numbering
+namespace. Thematic grouping is what frontmatter scope keys and `claims.md`
+sections already provide. **This is the evidence-id collision recurring a fourth
+time**, via a vector `.next-id` cannot defend against.
+
+**Second finding: the v1 methods path is still live in eight files** that an agent
+acts on — `planning/SKILL.md` ×3, `planning/references/multi-session.md` ×2,
+`implementation/SKILL.md:37` (which contradicts its own `:64` and `:148`),
+`implementation/references/escalation-reference.md`, `templates/plan/plan.md:23`,
+`templates/plan_dir/archive/README.md:21`. Worse than a dangling reference: it
+instructs an agent to *create* `research/methods/<slug>/rule.md`, which succeeds
+and silently produces a layout the convention, the lint and the INDEX all
+disagree with. → **new task 7.3b**.
+
+**Third: a measured lint baseline for the pilot** is now recorded in `phase-3.md`
+(§5 of the ⚠ ADDED block), per case-study §5.2. Today it FAILs on headline caps
+(6 rows), one root-level duplicate id (162), and 15 docs missing frontmatter keys.
+Any v3 lint run must be diffed against that, not read cold.

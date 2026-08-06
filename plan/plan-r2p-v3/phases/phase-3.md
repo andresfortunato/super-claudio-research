@@ -66,6 +66,32 @@ pilot validates invariant 9 stands — the three claims with no evidence doc are
 `docs/v2-case-study-cordoba.md` §7's highest-value follow-up, and invariant 9 is
 the check that finds them.
 
+**4. Invariant 1 is already broken, and fixing it belongs here.** The existing
+uniqueness check globs `"$EV"/[0-9]*_*.md` (`lint-research.sh:49`, and the same
+shape at `:80`) — **non-recursive**. The pilot has a tracked
+`research/evidence/access_to_finance/` holding three evidence docs whose ids
+**20, 21, 22 collide with three root-level docs**; none of the three appears in
+`INDEX.md`; and the linter reports none of it. A check that silently skips a whole
+directory is worse than no check, because it returns a confident PASS. Make the
+glob recursive, and see **decision E** on whether such subfolders are permitted at
+all. This is the evidence-id collision recurring a *fourth* time, through a vector
+`.next-id` cannot defend: not parallel allocation, but a second numbering
+namespace.
+
+**5. Baseline, measured 2026-08-05** — per case-study §5.2, *measure before
+claiming you broke nothing*. `lint-research.sh` on the pilot today:
+
+```
+FAIL headline cap (>120 chars): rows 157, 158, 162 ×2, 165, 168
+FAIL duplicate evidence ids: 162
+FAIL 15 evidence docs missing frontmatter or a required key
+ok   filename id matches frontmatter · no verdicts in ## Measured
+```
+
+Plus the three invisible collisions above, which do **not** appear. Any v3 lint
+run against the pilot must be diffed against this, not read cold — most of these
+predate v3.
+
 ## Tasks
 
 **3.1 — Invariant 8: `Rests on:` resolves.** Every id in every claim's `Rests on:`
