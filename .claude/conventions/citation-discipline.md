@@ -46,6 +46,11 @@ append-only layer, so every evidence revision threatens every deliverable.
   A caption is where a reader is most likely to want the provenance.
 - **`C<n>` is stable forever and never renumbered** (`claims.md`), which is what
   makes it safe to embed in a Word draft, a slide, or a PDF that outlives the repo.
+- **Resolving a reference means matching `^#{2,3} C<n>` in `research/claims.md`,
+  never `^## C<n>` alone.** A ledger that groups claims under `## §N` narrative
+  sections carries them at `###`. The pilot's 42-claim ledger does exactly that,
+  so a checker anchored to `##` reports **zero claims on a full ledger** — a
+  false all-clear, which is worse than a false alarm.
 
 ### A number that cites nothing
 
@@ -70,7 +75,7 @@ external source needs that source named inline, in the sentence.
 
 | Symptom | Broken link | Where it surfaces |
 |---|---|---|
-| `[C12]` names no `## C12` heading | deliverable → claim | invariant 13 *(proposed)*, `/cite-check` |
+| `[C12]` matches no `#{2,3} C12` heading | deliverable → claim | invariant 13 *(proposed)*, `/cite-check` |
 | `Rests on:` names an id with no file | claim → evidence | invariant 8 |
 | a chart in a deliverable that no evidence doc lists in `artifacts:` | evidence → artifact | invariant 9 |
 | an `artifacts:` path that does not exist on disk | evidence → artifact | invariant 12 |
@@ -79,6 +84,28 @@ external source needs that source named inline, in the sentence.
 The last row is the expensive one, and deliberately so: finding *every* number in
 a document and asking whether it is cited is a judgement walk, not a grep. That is
 `/cite-check`'s job, at the ≤2k tier.
+
+## Adopting this on a project that already cites evidence directly
+
+Measured on the pilot: three drafts of one memo carry **573 bare `#nn` evidence
+references and zero claim references**, against a ledger that already holds 42
+claims. Direct citation is not a habit someone can be told out of — it was the
+only expressible form before `[C<n>]` existed, so every existing deliverable is
+in the old form by construction.
+
+- **Convert on touch, not in a sweep.** When you edit a paragraph, convert the
+  references in it. A repo-wide rewrite re-opens every deliverable at once and
+  makes one enormous diff nobody can review against the ledger.
+- **The mapping is mechanically derivable, and must still be checked by hand.**
+  Each claim's `Rests on:` lists its evidence ids, so `#71 → C12` is a lookup.
+  But an id can support several claims, and the right claim depends on what the
+  *sentence* asserts — so the lookup proposes, the author decides.
+- **An `#nn` that no claim rests on is the valuable output of the exercise**, not
+  an inconvenience: it is either a claim nobody wrote down, or a number that
+  should not be in the deliverable. Both are findings.
+- Until a project's deliverables are converted, `/cite-check` will report large
+  counts. That is accurate. **It must print the count rather than truncating** —
+  a silent cap reads as "mostly fine" when it is not.
 
 ## Gaps — stated, not hidden
 

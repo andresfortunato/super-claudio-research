@@ -28,7 +28,9 @@ the project has confused claims with evidence.
 # Claims ledger
 **Last reviewed:** 2026-08-04 against evidence #151
 
-## C12 — Gran Córdoba's employment deficit is formal, not total
+## §2 — Labour: the deficit is formal        <!-- optional narrative section -->
+
+### C12 — Gran Córdoba's employment deficit is formal, not total
 **Status:** live · reviewed 2026-08-03
 **Unit:** metro (EPH aglomerado 13) · **Period:** 2014–2025
 **One number:** the formal employment-rate gap vs the nation widens 4.3 pp
@@ -41,7 +43,7 @@ Six fields, no more:
 
 | Field | Rule |
 |---|---|
-| heading | `## C<n> — <claim as a sentence>`. `C<n>` is stable forever; never renumber. |
+| heading | `C<n> — <claim as a sentence>` at **`##` or `###`** — `###` when the ledger groups claims under `## §N` narrative sections, `##` when it doesn't. `C<n>` is stable forever; never renumber. Anything reading the ledger must match `^#{2,3} C[0-9]+`, never `^## C` alone. |
 | `Status` | `live` \| `open` \| `retired`. `open` = we expect to settle it. |
 | `Unit` / `Period` | copied from the evidence it rests on. If sources disagree on unit, that is a `Contested by:` row, not a claim. |
 | `One number` | exactly one, the one you would put on a slide. If you can't pick one, it isn't a claim yet. |
@@ -90,7 +92,11 @@ evidence doc. Full rules, and what each broken link looks like:
   `Last reviewed` line. A hook nudges; the review is a human-or-model pass, not
   an automatic append.
 - Group claims under `##`-level narrative sections if the project has them, so
-  the ledger reads in deliverable order.
+  the ledger reads in deliverable order. **Claims then sit at `###`** — see the
+  heading rule above. This is what the pilot's 42-claim ledger does, under six
+  `## §N` sections, and it is why the heading rule allows both levels: an earlier
+  draft of this convention specified `## C<n>` *and* `##` narrative sections,
+  which cannot both hold.
 
 ## Success test
 
