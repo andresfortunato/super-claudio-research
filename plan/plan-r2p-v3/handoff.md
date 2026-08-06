@@ -12,15 +12,40 @@ the convention forbids fabricating it. Verify with `git log --oneline -2`.)
 | # | Phase | Status |
 |---|---|---|
 | 1 | Drain the field notes | **done** — 4 routes + 7 stamps, all 5 criteria verified |
-| 2 | State the chain once | **done** — all 4 tasks + template pointer, all 4 criteria verified |
+| 2 | State the chain once | **done** — all 4 tasks + template pointer, all 4 criteria verified. **One shipped assumption corrected after the pilot review — see D2** |
 | 3 | Lint the chain | **next** — unblocked. See *Carry into Phase 3* below |
 | 4 | `/cite-check` | blocked on 3 · **needs decision A** |
 | 5 | `/pipeline-check` | blocked on 3 · **needs decision C** |
 | 6 | Harden the tooling | unblocked, independent of everything |
 | 7 | Docs, constitution, release | blocked on all · **needs decision B** |
 
-**Decision made in-session:** principle 5's line budgets dropped — `log.md` **D1**.
-Decisions **A**, **B**, **C** remain open.
+**Decisions made in-session:** principle 5's line budgets dropped (`log.md` **D1**);
+pilot-repo review corrected the claim-heading anchor and fed phases 3 and 6
+(`log.md` **D2**). Decisions **A**, **B**, **C**, **D** remain open.
+
+## Pilot-repo review (2026-08-05) — what it changed
+
+Reviewed `~/cordoba-growth-narrative`: v2 layout, 173 evidence docs, 42 claims, 10
+worktrees. Full account in `log.md` **D2**. The three that bind future phases:
+
+1. **Claims sit at `### C<n>`, not `## C<n>`** — grouped under six `## §N`
+   sections. Phase 2 had shipped the `##` assumption, so a checker built to spec
+   would have reported **zero claims on a 42-claim ledger**. Both conventions now
+   resolve on `^#{2,3} C[0-9]+`; verified 42 hits against the pilot.
+2. **573 bare `#nn` refs, zero claim refs** across three drafts of one memo.
+   `[C<n>]` has a real adoption gap → convert-on-touch rule added to
+   `citation-discipline.md`, and **invariant 13 must be WARN, not FAIL** (a
+   FAIL with 573 targets is the linter-crying-wolf death `check-evidence.sh` had).
+3. **The pilot still runs `check-evidence.sh`, wired in its `settings.json`** —
+   the hook v2 deleted for firing unconditionally. `--upgrade` never auto-deletes
+   (correct) but prints **no warning** for an orphaned hook, though it does warn
+   about obsolete `skills/` and stale EXCLUDEs. → Phase 6d gains the warning + an
+   assertion.
+
+**Verified fine, no action:** `_inbox/` already promoted to the template; pilot
+fully on v2 layout; its CLAUDE.md convention pointers all resolve; project-local
+`.claude/skills/` correctly absent — `~/.claude/skills/` **symlinks into this
+repo**, so framework skill edits reach installed projects immediately.
 
 ## What landed — 9 commits
 
