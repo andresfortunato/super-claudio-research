@@ -80,6 +80,7 @@ _inbox/
 # Parallel-agent scratch: process state, never a research artifact.
 plan/_scratch/
 plan/*/output/
+research/evidence/.next-id.lock
 
 # Secrets and per-machine config (see .env.example for the contract)
 .env

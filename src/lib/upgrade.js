@@ -69,8 +69,10 @@ const EXCLUDE = new Set([
 // existing project that already has a framework block — keeps `r2p init
 // --upgrade` self-contained when new gitignored slots ship.
 const REQUIRED_GITIGNORE_LINES = [
-  'internal_docs/',
-  'literature/',
+  'reference/internal/',
+  'reference/literature/',
+  'reference/external/',
+  'research/evidence/.next-id.lock',
   '.env',
   '.env.*',
   '!.env.example',
