@@ -130,9 +130,9 @@ echo "== r2p v2 research lint =="
 if [[ -f "$EV/INDEX.md" ]]; then
   over=$(awk -F'|' '/^\| *[0-9]+ *\|/ {
             h=$3; gsub(/^ +| +$/,"",h);
-            if (length(h) > 120) printf "    row %s: %d chars\n", $2, length(h) }' "$EV/INDEX.md")
+            if (length(h) > 120) { gsub(/^ +| +$/,"",$2); printf "row %s: %d chars\n", $2, length(h) } }' "$EV/INDEX.md")
   if [[ -n "$over" ]]; then
-    note "FAIL headline cap (>120 chars):"; printf '%s\n' "$over"; fail=1
+    note "FAIL headline cap (>120 chars), $(grep -c . <<< "$over") row(s):"; show "$over"; fail=1
   else
     note "ok   headline cap"
   fi
@@ -154,7 +154,7 @@ else
 fi
 
 # --- 3/4/5. per-doc checks -------------------------------------------------
-missing_fm=0; bad_id=0; verdicts=""
+missing_fm=0; bad_id=0; verdicts=""; mismatch=""
 while IFS= read -r f; do
   if ! head -1 "$f" | grep -q '^---$'; then
     missing_fm=$((missing_fm+1)); continue
@@ -165,18 +165,22 @@ while IFS= read -r f; do
   done
   fid=$(sed -n 's/^id:[[:space:]]*\([0-9]*\).*/\1/p' <<< "$fm" | head -1)
   nid=$(ev_id "$f")
-  [[ "$fid" == "$nid" ]] || { bad_id=$((bad_id+1)); note "     id mismatch: $f (fm=$fid file=$nid)"; }
+  [[ "$fid" == "$nid" ]] || { bad_id=$((bad_id+1)); mismatch="${mismatch}$f (frontmatter=${fid:-none} filename=$nid)"$'\n'; }
   # verdict words inside ## Measured only
   meas=$(awk '/^## Measured/{f=1;next} /^## /{f=0} f' "$f")
   if [[ -n "$meas" ]] && grep -qiE '\b(confirms?|confirmed|refut|rejected|verdict|proves)\b' <<< "$meas"; then
-    verdicts="${verdicts}     $f"$'\n'
+    verdicts="${verdicts}$f"$'\n'
   fi
 done < <(ev_docs)
 (( missing_fm == 0 )) && note "ok   frontmatter complete" \
   || { note "FAIL $missing_fm evidence docs missing frontmatter or a required key"; fail=1; }
-(( bad_id == 0 )) && note "ok   filename id matches frontmatter" || fail=1
+if (( bad_id == 0 )); then
+  note "ok   filename id matches frontmatter"
+else
+  note "FAIL $bad_id doc(s) whose filename id differs from their frontmatter:"; show "$mismatch"; fail=1
+fi
 if [[ -n "$verdicts" ]]; then
-  note "FAIL verdict words inside ## Measured:"; printf '%s' "$verdicts"; fail=1
+  note "FAIL verdict words inside ## Measured, $(grep -c . <<< "$verdicts") doc(s):"; show "$verdicts"; fail=1
 else
   note "ok   no verdicts in ## Measured"
 fi
@@ -381,6 +385,11 @@ if [[ -n "$gone" ]]; then
   note "FAIL $(grep -c . <<< "$gone") artifacts: path(s) do not exist:"; show "$gone"; fail=1
 elif (( nbound )); then
   note "ok   every artifacts: path exists ($nbound bound)"
+elif [[ -n "$highest" ]]; then
+  # A corpus exists but nothing binds, so 10 and 12 both had nothing to read.
+  # Say so: two invariants silently absent from a report reads as two passes.
+  # (Empty on a fresh scaffold, which must stay silent.)
+  note "--   no artifacts: bindings in the corpus yet; invariants 10 and 12 had nothing to check"
 fi
 
 # --- 13 / 14. deliverable -> claim, and the legacy `#nn` form ---------------
