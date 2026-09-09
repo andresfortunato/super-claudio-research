@@ -186,13 +186,42 @@ confirms no work remains.
    the **archivist** subagent.
 3. The archivist synthesizes `plan/archive/plan-<slug>.md` (decisions, methods
    landed, files touched, learnings, metrics), appends a line to
-   `plan/archive/index.md`, updates CLAUDE.md if the structure changed, then
-   deletes `plan/plan-<slug>/`.
+   `plan/archive/index.md`, **promotes the plan's reusable rules to
+   `.claude/conventions/project/`** (below), updates CLAUDE.md if the structure
+   changed, then deletes `plan/plan-<slug>/`.
 4. The sentinel prevents re-blocking if the archivist was interrupted; it is
    removed with the plan directory.
 
 `.completed` is local working state — don't commit it. The archive entry is the
 permanent record, committed alongside the deletion.
+
+### A rule the plan wrote that outlives the plan moves out of the plan directory
+
+**Before archival, any reusable rule the plan produced moves to
+`.claude/conventions/project/`.** The archivist checks this at step 3, as part of
+what it synthesizes — not a separate hook, and not a researcher chore.
+
+**The test is one question: would the next plan on this project have to re-derive
+this?** If yes it is a project convention and the plan directory is the wrong home
+for it. If it is only true of this plan's data, this phase, or this deliverable, it
+stays in the plan and goes with it.
+
+**Measured on the pilot:** one plan produced **9 reusable rules. 3 reached
+`.claude/conventions/project/`. 6 are still in a closed plan's directory**, where
+nothing reads them and archival will delete them. Nobody decided to strand them —
+`project-conventions.md` says how to *write* a project convention and where it
+lives, but nothing said *when* a plan's by-product becomes one, so the default was
+"leave it where it was written."
+
+That is the same defect as **a mechanism invented and filed where it cannot act**,
+recurring one layer down: the framework had just finished draining its own field
+notes into conventions for exactly this reason, while every installed project kept
+reproducing it inside `plan/`. A rule nothing can reach is indistinguishable from a
+rule nobody wrote.
+
+**Promote, don't copy.** The rule lives in one place; the archive entry's *Key
+decisions* names where it went. Two copies drift, and the plan's copy is the one a
+future session finds first and the one archival deletes.
 
 **Boundary with `/research-cleanup`**: the archivist is per-plan and automated;
 `/research-cleanup` is project-wide and user-invoked (orphan scripts, stale

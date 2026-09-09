@@ -53,13 +53,15 @@ You receive a plan name. The plan directory is at `plan/plan-<name>/`.
    - **<Plan Title>** (YYYY-MM-DD) — one-sentence summary. [Full archive](plan-<name>.md)
    ```
 
-4. **Update CLAUDE.md if architecture changed.** Review the plan's File Manifest and Key Decisions. If the plan added a new convention, skill, hook, agent, or scaffolding directory — update `CLAUDE.md`'s codebase-tree gloss and add a pointer block following the existing pattern (~4 lines: name + when-to-apply + "see `.claude/conventions/<name>.md` (read on demand)"). Keep updates minimal — only what changed; do not rewrite. Skip this step entirely if the plan was scoped to internal protocol edits, doc rationale, or seeds without an architectural surface.
+4. **Promote the plan's reusable rules before anything is deleted.** Scan the plan directory — `log.md` decisions, phase files, `handoff.md` — for rules the plan wrote that the *next* plan on this project would otherwise re-derive. The test is that one question; a rule true only of this plan's data, phase, or deliverable is not one. Move each to `.claude/conventions/project/<domain>.md` (append to the matching domain file, create it only if no domain fits), add its INDEX row, and name the destination in the archive entry's *Key decisions*. **Promote, don't copy** — the plan's copy is about to be deleted, and two copies drift. Measured reason: on the pilot, one plan produced 9 reusable rules, 3 were promoted, and 6 were left in a closed plan's directory where nothing reads them. This step is why the deletion in step 6 is safe. See `.claude/conventions/plan-lifecycle.md` Stage 4.
 
-5. **Clean up the plan directory.** Delete `plan/plan-<name>/` entirely (including the `.completed` and `.archival-triggered` markers). The archive entry preserves what matters; `plan/plan-<name>/output/` (parallel-agent scratch) goes with it.
+5. **Update CLAUDE.md if architecture changed.** Review the plan's File Manifest and Key Decisions. If the plan added a new convention, skill, hook, agent, or scaffolding directory — update `CLAUDE.md`'s codebase-tree gloss and add a pointer block following the existing pattern (~4 lines: name + when-to-apply + "see `.claude/conventions/<name>.md` (read on demand)"). Keep updates minimal — only what changed; do not rewrite. Skip this step entirely if the plan was scoped to internal protocol edits, doc rationale, or seeds without an architectural surface.
 
-6. **Update project status.** If `.scc/status/plan-<name>.md` exists, delete it. If `.scc/status/project.md` exists, update its "Current focus" and "Next" lines to reflect the post-archive state.
+6. **Clean up the plan directory.** Delete `plan/plan-<name>/` entirely (including the `.completed` and `.archival-triggered` markers). The archive entry preserves what matters; `plan/plan-<name>/output/` (parallel-agent scratch) goes with it.
 
-7. **Report back.** One paragraph to the user: plan name, archive path, what was preserved (decisions, methods, learnings counts), and any architecture-level CLAUDE.md edits made. Recommend a follow-up `/research-cleanup` pass if the plan touched many source files (the plan-scoped cleanup the parallel `cleanup` agent does is narrow; project-wide orphans are out of your scope).
+7. **Update project status.** If `.scc/status/plan-<name>.md` exists, delete it. If `.scc/status/project.md` exists, update its "Current focus" and "Next" lines to reflect the post-archive state.
+
+8. **Report back.** One paragraph to the user: plan name, archive path, what was preserved (decisions, methods, learnings counts), and any architecture-level CLAUDE.md edits made. Recommend a follow-up `/research-cleanup` pass if the plan touched many source files (the plan-scoped cleanup the parallel `cleanup` agent does is narrow; project-wide orphans are out of your scope).
 
 ## Boundary with `/research-cleanup`
 
