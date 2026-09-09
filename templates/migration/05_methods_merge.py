@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+r"""
 Inputs:  research/_legacy/decisions/*.md, research/_legacy/learnings/*.md,
          research/methods/<v1 folders>/rule.md,
          mapping/{decisions_map,learnings_map}.csv, mapping/methods_topics.tsv
@@ -24,6 +24,15 @@ v1 section -> v2 section:
   Known limitations / Edge cases / Exclusions
   learnings (Problem/Solution/Prevention)  -> ## Traps
   everything else                          -> kept under its own heading in Rule
+
+AFTER ANY DOCUMENT MERGE, PRINT THE HEADING TREE. Two defects in the v2 run were
+invisible in the summary counts and obvious in the tree: an over-escaped regex
+(`r'^#\\s+.+$'` for `r'^#\s+.+$'`) left every source H1 in place, and inner `##`
+headings from merged learnings silently re-opened top-level sections, collapsing
+the structure of every topic file the merge produced. Both are structural, and a
+count of files written cannot see either. So this script prints the full tree of
+every file it writes, and flags the two shapes that cannot be correct: a second
+H1, and an H2 that is not one of the six sections the merge is defined to emit.
 """
 from __future__ import annotations
 
@@ -105,6 +114,66 @@ def route(heading: str) -> str:
     if LIM_H.match(heading):
         return "lim"
     return "rule"
+
+
+# The six sections a topic file is defined to contain, and nothing else at that
+# level. An H2 outside this set means a merged block re-opened a top-level
+# section instead of nesting under one.
+TOPIC_H2 = ["Rule", "Why this and not the alternatives", "Traps",
+            "Diagnostic counts", "Scope and limits", "Changelog"]
+
+
+def heading_tree(text: str) -> list[tuple[int, str]]:
+    out = []
+    fenced = False
+    for line in text.splitlines():
+        if line.lstrip().startswith("```"):
+            fenced = not fenced
+            continue
+        if fenced:
+            continue                      # a `## ` inside a code block is not a heading
+        m = re.match(r"^(#{1,6})[ \t]+(.*)$", line)
+        if m:
+            out.append((len(m.group(1)), m.group(2).strip()))
+    return out
+
+
+def audit_tree(tree: list[tuple[int, str]], expect_h2: list[str] | None) -> list[str]:
+    """The two shapes that cannot be correct. Empty list means the shape is right."""
+    bad = []
+    h1 = [t for lvl, t in tree if lvl == 1]
+    if len(h1) != 1:
+        bad.append(f"{len(h1)} H1 headings, expected 1"
+                   + (f" — extra: {h1[1:]}" if len(h1) > 1 else ""))
+    # Two consecutive headings with the same text: the signature of a failed H1
+    # strip. The wrapper writes `### <title>` and the source's own un-stripped H1
+    # lands right under it as `#### <title>`. Found while verifying the two rules
+    # above — breaking only the strip (not the demotion) produces exactly this and
+    # neither rule saw it. Deliberately "consecutive" and not "anywhere in the
+    # file": two merged decision records can legitimately both contribute a
+    # `#### Validation` under one section.
+    dup = [a for (la, a), (lb, b) in zip(tree, tree[1:]) if a == b]
+    if dup:
+        bad.append(f"{len(dup)} heading(s) immediately repeated at another level "
+                   f"— an H1 that was demoted instead of stripped: {dup}")
+    h2 = [t for lvl, t in tree if lvl == 2]
+    if expect_h2 is not None:
+        stray = [t for t in h2 if t not in expect_h2]
+        if stray:
+            bad.append(f"{len(stray)} H2 not in the defined section set: {stray}")
+        missing = [t for t in expect_h2 if t not in h2]
+        if missing:
+            bad.append(f"missing section(s): {missing}")
+    return bad
+
+
+def render_tree(rel: str, tree: list[tuple[int, str]], bad: list[str]) -> list[str]:
+    out = [f"**`{rel}`**" + ("  ⚠" if bad else "")]
+    out += [f"  - ⚠ {b}" for b in bad]
+    out += ["", "```"]
+    out += [f"{'  ' * (lvl - 1)}{'#' * lvl} {t}" for lvl, t in tree] or ["(no headings)"]
+    out += ["```", ""]
+    return out
 
 
 def title_of(text: str, fallback: str) -> str:
@@ -192,6 +261,7 @@ def main() -> int:
 
     # ---- write topic files -------------------------------------------------
     written = []
+    trees: list[tuple[str, str, list[str] | None]] = []
     for slug, meta in topics.items():
         a = acc.get(slug, {})
         if not a:
@@ -234,6 +304,7 @@ def main() -> int:
         out += ["- 2026-08-04 — merged into one topic file (r2p v2)", ""]
         (METH / f"{slug}.md").write_text("\n".join(out) + "\n", encoding="utf-8")
         written.append((slug, len(dts)))
+        trees.append((f"research/methods/{slug}.md", "\n".join(out), TOPIC_H2))
 
     # ---- _craft.md ---------------------------------------------------------
     craft_doc = [
@@ -248,6 +319,10 @@ def main() -> int:
         "",
     ] + craft
     (METH / "_craft.md").write_text("\n".join(craft_doc) + "\n", encoding="utf-8")
+    # `_craft.md` has no defined section set — one H2 per entry, by design — so it
+    # is audited for the H1 half only. Saying so beats passing an empty list and
+    # having it read as "no sections expected".
+    trees.append(("research/methods/_craft.md", "\n".join(craft_doc), None))
 
     # ---- source gotchas ----------------------------------------------------
     src_written = []
@@ -263,6 +338,8 @@ def main() -> int:
         if "## Gotchas" not in existing:
             p.write_text(existing.rstrip() + add, encoding="utf-8")
         src_written.append((stem, len(blocks), p.exists()))
+        trees.append((f"research/sources/{stem}.md",
+                      p.read_text(encoding="utf-8"), None))
 
     # ---- staged for the r2p repo ------------------------------------------
     fn_dir = ROOT / "plan/plan-r2p-v2-consolidation/for-r2p/field-notes"
@@ -300,9 +377,32 @@ def main() -> int:
         rep += ["## Unrouted", ""] + [f"- {u}" for u in unrouted]
     rep += ["", "## Records per topic", "", "| topic | records |", "|---|--:|"] + \
            [f"| {s} | {n} |" for s, n in sorted(written, key=lambda x: -x[1])]
+
+    # ---- heading trees -----------------------------------------------------
+    audited = [(rel, heading_tree(text), audit_tree(heading_tree(text), exp))
+               for rel, text, exp in trees]
+    broken = [(rel, tree, bad) for rel, tree, bad in audited if bad]
+    rep += ["", "## Heading trees", "",
+            f"{len(audited)} file(s) written, **{len(broken)} with a shape that "
+            f"cannot be correct**.", "",
+            "The v2 run shipped two merge defects that were invisible in the counts "
+            "above and obvious here: source H1s left in place by an over-escaped "
+            "regex, and inner `##` headings re-opening top-level sections. Read the "
+            "trees; the counts cannot see either.", ""]
+    for rel, tree, bad in broken:
+        rep += render_tree(rel, tree, bad)
+    if broken:
+        rep += ["### Trees that pass", ""]
+    for rel, tree, bad in audited:
+        if not bad:
+            rep += render_tree(rel, tree, bad)
+
     (MAP / "methods_merge_report.md").write_text("\n".join(rep) + "\n", encoding="utf-8")
-    print("\n".join(rep[:12]))
-    return 0
+    # Printed in full. The previous `rep[:12]` cut the report at twelve lines with
+    # no notice, which reads as "that was everything" — precisely how a merge
+    # defect survives its own report, and the reason this section exists at all.
+    print("\n".join(rep))
+    return 1 if broken else 0
 
 
 if __name__ == "__main__":
