@@ -4,7 +4,7 @@
 # Checks the invariants that keep the corpus readable at scale — every one of
 # them is a defect that actually happened on the pilot engagement:
 #   1. INDEX.md headline > 120 chars   (the index reached 330 KB with a 10,410-char row)
-#   2. duplicate evidence id           (three collisions from parallel fan-outs)
+#   2. duplicate evidence id           (five collisions; three distinct vectors)
 #   3. evidence doc missing frontmatter or a required key
 #   4. id in a filename != id in its frontmatter
 #   5. verdict word inside ## Measured (measurements must not carry verdicts)
@@ -37,6 +37,18 @@ warns=0
 note() { printf '  %s\n' "$1"; }
 warn() { warns=$((warns+1)); printf '  WARN %s\n' "$1"; }
 
+# Every evidence doc, recursively. The glob this replaces — "$EV"/[0-9]*_*.md —
+# stopped at the top level, so a `research/evidence/<topic>/` subdirectory was
+# never opened and the linter returned a confident PASS over it. On the pilot
+# that hid three docs whose ids 20/21/22 collided with three root-level docs,
+# and none of the three appeared in INDEX.md. A second numbering namespace is
+# the one collision vector `.next-id` cannot defend against — nothing was
+# allocated twice, the counter was simply never consulted — so the recursive
+# walk *is* the defence. Subfolders are permitted; unique NN project-wide is not
+# negotiable, because it is the key claims.md and every deliverable resolve on.
+ev_docs() { find "$EV" -type f -name '[0-9]*_*.md' 2>/dev/null | LC_ALL=C sort; }
+ev_id()   { basename "$1" | grep -oE '^[0-9]+' | sed 's/^0*//'; }
+
 echo "== r2p v2 research lint =="
 
 # --- 1. headline cap -------------------------------------------------------
@@ -52,18 +64,23 @@ if [[ -f "$EV/INDEX.md" ]]; then
 fi
 
 # --- 2. duplicate ids ------------------------------------------------------
-dupes=$(ls "$EV"/[0-9]*_*.md 2>/dev/null | sed 's|.*/||' | grep -oE '^[0-9]+' \
-        | sed 's/^0*//' | sort -n | uniq -d)
+dupes=$(while IFS= read -r f; do ev_id "$f"; done < <(ev_docs) | sort -n | uniq -d)
 if [[ -n "$dupes" ]]; then
-  note "FAIL duplicate evidence ids: $(tr '\n' ' ' <<< "$dupes")"; fail=1
+  note "FAIL duplicate evidence ids:"; fail=1
+  while IFS= read -r d; do
+    [[ -n "$d" ]] || continue
+    note "     #$d claimed by:"
+    while IFS= read -r f; do
+      [[ "$(ev_id "$f")" == "$d" ]] && note "       $f"
+    done < <(ev_docs)
+  done <<< "$dupes"
 else
   note "ok   evidence ids unique"
 fi
 
 # --- 3/4/5. per-doc checks -------------------------------------------------
 missing_fm=0; bad_id=0; verdicts=""
-for f in "$EV"/[0-9]*_*.md; do
-  [[ -f "$f" ]] || continue
+while IFS= read -r f; do
   if ! head -1 "$f" | grep -q '^---$'; then
     missing_fm=$((missing_fm+1)); continue
   fi
@@ -72,14 +89,14 @@ for f in "$EV"/[0-9]*_*.md; do
     grep -q "^${key}:" <<< "$fm" || { missing_fm=$((missing_fm+1)); break; }
   done
   fid=$(sed -n 's/^id:[[:space:]]*\([0-9]*\).*/\1/p' <<< "$fm" | head -1)
-  nid=$(basename "$f" | grep -oE '^[0-9]+' | sed 's/^0*//')
+  nid=$(ev_id "$f")
   [[ "$fid" == "$nid" ]] || { bad_id=$((bad_id+1)); note "     id mismatch: $f (fm=$fid file=$nid)"; }
   # verdict words inside ## Measured only
   meas=$(awk '/^## Measured/{f=1;next} /^## /{f=0} f' "$f")
   if [[ -n "$meas" ]] && grep -qiE '\b(confirms?|confirmed|refut|rejected|verdict|proves)\b' <<< "$meas"; then
     verdicts="${verdicts}     $f"$'\n'
   fi
-done
+done < <(ev_docs)
 (( missing_fm == 0 )) && note "ok   frontmatter complete" \
   || { note "FAIL $missing_fm evidence docs missing frontmatter or a required key"; fail=1; }
 (( bad_id == 0 )) && note "ok   filename id matches frontmatter" || fail=1
@@ -93,17 +110,16 @@ fi
 if [[ -f research/claims.md ]]; then
   reviewed=$(grep -m1 -oE '\*\*Last reviewed:\*\* [0-9]{4}-[0-9]{2}-[0-9]{2}' research/claims.md \
              | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
-  newest=$(for f in "$EV"/[0-9]*_*.md; do
-             [[ -f "$f" ]] || continue
+  newest=$(while IFS= read -r f; do
              sed -n 's/^date:[[:space:]]*\([0-9-]\{10\}\).*/\1/p' "$f" | head -1
-           done | sort -r | head -1)
+           done < <(ev_docs) | sort -r | head -1)
   if [[ -n "$reviewed" && -n "$newest" && "$newest" > "$reviewed" ]]; then
     warn "claims.md last reviewed $reviewed but newest evidence is $newest"
   else
     note "ok   claims.md current (reviewed ${reviewed:-?})"
   fi
 else
-  n=$(ls "$EV"/[0-9]*_*.md 2>/dev/null | wc -l)
+  n=$(ev_docs | wc -l)
   (( n > 40 )) && { note "FAIL $n evidence docs and no research/claims.md (mandatory past 40)"; fail=1; }
 fi
 
