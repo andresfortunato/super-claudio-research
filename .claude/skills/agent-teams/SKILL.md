@@ -161,16 +161,53 @@ Teammates write to a visible directory agreed upon in the orchestration plan. Th
 
 ## What didn't work
 [Approaches tried and abandoned — omit section if none]
+
+## Ranked output
+[Required when this teammate produced items competing for limited space —
+findings, chart candidates, slide rows, recommendations. Ordered best-first,
+with the teammate's own drop candidates named. Omit only if the output is not
+a competing set.]
 ```
+
+#### An unranked output is the defect, not the overflow
+
+**When a teammate produces items that compete for limited space, it returns them
+ranked and names its own drop candidates.** A teammate that returns a flat list
+has not finished the work — it has moved the hardest part of the judgement to a
+lead who has less context about those items than it does.
+
+**Measured on the pilot.** A chart-budget gate reported the fan-out's output as a
+global failure — "79 rows against the budget, fails by 2.5×" — and a handoff had
+already written it up that way. Measured per section against the outline's own
+slot counts, it was not global at all: **every sub-agent that ranked its rows came
+in at or near its allocation and named its own drop candidates; the two that
+emitted unranked rows produced all of the overflow.** The budget was never the
+problem. Two teammates skipping the ranking step was.
+
+**The lead sends unranked output back; it does not trim it.** Trimming looks
+cheaper and is the wrong repair: the lead is choosing between items it did not
+produce, so it drops on legibility rather than on merit, and the teammate's reason
+for keeping a weak-looking item is lost with no record that it existed. Sending it
+back costs one short round-trip and returns a ranking from the only agent that can
+justify one.
+
+This is the **producer** side of the size rule whose consumer side is *express a
+size limit as a rank or a share, never an absolute count*. The two are one
+mechanism: a ranked return is what makes a share expressible downstream, and an
+absolute count applied to an unranked list can only ever be enforced by
+truncation — which is the trimming this rule exists to prevent.
 
 ### Lead consolidation
 
 After all teammates finish:
 1. Transcribe each teammate's returned report to disk, then read them
-2. Review for conflicts or contradictions between teammates
-3. For comparisons: compare results against the criteria from the orchestration plan
-4. Synthesize into a summary for the user
-5. For plan-based work: update `plan/plan-[name]/handoff.md` with task statuses, surprises, and what didn't work — `handoff.md` is the source of truth, no sidecar status file
+2. **Check each competing-set output arrived ranked.** Unranked → send it back to
+   that teammate. Do not trim it yourself, and do not read an aggregate overflow
+   as a budget failure before checking which teammates ranked
+3. Review for conflicts or contradictions between teammates
+4. For comparisons: compare results against the criteria from the orchestration plan
+5. Synthesize into a summary for the user
+6. For plan-based work: update `plan/plan-[name]/handoff.md` with task statuses, surprises, and what didn't work — `handoff.md` is the source of truth, no sidecar status file
 
 ## Short vs Long Running Teams
 
