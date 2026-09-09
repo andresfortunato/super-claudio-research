@@ -11,7 +11,21 @@
 #   6. claims.md staler than the newest evidence doc
 #   7. method or source doc with no `triggers:` line (invisible to retrieval)
 #
-# Exit 1 on any failure, with a per-check count. Nothing is auto-fixed.
+# Two verdict tiers, and the split is deliberate:
+#   FAIL — a broken link or a duplicate id. Exit 1. Always mechanical, never a
+#          judgement call, and never so numerous that a mid-adoption project
+#          drowns in them.
+#   WARN — printed, counted, exit 0. For checks whose finding needs an eye
+#          before it means anything, or whose true-positive count on a real
+#          project is large enough that failing the build would train everyone
+#          to ignore the linter. That is not hypothetical: v2 deleted
+#          `check-evidence.sh` for exactly that, and the pilot reached the same
+#          conclusion independently — its `gate_retracciones.py:132-146` prints
+#          rows and asks for an eye rather than shipping a test that misreports,
+#          because a stopword check called 12 of 40 rows wrong.
+#
+# A check that cannot decide which tier it belongs in is FAIL only if a green
+# run on a correct project is genuinely reachable today. Nothing is auto-fixed.
 
 set -uo pipefail
 shopt -s nullglob   # an empty evidence dir must not glob-literal into sed
@@ -19,7 +33,9 @@ cd "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}" 
 
 EV=research/evidence
 fail=0
+warns=0
 note() { printf '  %s\n' "$1"; }
+warn() { warns=$((warns+1)); printf '  WARN %s\n' "$1"; }
 
 echo "== r2p v2 research lint =="
 
@@ -82,7 +98,7 @@ if [[ -f research/claims.md ]]; then
              sed -n 's/^date:[[:space:]]*\([0-9-]\{10\}\).*/\1/p' "$f" | head -1
            done | sort -r | head -1)
   if [[ -n "$reviewed" && -n "$newest" && "$newest" > "$reviewed" ]]; then
-    note "WARN claims.md last reviewed $reviewed but newest evidence is $newest"
+    warn "claims.md last reviewed $reviewed but newest evidence is $newest"
   else
     note "ok   claims.md current (reviewed ${reviewed:-?})"
   fi
@@ -99,8 +115,14 @@ for f in research/methods/*.md research/sources/*.md; do
   head -14 "$f" | grep -q '^triggers:' || { notrig=$((notrig+1)); }
 done
 (( notrig == 0 )) && note "ok   every method/source doc has triggers" \
-  || note "WARN $notrig method/source docs have no triggers: line (invisible to retrieval)"
+  || warn "$notrig method/source docs have no triggers: line (invisible to retrieval)"
 
 echo
-(( fail == 0 )) && echo "PASS" || echo "FAIL"
+if (( fail )); then
+  printf 'FAIL'
+else
+  printf 'PASS'
+fi
+(( warns )) && printf ' — %d warning(s)' "$warns"
+printf '\n'
 exit $fail
