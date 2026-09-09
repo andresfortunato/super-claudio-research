@@ -10,6 +10,7 @@
 #   5. verdict word inside ## Measured (measurements must not carry verdicts)
 #   6. claims.md staler than the newest evidence doc
 #   7. method or source doc with no `triggers:` line (invisible to retrieval)
+#   8. claim `Rests on:` naming an evidence id with no file  (link claim->evidence)
 #
 # Two verdict tiers, and the split is deliberate:
 #   FAIL — a broken link or a duplicate id. Exit 1. Always mechanical, never a
@@ -132,6 +133,36 @@ for f in research/methods/*.md research/sources/*.md; do
 done
 (( notrig == 0 )) && note "ok   every method/source doc has triggers" \
   || warn "$notrig method/source docs have no triggers: line (invisible to retrieval)"
+
+# --- 8. claim -> evidence: every `Rests on:` id resolves --------------------
+# Link 2 of the citation chain (citation-discipline.md). FAIL: a claim resting
+# on an evidence doc that was never written is the pilot's highest-value defect
+# class, and the only observable symptom is the dangling id.
+EV_IDS=$(while IFS= read -r f; do ev_id "$f"; done < <(ev_docs) | sort -u)
+have_id() { grep -qx -- "$1" <<< "$EV_IDS"; }
+
+if [[ -f research/claims.md ]]; then
+  unresolved=""; claim="?"
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^#{2,3}[[:space:]]+(C[0-9]+) ]]; then
+      claim="${BASH_REMATCH[1]}"
+    elif [[ "$line" == *"Rests on:"* ]]; then
+      # `**Rests on:** #71, #72 · **Supersedes the reading of:** #62` — take only
+      # the ids before the first `·`, or the supersedes leg gets checked as if it
+      # were a rest-on and reports the wrong field name.
+      seg=${line#*Rests on:}; seg=${seg%%·*}
+      while IFS= read -r id; do
+        [[ -n "$id" ]] || continue
+        have_id "$id" || unresolved="${unresolved}     $claim rests on #$id — no such evidence doc"$'\n'
+      done < <(grep -oE '#[0-9]+' <<< "$seg" | tr -d '#' | sed 's/^0*//')
+    fi
+  done < research/claims.md
+  if [[ -n "$unresolved" ]]; then
+    note "FAIL claim rests on evidence that does not exist:"; printf '%s' "$unresolved"; fail=1
+  else
+    note "ok   every claim's Rests on: resolves"
+  fi
+fi
 
 echo
 if (( fail )); then
