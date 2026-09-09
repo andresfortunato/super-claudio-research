@@ -78,7 +78,27 @@ Verification is tiered by cost and by who triggers it:
 - **`/verify` (≤2k tokens, user-invoked).** Per-artifact: one regression, one chart, one paragraph. Sign-of-coefficients, magnitudes, missingness, source citation, provenance. Run when you're about to publish or hand off.
 - **`/deliverable-review` (≤12k tokens, user-invoked, forked parallel).** Seven lenses (data validity, identification/reasoning, robustness, framing, audience-fit, political-economy realism, peer-Lab plausibility), each in a separate sub-context. Run only on advanced deliverable drafts — last-mile, not exploratory.
 
+- **`/pipeline-check` (side-effecting, user-invoked).** ✚ **Added 2026-09-09.** Detects which analytical outputs are stale against their inputs and **re-runs the producing script directly**. The first tier in the framework that writes anything.
+
 There is deliberately no always-fire review. Always-fire reviews train Claude (and researchers) to discount review output as background noise. Reserve the heavy machinery for moments where it matters.
+
+**Why a side-effecting tier exists, and what bounds it (2026-09-09 revision).** The three tiers above grade by *token* cost, and every one of them is read-only: `/verify` never edits an artifact, `/deliverable-review` never edits a draft, `/research-cleanup` writes a proposal and touches nothing. That read-only posture was never a stated principle — it was a coincidence of the first three tiers all being *review* tools. `/pipeline-check` is not a review tool. Its finding is "this chart is older than the data under it", and the only useful response to that finding is to re-render the chart. Reporting staleness and handing over a command makes the researcher a copy-paste relay for a decision the check already made.
+
+Token cost is therefore the wrong axis here, and the tier list needed a second one:
+
+| Axis | Question |
+|---|---|
+| **Token cost** | zero / ≤2k / ≤12k — how much context does invoking it spend? |
+| **Side-effect cost** | read-only / writes derived files / writes source files — what does it change if it is wrong? |
+
+**A side-effecting tier is admissible only inside these bounds**, and they are the reason this revision is narrow rather than an opening:
+
+1. **It re-runs existing, human-inspectable code.** It never writes or edits a script. This keeps the *No LLM-managed source-of-truth code* boundary intact — the trust boundary is unchanged, only the trigger moved.
+2. **It writes only derived files** — things under `output/` that the script declares in its header `Outputs:`. Never `data/raw/`, never source, never a deliverable. A derived file is reproducible by definition, which is what makes an unwanted re-run cheap.
+3. **It stays user-invoked.** An always-fire tier that executes scripts is a build system, and this framework is explicitly not a workflow engine.
+4. **It reports what it ran.** Execution without a record is the thing `provenance.md` exists to prevent.
+
+A future proposal that wants to write *source* files — edit a script, rewrite a deliverable, touch `data/raw/` — does not inherit this revision. It fails principle 7 as amended and revises this document again.
 
 Why no automatic per-run audit log: an earlier draft shipped a `manifest.jsonl` PostToolUse hook with timestamp / script / inputs / outputs / output_sha256 / seed / env_hash / git_sha. Removed in favor of the conventions above because git + a script header gives ~80% of the value at zero install cost; the 20% delta (auto-discipline, env_hash without a lockfile, seedless-run surfacing) didn't pay for the JSONL substrate, the `jq` dependency, and the hook itself.
 
@@ -113,7 +133,7 @@ Before proposing a new convention, hook, skill, or template, run it past the con
 | Project-shared | Is anything in here user-personal that should be in `settings.local.json`? |
 | Short CLAUDE.md | Does the rule itself live in `.claude/conventions/<name>.md`, with only a pointer block in CLAUDE.md? (No line budgets — see the 2026-08-05 revision.) |
 | Markdown-first | Does it work without a specific language toolchain? |
-| Stakes-graded | Does it fit the cost tier (zero / ≤2k / ≤12k tokens)? Or invent a new one with reason? |
+| Stakes-graded | Does it fit the cost tier (zero / ≤2k / ≤12k tokens)? Or invent a new one with reason? **And what does it change if it is wrong** — read-only, derived files, or source? Anything past read-only needs the bounds in principle 7. |
 | Open-source | Is anything here engagement-specific? |
 | Verifiable freshness | If this convention adds a ref doc whose claims age out, does it carry a `Status` date paired with a re-runnable headline anchor? |
 
