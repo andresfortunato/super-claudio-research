@@ -107,6 +107,79 @@ in the old form by construction.
   counts. That is accurate. **It must print the count rather than truncating** —
   a silent cap reads as "mostly fine" when it is not.
 
+## Repairing an ambiguous evidence id
+
+`.next-id` (`evidence.md`) is the *prevention* half. This is the *recovery* half.
+
+**This is the fifth recorded appearance of the evidence-id collision** — and the
+count is the reason the section exists. It has arrived by three distinct vectors:
+parallel worktrees on separate branches, parallel agent teams inside one worktree,
+and a **second numbering namespace** (a `research/evidence/<topic>/` subdirectory
+whose ids restarted at 20 and collided with the root's). The third of those
+`.next-id` cannot defend against at all: nothing was allocated twice, the counter
+was simply never consulted. Prevention is necessary and has not been sufficient
+once. Read this section as load-bearing, not as a hypothetical.
+
+**A collision breaks link 2 in a way no lint can see.** `Rests on: #119` resolves
+— to two different files. The check passes, the citation is wrong, and nothing
+errors.
+
+### The rule: renumber the doc, never tag the reference
+
+The pilot ran the full recovery cycle on three collisions and both halves are
+measured. **Only one held.**
+
+| Repair | Verdict |
+|---|---|
+| **Renumber the doc**, banner it, append `(was #NN)` to the headline | **held** — still resolves correctly, and is self-describing to a reader who has never heard of the collision |
+| **Tag the reference inline** — `#119`(sec) vs `#119`(mig) | **rots** — do not use |
+
+The inline disambiguator is **rejected, not an alternative.** It fails for a
+structural reason, not a discipline one: the tag encodes a distinction *between*
+two ids, so it is frozen against a numbering that the renumbering step then
+changes. On the pilot, the disambiguation table names three files that no longer
+exist, and three memo fragments still carry `#119`(sec) pointing at a doc that has
+been `#149` since 2026-08-04. **A reference cannot be repaired in place; only the
+doc can.** Tagging spreads the collision to every citation site and leaves nothing
+that a later reader can resolve.
+
+### The banner
+
+Renumbering silently is worse than the collision — every existing citation of the
+old id becomes wrong with no trace. The doc that moves carries a banner directly
+under the frontmatter, and it states four things:
+
+```markdown
+> ⚠ **Renumbered 131 → 150 on 2026-08-04.** This doc shared id #131 with another
+> evidence doc after a parallel fan-out. Citations reading "#131" before that date
+> may mean either doc — check the unit and period.
+```
+
+1. **Old id and new id**, in that order. The old id is what a stale citation
+   carries, so it is what a reader arrives searching for.
+2. **The date.** It is what makes the ambiguity bounded rather than permanent.
+3. **How the collision happened** — one clause. It tells the next reader whether
+   the vector is still open.
+4. **The explicit ambiguity warning**, naming the old id in quotes and saying how
+   to disambiguate (`unit` and `period` are the discriminating keys —
+   `evidence.md`, *Frontmatter scope keys make contradictions checkable*).
+
+Append `(was #NN)` to the doc's headline as well. The banner serves someone who
+opened the file; `(was #NN)` serves someone scanning the INDEX, who is the reader
+more likely to be holding the stale id.
+
+**Which doc moves:** the one with fewer inbound citations. Renumbering is a cost
+paid per citation site, and the point is to pay it once.
+
+**`status:` does not change.** The id moved; the finding did not. `revised` means
+part of the doc is retired (`evidence.md`) and setting it here puts a retraction
+signal in the INDEX for a doc that retracted nothing. *(The pilot set `revised` on
+all three, for want of anything better — the banner it wrote is the part that
+graduated, not the status.)*
+
+**A renumber is one commit** — the doc, its INDEX row, and `.next-id`. Splitting it
+leaves a window in which the INDEX points at a file that does not exist.
+
 ## Gaps — stated, not hidden
 
 **Invariant 13 is proposed, not shipped.** Links 2 and 3 have cheap checks; link 1
