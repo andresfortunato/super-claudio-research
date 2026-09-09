@@ -6,6 +6,9 @@
   "bin": {
     "r2p": "./src/cli.js"
   },
+  "scripts": {
+    "test": "bash test/upgrade-integration.sh"
+  },
   "files": [
     "src/",
     ".claude/",

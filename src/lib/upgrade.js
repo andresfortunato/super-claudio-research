@@ -65,6 +65,27 @@ const EXCLUDE = new Set([
   'templates/handoff.md',
 ]);
 
+// Hooks the framework has REMOVED. Append here whenever a hook is deleted, or
+// the deletion is silent in every project that already installed it.
+//
+// This exists because of a measured failure: v2 deleted `check-evidence.sh` for
+// firing unconditionally after a path refactor, and months later the pilot still
+// had the file AND a settings.json entry running it. Never auto-deleting is the
+// right call — clobbering a researcher's config would be worse — but `--upgrade`
+// warned about an obsolete `.claude/skills/` directory and about stale EXCLUDE
+// paths and emitted nothing at all for a hook the framework no longer ships that
+// the project is still wired to run. Grepping its console.log calls for
+// hook-related output returned zero matches. Silent deprecation is how a removed
+// hook survives a full release cycle in production.
+//
+// An explicit removal list, not "any hook we do not ship": a project is free to
+// write its own hooks, and calling those obsolete is how a warning earns being
+// ignored.
+const REMOVED_HOOKS = new Map([
+  ['check-insights.sh', 'v1 — the insights Stop hook; insights/ became research/evidence/'],
+  ['check-evidence.sh', 'v2 — fired unconditionally after a path refactor; its invariants moved to lint-research.sh'],
+]);
+
 // Gitignore lines the framework requires. Upgrade appends any missing on an
 // existing project that already has a framework block — keeps `r2p init
 // --upgrade` self-contained when new gitignored slots ship.
@@ -113,6 +134,37 @@ async function staleExcludes() {
     if (!(await fileExists(join(FRAMEWORK_ROOT, rel)))) stale.push(rel);
   }
   return stale;
+}
+
+// The same guard staleExcludes() applies to EXCLUDE, applied to REMOVED_HOOKS: a
+// name that is shipping again would make this warn about a live hook forever, and
+// the lesson of this file is that a list nobody re-checks goes stale in silence.
+async function resurrectedHooks() {
+  const back = [];
+  for (const name of REMOVED_HOOKS.keys()) {
+    if (await fileExists(join(FRAMEWORK_ROOT, '.claude/hooks', name))) back.push(name);
+  }
+  return back;
+}
+
+// Removed hooks still on disk in the project, and whether its settings.json
+// still runs them. Both halves matter: the file alone is dead weight, the file
+// plus the wiring is a hook that is still firing.
+async function orphanedHooks(target) {
+  let settings = '';
+  for (const rel of ['.claude/settings.json', '.claude/settings.local.json']) {
+    try {
+      settings += await readFile(join(target, rel), 'utf-8');
+    } catch {
+      // absent is normal
+    }
+  }
+  const found = [];
+  for (const [name, why] of REMOVED_HOOKS) {
+    if (!(await fileExists(join(target, '.claude/hooks', name)))) continue;
+    found.push({ name, why, wired: settings.includes(name) });
+  }
+  return found;
 }
 
 // toProjectRel and isNotInstalled now come from ../lib/template-map.js — see the
@@ -255,6 +307,13 @@ export async function upgradeProject(target, { withWiki = false } = {}) {
     );
     for (const rel of stale) console.log(`      ${rel}`);
   }
+  const resurrected = await resurrectedHooks();
+  if (resurrected.length > 0) {
+    console.log(
+      `  ! ${resurrected.length} REMOVED_HOOKS entry(ies) are shipping again — framework bug, not a problem with this project:`,
+    );
+    for (const name of resurrected) console.log(`      ${name}`);
+  }
 
   const candidates = [];
   for await (const rel of walkFiles('.claude/conventions')) candidates.push(rel);
@@ -360,6 +419,32 @@ export async function upgradeProject(target, { withWiki = false } = {}) {
       '  ⚠ .claude/skills/ exists in this project — obsolete (skills now live globally in ~/.claude/skills/).',
     );
     console.log('    Run `rm -rf .claude/skills/` to clean up. Not deleting automatically.');
+  }
+
+  // Removed-hook warning. Never deletes: `--upgrade` does not rewrite a
+  // project's settings.json, so the wiring has to be cleared by hand anyway, and
+  // deleting the script while leaving the entry would turn a stale hook into a
+  // failing one.
+  const orphans = await orphanedHooks(target);
+  if (orphans.length > 0) {
+    console.log('');
+    console.log(
+      `  ⚠ ${orphans.length} hook(s) in .claude/hooks/ were removed from the framework:`,
+    );
+    for (const o of orphans) {
+      console.log(`      ${o.name} — obsolete (${o.why})`);
+      if (o.wired) {
+        console.log(
+          '        AND still referenced by this project\'s settings.json — it is still firing.',
+        );
+      } else {
+        console.log('        Not referenced by settings.json; the file is dead weight.');
+      }
+    }
+    console.log(
+      '    Delete the file, and its settings.json entry if present. Not doing either',
+    );
+    console.log("    automatically — `--upgrade` never rewrites a project's settings.json.");
   }
 
   console.log('');
