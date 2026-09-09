@@ -57,6 +57,24 @@ warn() { warns=$((warns+1)); printf '  WARN %s\n' "$1"; }
 ev_docs() { find "$EV" -type f -name '[0-9]*_*.md' 2>/dev/null | LC_ALL=C sort; }
 ev_id()   { basename "$1" | grep -oE '^[0-9]+' | sed 's/^0*//'; }
 
+# Drop `<!-- … -->` spans, including multi-line ones. Authoring guidance is not
+# a measurement, and the shipped evidence template's own comment under
+# `## Measured` spells out the verdict words the check greps for — so a doc
+# created from the template failed invariant 5 on creation.
+strip_html_comments() {
+  awk '{
+    line = $0
+    if (inc) { p = index(line, "-->"); if (p == 0) next; line = substr(line, p + 3); inc = 0 }
+    while ((sopen = index(line, "<!--")) > 0) {
+      pre = substr(line, 1, sopen - 1); rest = substr(line, sopen + 4)
+      e = index(rest, "-->")
+      if (e == 0) { line = pre; inc = 1; break }
+      line = pre substr(rest, e + 3)
+    }
+    print line
+  }'
+}
+
 # `artifacts:` is a YAML *block* list, never inline (evidence.md). Emit one path
 # per line for one doc. The key is OPTIONAL and absent is the common legitimate
 # state — a doc that measures something without drawing it. Absence means "not
@@ -167,7 +185,7 @@ while IFS= read -r f; do
   nid=$(ev_id "$f")
   [[ "$fid" == "$nid" ]] || { bad_id=$((bad_id+1)); mismatch="${mismatch}$f (frontmatter=${fid:-none} filename=$nid)"$'\n'; }
   # verdict words inside ## Measured only
-  meas=$(awk '/^## Measured/{f=1;next} /^## /{f=0} f' "$f")
+  meas=$(awk '/^## Measured/{f=1;next} /^## /{f=0} f' "$f" | strip_html_comments)
   if [[ -n "$meas" ]] && grep -qiE '\b(confirms?|confirmed|refut|rejected|verdict|proves)\b' <<< "$meas"; then
     verdicts="${verdicts}$f"$'\n'
   fi

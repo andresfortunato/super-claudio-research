@@ -12,11 +12,14 @@ kind: measurement            # measurement | comparison | decomposition | scenar
 confidence: high             # high | medium | low
 data: []                     # research/sources/ stems
 methods: []                  # research/methods/ slugs this rests on
-artifacts:                    # OPTIONAL — the charts/tables THIS doc writes up.
-  - output/<theme>/<chart>.png #   Hand-authored or absent. NEVER inferred: a
-  - output/<theme>/<table>.csv #   wrong binding is worse than a missing one.
-# artifacts:                  # ...or omit the key entirely. Absent is normal and
-#                             #   means "not stated", never "no charts exist".
+# OPTIONAL — the charts/tables THIS doc writes up. Absent is normal and means
+# "not stated", never "no charts exist". Hand-authored or absent, NEVER inferred:
+# a wrong binding is worse than a missing one. Uncomment and replace with real
+# paths; lint invariant 12 FAILs on a path that does not exist, so the
+# placeholders below must not ship as live YAML.
+# artifacts:
+#   - output/<theme>/<chart>.png
+#   - output/<theme>/<table>.csv
 ---
 
 # <Headline measurement — the same text as the frontmatter headline>
