@@ -14,6 +14,8 @@
 #   9. artifact used in deliverables/ that no evidence doc mentions at all
 #  9b. artifact an evidence doc discusses but does not bind via `artifacts:`
 #  10. evidence doc older than the artifacts it binds     (a re-render it never saw)
+#  11. `.next-id` not ahead of the highest id on disk     (the next allocation collides)
+#  12. `artifacts:` naming a path that does not exist    (a typo that satisfies inv 9)
 #
 # Two verdict tiers, and the split is deliberate:
 #   FAIL — a broken link or a duplicate id. Exit 1. Always mechanical, never a
@@ -255,7 +257,10 @@ if [[ -d deliverables ]]; then
   if [[ -n "$unbound" ]]; then
     warn "$(grep -c . <<< "$unbound") of $nref artifacts in deliverables/ are discussed by an evidence doc but not listed under the artifacts: key:"
     show "$unbound"
-  elif (( nref )); then
+  elif (( nref )) && [[ -z "$orphan" ]]; then
+    # Only vouch for the binding when there is something left to vouch for —
+    # with every reference orphaned, "every artifact is bound" is true and
+    # useless, and reads as reassurance next to a FAIL.
     note "ok   every artifact in deliverables/ is bound via artifacts:"
   fi
 fi
@@ -317,6 +322,46 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
   elif (( checked )); then
     note "ok   no evidence doc is older than the artifacts it binds ($checked checked)"
   fi
+fi
+
+# --- 11. `.next-id` is ahead of the corpus ---------------------------------
+# evidence.md names `.next-id` as the source of ids. If it is not strictly
+# greater than the highest id on disk, the next allocation collides on issue —
+# a fifth appearance of the defect, pre-armed. FAIL, because it is a one-line
+# fix and the failure it prevents is silent.
+#
+# This will pass on a healthy project and stay quiet for months. Its value is
+# prospective: a green run here is not evidence the check is idle.
+highest=$(while IFS= read -r f; do ev_id "$f"; done < <(ev_docs) | sort -n | tail -1)
+if [[ -f "$EV/.next-id" ]]; then
+  nid=$(tr -dc '0-9' < "$EV/.next-id")
+  if [[ -z "$nid" ]]; then
+    note "FAIL $EV/.next-id holds no number"; fail=1
+  elif [[ -n "$highest" ]] && (( nid <= highest )); then
+    note "FAIL $EV/.next-id is $nid but the highest id on disk is $highest — the next allocation collides"; fail=1
+  else
+    note "ok   .next-id ($nid) is ahead of the corpus (highest ${highest:-none})"
+  fi
+elif [[ -n "$highest" ]]; then
+  note "FAIL $EV/.next-id is missing, so the next id is whatever someone guesses (highest on disk: $highest)"; fail=1
+fi
+
+# --- 12. every bound artifact exists ---------------------------------------
+# A typo'd path satisfies invariant 9 for nothing: the deliverable's reference
+# resolves to a binding, and the binding resolves to nothing. FAIL — this only
+# fires on docs that opted into `artifacts:`, so there is no adoption cliff.
+gone=""; nbound=0
+while IFS= read -r f; do
+  while IFS= read -r a; do
+    [[ -n "$a" ]] || continue
+    nbound=$((nbound+1))
+    [[ -e "$a" ]] || gone="${gone}#$(ev_id "$f") binds $a — no such file"$'\n'
+  done < <(ev_artifacts "$f")
+done < <(ev_docs)
+if [[ -n "$gone" ]]; then
+  note "FAIL $(grep -c . <<< "$gone") artifacts: path(s) do not exist:"; show "$gone"; fail=1
+elif (( nbound )); then
+  note "ok   every artifacts: path exists ($nbound bound)"
 fi
 
 echo
