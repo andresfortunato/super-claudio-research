@@ -93,10 +93,18 @@ def candidates(text: str) -> set[str]:
     return out
 
 
+# The report this script writes. Excluded from its own scan: if someone commits
+# it, every quoted line in it becomes an input, and the duplicate-path detector
+# reports the tool's own table rows as collapses. Measured, not hypothetical —
+# one accidental commit of `linkcheck.md` produced a phantom 3x `data/raw/`
+# collapse whose "source" was a previous run's output row.
+SELF_REPORT = "linkcheck.md"
+
+
 def tracked_md(root: Path) -> list[Path]:
     out = subprocess.run(["git", "-C", str(root), "ls-files", "*.md"],
                          capture_output=True, text=True, check=True).stdout.split()
-    return [root / f for f in out]
+    return [root / f for f in out if f != SELF_REPORT]
 
 
 def scan(root: Path) -> tuple[dict[str, set[str]], int, int]:

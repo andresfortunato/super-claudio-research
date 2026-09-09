@@ -1,6 +1,6 @@
 {
   "name": "research-to-policy",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Research to Policy \u2014 research-engagement framework for Claude Code (skills, conventions, planning scaffolding)",
   "type": "module",
   "bin": {

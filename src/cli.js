@@ -10,7 +10,7 @@ const program = new Command();
 program
   .name('r2p')
   .description('Research to Policy — research-engagement framework for Claude Code')
-  .version('0.2.0');
+  .version('0.3.0');
 
 program
   .command('init')

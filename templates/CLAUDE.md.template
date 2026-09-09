@@ -1,7 +1,7 @@
 # <PROJECT NAME> — CLAUDE.md
 
 <!--
-r2p v2 template. Keep CLAUDE.md SHORT — it loads every session. Long protocols
+r2p v3 template. Keep CLAUDE.md SHORT — it loads every session. Long protocols
 belong in .claude/conventions/<name>.md, read on demand.
 
 v2 collapsed v1's fourteen sections to seven. The rule that produced that:
@@ -36,7 +36,7 @@ always is.
 ## Project Overview
 
 <2–3 sentences: what this research project is, who the counterpart is, what the
-current phase of work is. Name the framework version: research-to-policy v2.>
+current phase of work is. Name the framework version: research-to-policy v3.>
 
 ## Codebase Structure
 
@@ -125,7 +125,10 @@ Protocol: `.claude/conventions/plan-lifecycle.md`.
   `research/wiki/SCHEMA.md`. Promote either to its own section here only once a
   stream-type source line (news, filings, bulletins) actually starts.
 - **Citations** — a deliverable cites claims as `[C12]`, never evidence ids; an
-  evidence doc binds its charts with the `artifacts:` key. Protocol:
+  evidence doc binds its charts with the `artifacts:` key. `bash
+  .claude/hooks/lint-research.sh` checks that the references resolve;
+  `/cite-check` walks a finished deliverable's numbers and `/pipeline-check`
+  re-runs an evidence doc's script and diffs `## Measured`. Protocol:
   `.claude/conventions/citation-discipline.md`. Promote to its own section only
   once `deliverables/` actually carries citations.
 - **A guessed scope key** — an evidence doc's `unit`/`period` that was inferred

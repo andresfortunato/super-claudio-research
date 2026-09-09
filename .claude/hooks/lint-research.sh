@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Lint the r2p v2 research record. Run manually, from CI, or wire to a Stop hook.
+# Lint the r2p v3 research record. Run manually, from CI, or wire to a Stop hook.
 #
 # Checks the invariants that keep the corpus readable at scale — every one of
 # them is a defect that actually happened on the pilot engagement:
@@ -281,7 +281,7 @@ while IFS=$'\t' read -r _i _v; do
   EV_DATE_OF[$_i]=$_v
 done < <(scan_rows DATE | cut -f2-)
 
-echo "== r2p v2 research lint =="
+echo "== r2p v3 research lint =="
 
 # --- 1. headline cap -------------------------------------------------------
 if [[ -f "$EV/INDEX.md" ]]; then
