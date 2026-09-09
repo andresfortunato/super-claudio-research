@@ -1,3 +1,11 @@
+---
+source: world_bank_api
+status: verified 2026-05-06        # verified <date> | stale | retired
+triggers: "world bank wdi indicator api country iso3 gdp per capita open data"
+wrapper: none                      # function in <project>_utils.py, or "none"
+env: [none]                        # env-var names, or [none]
+---
+
 # World Bank API — usage guide
 
 > **This is a template / worked example.** Replace with your project's
