@@ -33,6 +33,17 @@ shape is what makes headers greppable across a repo.
 # Env:      R 4.3.1, tidyverse 2.0.0, fixest 0.11
 ```
 
+**If the script counts something, the header names the unit it counts and the
+plausible wrong unit it rejects.** `Inputs:` / `Outputs:` give provenance for
+*data*; a script that returns a verdict — a gate, a coverage check, a budget
+count — has a second input nothing else records: its counting rule. State it as
+one line, e.g. `# Counts: charts, not table rows — counting rows is what turns
+76 into 79`. Four of four gates on the pilot wrote this line unprompted, and each
+one names a real miscount it caught, which is why it is a rule rather than a
+suggestion. The rejected unit is the load-bearing half: "counts charts" is
+ambiguous on its own, and the near-miss alternative is what a later reader will
+otherwise assume.
+
 **Optional `Supersedes:`** — when a script replaces an earlier one:
 
 ```
