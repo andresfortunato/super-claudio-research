@@ -25,7 +25,7 @@ r2p init
 
 ### Adopting r2p in an existing, disorganized project
 
-If the project predates r2p — random scripts at the root, charts mixed with data, methodology buried in `README.md` and script docstrings, prior `CLAUDE.md` or `.cursorrules` content — run the adoption audit after `r2p init`. The audit walks the tree, classifies pre-existing files against framework slots (`research/wiki/raw/`, `output/`, `data/processed/`, `research/methods/`, `research/evidence/`, `.claude/conventions/project/`), reconciles any prior AI config, surfaces methodology calls hidden in unstructured locations as candidate `research/methods/` records, and flags orphan analysis. Output is `ADOPTION_PROPOSAL.md` at project root. **Nothing is moved automatically** — you review the proposal section by section, execute the moves by hand, and commit after each. Run once per project, at adoption; for ongoing maintenance use `/research-cleanup`.
+If the project predates r2p — random scripts at the root, charts mixed with data, methodology buried in `README.md` and script docstrings, prior `CLAUDE.md` or `.cursorrules` content — run the adoption audit after `r2p init`. The audit walks the tree, classifies pre-existing files against framework slots (`data/raw/`, `data/processed/`, `output/`, `research/methods/`, `research/evidence/`, `.claude/conventions/project/`), reconciles any prior AI config, surfaces methodology calls hidden in unstructured locations as candidate `research/methods/` records, and flags orphan analysis. Output is `ADOPTION_PROPOSAL.md` at project root. **Nothing is moved automatically** — you review the proposal section by section, execute the moves by hand, and commit after each. Run once per project, at adoption; for ongoing maintenance use `/research-cleanup`.
 
 The audit is shipped as a plain instruction document (`docs/r2p-adopt.md` in the framework), **not as an installed skill** — it's only useful once per project, so the framework keeps it out of Claude's context until you explicitly ask for it. To run it, paste a prompt like this in a Claude Code session at the project root:
 
@@ -62,7 +62,8 @@ When the plan is verified end-to-end, `touch plan/plan-wage-gaps/.completed` tri
 - Many plans tend to micromanage implementation, which is counterproductive because in reality plans change all the time. Micromanaged plans constrain the implementation agent's problem-solving capacity.
 - Baking code snippets in plans is a waste of tokens. The implementation agent or session will re-read the codebase.
 - We want to minimize the ratio of .md lines to code execution that is required to achieve high quality results.
-- Verification belongs on the *substance* of the analysis, not on Python type signatures. The right checks are sign-of-coefficients, magnitude plausibility, missingness, and source citation — and they are stakes-graded: cheap per-artifact (`/verify`) for in-progress work, heavier multi-lens forked review (`/deliverable-review`) for last-mile drafts.
+- Verification belongs on the *substance* of the analysis, not on Python type signatures. The right checks are sign-of-coefficients, magnitude plausibility, missingness, and source citation — and they are stakes-graded: free and mechanical (`lint-research.sh`, run by hand or in CI) for the record itself, cheap per-artifact (`/verify`) for in-progress work, heavier multi-lens forked review (`/deliverable-review`) for last-mile drafts.
+- Every number in a finished deliverable should trace to a claim, every claim to a live evidence doc, and every evidence doc to the chart and script behind it. The chain is checked, not assumed: the cheap half is a lint invariant, the expensive half is a skill you invoke (`/cite-check`, `/pipeline-check`).
 - Reproducibility is a contract, not an aspiration. Every analytical chart, table, and number must resolve via `git log` to the script, seed, and inputs that produced it. Script headers, `Run:`/`Out:` commit lines, and `.meta.json` sidecars are how that contract is enforced.
 - Working state and settled findings live in different folders. Brainstorms and plans are gitignored exploration; decisions, evidence, and the archive are the project's persistent, citable memory. Conflating them makes the project unreadable to future-you and to peer reviewers.
 
@@ -147,6 +148,8 @@ User-invoked skills (`/<name>` in Claude Code):
 | `/agent-teams` | Parallelizing 2+ independent units | Orchestrates teammate scope, isolation, output collection — methodology comparisons, robustness sweeps, multi-source ingest |
 | `/learning-capture` | Captured a gotcha or insight | Files `research/methods/<slug>.md` + adds a row to `the `triggers:` frontmatter of the topic or source file` |
 | `/verify` | Before publishing one artifact | 3–5 domain-shaped checks on a regression / chart / paragraph (≤2k tokens) |
+| `/cite-check` | Before sending a finished deliverable | Walks its citation chain: every number to a claim, every claim to live evidence (≤2k tokens) |
+| `/pipeline-check` | When the inputs under a number moved | Traces an evidence doc to its script, **re-runs it**, diffs against `## Measured`. The one skill that writes |
 | `/deliverable-review` | Last-mile draft of a deliverable | Forked parallel seven-lens review (≤12k tokens total) |
 | `/wiki-ingest` | Adding a raw source to the wiki | Distills `research/wiki/raw/<path>` into one or more `research/wiki/` pages |
 | `/wiki-lint` | After a batch of ingests | Flags orphans, contradictions, stale pages, page-budget violations |
@@ -159,7 +162,7 @@ Background hooks (silent unless their condition holds):
 | Hook | Event | What it does |
 |---|---|---|
 | `check-archival.sh` | Stop | BLOCKING nudge to launch the archivist when `plan/plan-<slug>/.completed` exists and the plan is not yet archived |
-| `lint-research.sh` | *(not wired)* | Seven invariants on the research record — index headline cap, duplicate evidence ids, frontmatter completeness, verdicts in `## Measured`, claims staleness, retrieval triggers. Run manually or from CI |
+| `lint-research.sh` | *(not wired, by design)* | **Eighteen** invariants on the research record — duplicate evidence ids, frontmatter completeness, verdicts in `## Measured`, retrieval triggers, and the citation chain: a claim resting on an id with no file, an artifact no evidence doc binds, a `[C12]` matching no claim, a doc pointer resolving to nothing. Every one is a defect that happened on a real project. 2.3s over 285 docs. Run manually or from CI — never as a hook; see `docs/verification-architecture.md` |
 | `retrieve-learnings.sh` | UserPromptSubmit | Surfaces ≤3 matched learnings as `additionalContext` when ≥2 trigger keywords appear in the prompt |
 | `precompact-handoff.sh` | PreCompact | Nudges handoff refresh and prompts for session surprises worth saving as learnings |
 
@@ -175,6 +178,7 @@ Conventions installed (long-form rules read on demand from `.claude/conventions/
 |---|---|
 | `evidence` | `research/evidence/NN_<slug>.md`: frontmatter scope keys, `## Measured` vs `## Reading`, 120-char index cap, `status` supersession |
 | `claims` | `research/claims.md`: the curated ledger above an append-only corpus. Mandatory past 40 evidence docs |
+| `citation-discipline` | The chain `deliverable → claim → evidence → artifact → script → source`, stated once, with the mechanism that checks each link named beside it |
 | `methods` | `research/methods/<topic>.md`: one file per methodological object — the rule, why-not-the-alternatives, the traps, diagnostic counts. Merges v1's `decisions` + `methods` + `learning-capture` |
 | `sources` | `research/sources/<source>.md` + the runtime half (`<project>_utils.py`, `.env`/`.env.example`, `data/README.md`). Merges v1's `data-sources` + `data-access` |
 | `plan-lifecycle` | brainstorm → plan → handoff → archive in one file. Merges v1's `brainstorm-format` + `plan-structure` + `handoff-format` + plan archival |
@@ -198,7 +202,7 @@ The framework's own internals — useful if you're proposing a new convention, h
 
 ```text
 .claude/
-├── conventions/                       ← 8 convention files (long-form rules, on-demand reads)
+├── conventions/                       ← 7 mandatory + 2 optional (long-form rules, on-demand reads)
 ├── hooks/
 │   ├── check-archival.sh              ← Stop hook: archival tripwire
 │   ├── lint-research.sh               ← research-record invariants; manual / CI, not wired
@@ -213,6 +217,8 @@ The framework's own internals — useful if you're proposing a new convention, h
 │   ├── agent-teams/                   ← parallel teammate orchestration
 │   ├── learning-capture/              ← gotchas + tips, retrieval-keyed
 │   ├── verify/                        ← per-artifact sanity check
+│   ├── cite-check/                    ← one deliverable's citation chain, walked
+│   ├── pipeline-check/                ← re-run an evidence doc's script, diff the numbers
 │   ├── deliverable-review/            ← seven-lens forked review
 │   ├── wiki-ingest/                   ← research/wiki/raw/ → research/wiki/{sources,concepts,...} distillation
 │   ├── wiki-lint/                     ← orphans, contradictions, stale, budget
@@ -222,44 +228,44 @@ The framework's own internals — useful if you're proposing a new convention, h
 │   └── web-scraping/                  ← Playwright/httpx/BeautifulSoup toolkit (delegated to)
 └── settings.template.json             ← copied to .claude/settings.json (project-shared)
 
-docs/
-├── audience-and-philosophy.md         ← design constitution (eight principles)
-├── extending.md                       ← how to add new conventions/hooks
-├── evidence-mechanism.md              ← rationale + tradeoffs (one per convention)
-├── theme-parallel-mechanism.md
-├── handoff-mechanism.md
-├── plan-structure-mechanism.md
-├── plan-archival-mechanism.md
-├── brainstorm-mechanism.md
-├── learning-capture-mechanism.md
+docs/                                   ← rationale, not protocol; `r2p init` installs none of it
+├── audience-and-philosophy.md         ← the design constitution (ten principles)
+├── extending.md                       ← how to add a convention, a check, a skill
+├── r2p-adopt.md                       ← the one-shot adoption audit (a prompt, not a skill)
+├── v1-to-v2-migration.md              ← release change tables + the traps
+├── v2-to-v3.md
+├── v2-case-study-cordoba.md           ← the six-month pilot audit that drove v2 and v3
+├── lessons-ai-assisted-research.md
+├── verification-architecture.md       ← the five verification tiers and why each exists
+├── citation-chain-mechanism.md        ← rationale for v3's three chain mechanisms
 ├── wiki-architecture.md
-├── verification-architecture.md
+├── evidence-and-claims-mechanism.md   ← one design doc per live convention
+├── project-conventions-mechanism.md
 ├── source-registry-mechanism.md
-├── data-sources-mechanism.md
-├── data-access-mechanism.md
 ├── migrate-source-mechanism.md
-├── methods-mechanism.md
-└── project-conventions-mechanism.md
+├── theme-parallel-mechanism.md
+├── skill-independence-mechanism.md
+└── field-notes/                       ← framework bugs found while running the framework
 
 templates/                              ← seeds installed by `r2p init`
-├── CLAUDE.md.template                 ← short CLAUDE.md scaffold with v1.1 pointer blocks
-├── research/evidence/INDEX.md                  ← empty INDEX seed
-├── research/wiki/                              ← SCHEMA.md + README.md + index.md + log.md
-├── research/wiki/raw/                          ← README.md + registry.yaml + seen.jsonl + scraped/
-├── research/sources/                      ← INDEX.md + README.md + EXAMPLE_world_bank_api.md
+├── CLAUDE.md.template                 ← short CLAUDE.md scaffold; also written to CLAUDE_TEMPLATE.md as a diff target
+├── research/claims.md                 ← the curated ledger, empty seed
+├── research/evidence/                 ← INDEX.md + .next-id + EXAMPLE_01_slug.md
+├── research/methods/                  ← INDEX.md + _craft.md + EXAMPLE_topic.md + _adjuncts/
+├── research/sources/                  ← INDEX.md + README.md + EXAMPLE_world_bank_api.md
+├── research/wiki/                     ← SCHEMA.md + README.md + index.md + log.md   (--with-wiki only)
+├── research/wiki/raw/                 ← README.md + registry.yaml + seen.jsonl + scraped/  (--with-wiki only)
 ├── data/README.md                     ← on-disk inventory template (data/ otherwise gitignored)
 ├── .env.example                       ← committed env-var contract (.env stays local)
-├── research/methods/                           ← README.md + EXAMPLE_method/rule.md
-├── .claude/conventions/project/               ← INDEX.md + README.md + EXAMPLE_visualization.md
+├── claude_conventions_project/        ← → .claude/conventions/project/: INDEX.md + README.md + EXAMPLE_visualization.md
 ├── handoff.md                         ← session-end handoff template
-├── decision-record.md                 ← decision-record fillable template
-├── plan/brainstorms/README.md              ← orientation for the gitignored plan/brainstorms/ directory
-├── research/methods/                         ← README.md + index.yaml (empty seed)
-├── plan/archive/                           ← README.md + index.md (empty rollup seed)
-├── reference/internal/README.md            ← orientation for the gitignored reference/internal/ directory
-├── literature/README.md               ← orientation for the gitignored literature/ directory
-├── deliverables/decks/README.md                   ← orientation for the deliverables/decks/ directory
-└── deliverables/                      ← three profiles, each PROFILE.md + template.md
+├── plan/plan.md                       ← plan scaffold used by `r2p plan init <slug>`
+├── plan_dir/brainstorms/README.md     ← orientation for the gitignored plan/brainstorms/ directory
+├── plan_dir/archive/                  ← README.md + index.md (empty rollup seed)
+├── reference/                         ← README.md + internal/ + literature/ orientation READMEs, notes/, external/
+├── deliverables/decks/README.md       ← orientation for the deliverables/decks/ directory
+├── deliverables/memos/                ← three profiles, each PROFILE.md + template.md
+└── migration/                         ← the v1→v2 scripts; read-and-adapt, not a library
 ```
 
 Hooks are pure bash + standard Unix tools. The `r2p` CLI requires Node ≥18 (one runtime dep: `commander`); everything `r2p init` installs into a target project is plain markdown, JSON, YAML, or shell.
@@ -318,4 +324,4 @@ These principles are load-bearing for anyone proposing a new convention, hook, o
 3. **Composable, not monolithic.** Each convention is one file in `conventions/` and (optionally) one script in `hooks/`. Adopt only what your project needs.
 4. **Project-shared, not user-personal.** Everything in `.claude/conventions/`, `.claude/hooks/`, and `.claude/settings.json` is committed to the research repo so collaborators (human or AI) get the same scaffolding. User-personal config stays in `.claude/settings.local.json` (gitignored).
 
-The full eight-principle constitution (silent-by-default, conditional-not-always-fire, composable, project-shared, short CLAUDE.md, markdown-first, stakes-graded verification, open-source-from-day-one) is in `docs/audience-and-philosophy.md`. Read that before proposing a new convention or hook.
+The full ten-principle constitution (silent-by-default, conditional-not-always-fire, composable, project-shared, short CLAUDE.md, markdown-first, stakes-graded verification, open-source-from-day-one, verifiable freshness anchors, silence-reads-as-a-pass) is in `docs/audience-and-philosophy.md`. Read that before proposing a new convention, check, or skill — and `docs/extending.md` for the steps, which start at a lint invariant rather than a hook.
