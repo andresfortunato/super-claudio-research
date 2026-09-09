@@ -16,6 +16,8 @@
 #  10. evidence doc older than the artifacts it binds     (a re-render it never saw)
 #  11. `.next-id` not ahead of the highest id on disk     (the next allocation collides)
 #  12. `artifacts:` naming a path that does not exist    (a typo that satisfies inv 9)
+#  13. `[C<n>]` in a deliverable matching no claim heading (link deliverable->claim)
+#  14. bare `#nn` in a deliverable naming no live evidence id, banners honoured
 #
 # Two verdict tiers, and the split is deliberate:
 #   FAIL — a broken link or a duplicate id. Exit 1. Always mechanical, never a
@@ -98,6 +100,23 @@ show() {
 # Anchored on `output/` because that is where the layout puts artifacts and what
 # provenance.md's `Run:`/`Out:` records — it keeps `data/raw/*.csv` and a memo's
 # own companion PDF out of a check about charts.
+# Ids that USED to be live and were renumbered away. citation-discipline.md's
+# recovery rule (T2) says the moved doc carries
+# `> ⚠ **Renumbered 131 → 150 on <date>.**` under its frontmatter and `(was #131)`
+# on its headline, precisely so a stale citation stays resolvable. So `#131`
+# matching no file is not automatically broken — it is broken only if no banner
+# claims it. Three live examples on the pilot: 119→149, 131→150, 139→151.
+renumbered_ids() {
+  grep -rhoE 'Renumbered[[:space:]]+[0-9]+[[:space:]]*(→|->)' "$EV" 2>/dev/null \
+    | grep -oE '[0-9]+'
+  grep -rhoE '\(was #[0-9]+\)' "$EV" 2>/dev/null | grep -oE '[0-9]+'
+}
+
+# Every markdown deliverable. `.R`/`.py` render scripts living under
+# deliverables/ are excluded on purpose: they are full of hex colours, and a
+# deliverable is a document.
+deliverable_docs() { find deliverables -type f -name '*.md' -print0 2>/dev/null; }
+
 deliverable_artifacts() {
   [[ -d deliverables ]] || return 0
   find deliverables -type f -name '*.md' -print0 2>/dev/null \
@@ -362,6 +381,72 @@ if [[ -n "$gone" ]]; then
   note "FAIL $(grep -c . <<< "$gone") artifacts: path(s) do not exist:"; show "$gone"; fail=1
 elif (( nbound )); then
   note "ok   every artifacts: path exists ($nbound bound)"
+fi
+
+# --- 13 / 14. deliverable -> claim, and the legacy `#nn` form ---------------
+# Link 1 of the chain, which v2 left with only its expensive half (/cite-check).
+# citation-discipline.md § Gaps promised invariant 13; this is it.
+if [[ -d deliverables ]]; then
+
+  # 13. `[C<n>]` resolving to a claim heading.
+  # Anchored `^#{2,3} C<n>`, never `^## C<n>` alone — the pilot's ledger carries
+  # all 48 claims at `###` under `## §N` sections, so the `##` form matches zero.
+  if [[ -f research/claims.md ]]; then
+    claim_ids=$(grep -oE '^#{2,3} C[0-9]+' research/claims.md | grep -oE '[0-9]+' | sort -u)
+    badc=""; nc=0
+    while IFS= read -r c; do
+      [[ -n "$c" ]] || continue
+      nc=$((nc+1))
+      grep -qx -- "$c" <<< "$claim_ids" || badc="${badc}[C$c] — no such claim in research/claims.md"$'\n'
+    done < <(deliverable_docs | xargs -0 -r grep -ohE '\[C[0-9]+\]' 2>/dev/null \
+             | grep -oE '[0-9]+' | sort -un)
+    if [[ -n "$badc" ]]; then
+      warn "$(grep -c . <<< "$badc") claim reference(s) in deliverables/ resolve to nothing:"
+      show "$badc"
+    elif (( nc )); then
+      note "ok   every [C<n>] in deliverables/ resolves ($nc distinct)"
+    fi
+  fi
+
+  # 14. bare `#nn` resolving to a live evidence id, or to a renumber banner.
+  # WARN and it will stay WARN: citation-discipline.md's convert-on-touch rule
+  # keeps the `#nn` form legal indefinitely, so this fires at adoption volume.
+  # The pilot carries 159 distinct bare ids across 1053 occurrences and zero
+  # claim references — at adoption time this, not 13, is what actually reports.
+  #
+  # The failure it catches already happened: the pilot renumbered 119/131/139
+  # carefully — banner, `(was #NN)` — and never updated the citations. Nothing
+  # could see it. Honouring the banner is what keeps those three out of the
+  # report while a genuinely dangling id stays in.
+  #
+  # Know what this CANNOT catch. Evidence ids are allocated contiguously, so the
+  # id space is dense — measured on the pilot, 285 docs over 1..285 with zero
+  # gaps. A reference can therefore only be caught when it lands ABOVE the high
+  # water mark; a transposed `#71` -> `#17` resolves silently to the wrong doc
+  # and always will. That is not a bug in the check, it is the ceiling of the
+  # `#nn` form, and it is the strongest argument for converting to `[C<n>]`:
+  # claim ids are sparse and hand-curated, so `[C99]` is catchable where `#99`
+  # is not (invariant 13).
+  live=$( { while IFS= read -r f; do ev_id "$f"; done < <(ev_docs); renumbered_ids; } | sort -u)
+  badn=""; nn=0
+  while IFS= read -r tok; do
+    [[ -n "$tok" ]] || continue
+    # `#5FA1C7` and `#266798` are hex colours in an embedded code block, not
+    # ids. Drop anything carrying a hex letter, and anything longer than four
+    # digits — no evidence corpus reaches five.
+    [[ "$tok" =~ [A-Fa-f] ]] && continue
+    (( ${#tok} > 4 )) && continue
+    id=$(sed 's/^0*//' <<< "$tok"); [[ -n "$id" ]] || continue
+    nn=$((nn+1))
+    grep -qx -- "$id" <<< "$live" || badn="${badn}#$id — no evidence doc and no renumber banner claims it"$'\n'
+  done < <(deliverable_docs | xargs -0 -r grep -ohE '#[0-9][0-9A-Fa-f]*' 2>/dev/null \
+           | sed 's/^#//' | sort -u)
+  if [[ -n "$badn" ]]; then
+    warn "$(grep -c . <<< "$badn") of $nn bare #nn reference(s) in deliverables/ resolve to nothing:"
+    show "$badn"
+  elif (( nn )); then
+    note "ok   every bare #nn in deliverables/ resolves ($nn distinct)"
+  fi
 fi
 
 echo
