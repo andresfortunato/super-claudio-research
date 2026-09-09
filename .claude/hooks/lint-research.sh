@@ -19,6 +19,9 @@
 #  13. `[C<n>]` in a deliverable matching no claim heading (link deliverable->claim)
 #  14. bare `#nn` in a deliverable naming no live evidence id, banners honoured
 #  15. a `.claude/**` or `docs/**` markdown pointer naming a file that is gone
+#  16. claim resting on evidence whose `status:` is retired (or revised, WARN)
+#  17. claim with no `Rests on:` ids at all — "an assertion" (claims.md)
+#  18. id in a claim's other legs (`Contested by:`, `Supersedes`) naming nothing
 #
 # Two verdict tiers, and the split is deliberate:
 #   FAIL — a broken link or a duplicate id. Exit 1. Always mechanical, never a
@@ -369,26 +372,136 @@ done
 EV_IDS=$(ev_ids_all | sort -u)
 have_id() { grep -qx -- "$1" <<< "$EV_IDS"; }
 
+# One stateful pass over the ledger, feeding invariants 8, 16, 17 and 18. It
+# replaced a line-scan that looked only at lines containing `Rests on:` and read
+# only the ids before the first `·`. That was deliberate — the comment said
+# checking the later legs "reports the wrong field name" — but the consequence
+# was that `**Supersedes the reading of:** #62` and every `**Contested by:**` id
+# went unchecked, and a dangling id there is a broken link either way. Tracking
+# which field is in force costs one variable and reports the right name.
+#
+# Line-based was also wrong on volume, not just on principle. Measured on the
+# pilot: the ledger's `Contested by:` values wrap across lines, so a line scan
+# sees 10 of the 34 ids in those legs. It missed 70% of its own population.
+#
+# `claim` is cleared by any heading that is not a `C<n>` claim, so `## §N`
+# narrative sections bound each block and a number in section prose cannot be
+# attributed to the claim above it.
 if [[ -f research/claims.md ]]; then
-  unresolved=""; claim="?"
-  while IFS= read -r line; do
-    if [[ "$line" =~ ^#{2,3}[[:space:]]+(C[0-9]+) ]]; then
-      claim="${BASH_REMATCH[1]}"
-    elif [[ "$line" == *"Rests on:"* ]]; then
-      # `**Rests on:** #71, #72 · **Supersedes the reading of:** #62` — take only
-      # the ids before the first `·`, or the supersedes leg gets checked as if it
-      # were a rest-on and reports the wrong field name.
-      seg=${line#*Rests on:}; seg=${seg%%·*}
-      while IFS= read -r id; do
-        [[ -n "$id" ]] || continue
-        have_id "$id" || unresolved="${unresolved}     $claim rests on #$id — no such evidence doc"$'\n'
-      done < <(grep -oE '#[0-9]+' <<< "$seg" | tr -d '#' | sed 's/^0*//')
+  # Status by id, off the corpus scan. Only two values matter here.
+  retired_ids=""; revised_ids=""
+  while IFS=$'\t' read -r _i _v; do
+    [[ -n "$_i" ]] || continue
+    case "$_v" in
+      retired) retired_ids="${retired_ids}${EV_IDNUM[$_i]}"$'\n' ;;
+      revised) revised_ids="${revised_ids}${EV_IDNUM[$_i]}"$'\n' ;;
+    esac
+  done < <(scan_rows STATUS | cut -f2-)
+  in_list() { [[ $'\n'"$2" == *$'\n'"$1"$'\n'* ]]; }
+
+  unresolved=""; noids=""; onretired=""; onrevised=""; badleg=""
+  claim=""; field=""; nrests=0; nlegs=0; nclaims=0
+  end_claim() {
+    [[ -n "$claim" ]] || return 0
+    (( nrests )) || noids="${noids}$claim — no Rests on: ids"$'\n'
+  }
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" =~ ^#{1,6}[[:space:]] ]]; then
+      end_claim; claim=""; field=""; nrests=0
+      [[ "$line" =~ ^#{2,3}[[:space:]]+(C[0-9]+) ]] || continue
+      claim="${BASH_REMATCH[1]}"; nclaims=$((nclaims+1)); continue
     fi
+    [[ -n "$claim" ]] || continue
+    # One line can carry several fields: `**Rests on:** #71 · **Supersedes …**`.
+    # A line with no `**Field:**` marker continues the previous field, which is
+    # how the pilot writes a long `Contested by:`.
+    rest=$line
+    while : ; do
+      seg=${rest%%·*}
+      [[ "$seg" =~ \*\*([^*]+):\*\* ]] && field="${BASH_REMATCH[1]}"
+      sub=$seg
+      while [[ "$sub" =~ \#([0-9A-Fa-f]+) ]]; do
+        tok="${BASH_REMATCH[1]}"; sub=${sub#*"#$tok"}
+        # Same two guards invariant 14 uses: `#5FA1C7` is a hex colour, and no
+        # evidence corpus reaches five digits.
+        [[ "$tok" =~ [A-Fa-f] ]] && continue
+        (( ${#tok} > 4 )) && continue
+        id=$((10#$tok))
+        if [[ "$field" == "Rests on" ]]; then
+          nrests=$((nrests+1))
+          if ! have_id "$id"; then
+            unresolved="${unresolved}     $claim rests on #$id — no such evidence doc"$'\n'
+          elif in_list "$id" "$retired_ids"; then
+            onretired="${onretired}$claim rests on #$id, whose status: is retired"$'\n'
+          elif in_list "$id" "$revised_ids"; then
+            onrevised="${onrevised}$claim rests on #$id, whose status: is revised"$'\n'
+          fi
+        else
+          nlegs=$((nlegs+1))
+          have_id "$id" || badleg="${badleg}$claim — \"${field:-?}\" names #$id, no such evidence doc"$'\n'
+        fi
+      done
+      [[ "$rest" == *·* ]] || break
+      rest=${rest#*·}
+    done
   done < research/claims.md
+  end_claim
+
+  # --- 8. claim -> evidence
   if [[ -n "$unresolved" ]]; then
     note "FAIL claim rests on evidence that does not exist:"; printf '%s' "$unresolved"; fail=1
   else
     note "ok   every claim's Rests on: resolves"
+  fi
+
+  # --- 17. a claim with no ids -----------------------------------------------
+  # `claims.md`: "evidence ids. A claim with no ids is an assertion — delete it."
+  # The convention states it as an imperative and nothing enforced it. FAIL: the
+  # test is as mechanical as invariant 8 and the pilot's population is zero
+  # across 48 claims, so there is no adoption backlog to drown a build in.
+  if [[ -n "$noids" ]]; then
+    note "FAIL $(grep -c . <<< "$noids") claim(s) rest on no evidence at all — an assertion, not a claim:"
+    show "$noids"; fail=1
+  elif (( nclaims )); then
+    note "ok   every claim rests on at least one id ($nclaims claims)"
+  fi
+
+  # --- 18. the legs invariant 8 skips ---------------------------------------
+  # FAIL, same reasoning as 8: a dangling id is a dangling id whichever field
+  # holds it. Population on the pilot is 34 ids across `Contested by:` and
+  # `Supersedes the reading of:`, none of them broken — so this is prospective,
+  # like invariant 11, and a green run here is not evidence the check is idle.
+  if [[ -n "$badleg" ]]; then
+    note "FAIL $(grep -c . <<< "$badleg") id(s) in a claim's other legs resolve to nothing:"
+    show "$badleg"; fail=1
+  elif (( nlegs )); then
+    note "ok   every id in a claim's other legs resolves ($nlegs checked)"
+  fi
+
+  # --- 16. resting on retracted evidence ------------------------------------
+  # citation-discipline.md § *Deliverable → claim*: the indirection exists so
+  # that "a retired evidence leg updates one claim, and every deliverable resting
+  # on that claim keeps working." That only holds if someone updates the claim.
+  # Nothing checked whether they did.
+  #
+  # The two statuses split by tier because `evidence.md` defines them that way:
+  #   retired — "the whole doc is superseded". A claim resting on it rests on
+  #             nothing. FAIL; mechanical; pilot population zero.
+  #   revised — "part of the doc is retired", and the doc carries a banner
+  #             naming which leg. Whether the claim leaned on the retired leg or
+  #             the surviving one cannot be decided by grep. WARN — the tier for
+  #             a finding that needs an eye before it means anything. Pilot
+  #             population: 21, and every one is worth the look.
+  if [[ -n "$onretired" ]]; then
+    note "FAIL $(grep -c . <<< "$onretired") claim(s) rest on retired evidence:"
+    show "$onretired"; fail=1
+  fi
+  if [[ -n "$onrevised" ]]; then
+    warn "$(grep -c . <<< "$onrevised") claim(s) rest on revised evidence — check the doc's banner for which leg was retired:"
+    show "$onrevised"
+  fi
+  if [[ -z "$onretired" && -z "$onrevised" ]] && (( nclaims )); then
+    note "ok   no claim rests on retracted evidence"
   fi
 fi
 
