@@ -466,3 +466,104 @@ half is for.
 invariant 15. It sits in `/cite-check` because `phase-4.md` put it there, and
 Phase 4 does not get to grow into `lint-research.sh`. **Phase 6 candidate**,
 alongside the two one-liners the previous handoff already lists.
+
+## D8 — Decisions B and C answered; Phase 5 shipped; the constitution amended first (2026-09-09)
+
+Both remaining open decisions were answered, **both against the recommendation
+on file.** Neither reversal was cosmetic — C forced a constitution amendment
+before any code landed, and B inverted which follow-up work Phase 7 owns.
+
+### 1. Decision **C** — `/pipeline-check` runs the script directly
+
+Recommended: report-and-hand-over, execute only on a second confirmation.
+**Answered: run it directly.** The reasoning that makes it right is that
+reporting staleness and printing a command makes the researcher a copy-paste
+relay for a decision the check has already made — the only useful response to
+"this chart is older than the data under it" is to re-render the chart.
+
+**The constitution was amended before Phase 5 landed** (`c7543f5`), per
+CLAUDE.md: a change that fails a principle revises the document explicitly,
+first. Principle 7 graded verification by **token cost** (zero / ≤2k / ≤12k) and
+all three shipped tiers were read-only. That read-only posture was never a
+stated principle — it was a coincidence of the first three tiers all being
+*review* tools. Principle 7 now carries a second axis (side-effect cost:
+read-only / derived / source) and four bounds: re-runs existing inspectable code,
+writes only script-declared `Outputs:`, stays user-invoked, reports what it ran.
+A proposal wanting to write *source* files does not inherit this and revises the
+document again.
+
+*Note the constitution's binding table already anticipated this* — "does it fit
+the cost tier, **or invent a new one with reason?**" The amendment is an
+extension of principle 7, not a reversal of it, and saying so accurately matters:
+overstating a decision as a constitutional violation is its own kind of drift.
+
+### 2. Decision **B** — delete the 14 `docs/*-mechanism.md` files
+
+Recommended: move to `docs/v1/` with a README. **Answered: delete.**
+
+**This transfers work to Phase 7 rather than removing it.** The recommendation's
+argument was that `docs/v2-case-study-cordoba.md` cites those files; deleting
+them makes those citations dangle, which is the same defect class as the pointer
+bugs below. **Phase 7 must audit and repoint or drop every reference in the same
+commit as the deletion.** A phase that deletes 2,695 lines and leaves the
+citations is not done.
+
+### 3. The pointer inventory is larger than D5 recorded, and D5 was wrong about it
+
+D5 listed **five** dangling convention pointers and said **`decision-records`
+has no v2 successor**, which is what escalated the sweep from a repath to a
+convention-design question needing a researcher call.
+
+**That is wrong.** `methods.md` line 1 reads *"Methods — Protocol (v2, absorbs
+decision-records and learning-capture)."* Every dead name has a known home; the
+v2 conventions carry their own merge history in their titles. Measured:
+
+| Dead pointer | v2 home | Cited from |
+|---|---|---|
+| `script-header.md` | `provenance.md` | `docs/verification-architecture.md:53`, `docs/r2p-adopt.md` ×4 |
+| `analytical-commit-format.md` | `provenance.md` | `docs/verification-architecture.md:54`, `docs/r2p-adopt.md:516` |
+| `data-sources.md` | `sources.md` | **`.claude/conventions/project-conventions.md:26`**, `docs/audience-and-philosophy.md:99` |
+| `data-access.md` | `sources.md` | **`templates/.env.example:7`** — ships into every project |
+| `handoff-format.md` | `plan-lifecycle.md` | **`.claude/hooks/precompact-handoff.sh:36`** |
+| `learning-capture.md` | `methods.md` | **`.claude/hooks/precompact-handoff.sh:40`** |
+| `decision-records.md` | `methods.md` | **`.claude/conventions/project-conventions.md:179`** |
+
+**Seven, not five, and three of the citing files are shipped runtime surfaces**
+rather than docs: a live convention, a template that installs into every project,
+and a hook. `precompact-handoff.sh` is the worst — it fires automatically when a
+session's context fills and directs the session to read two convention files that
+do not exist, in every installed project. It went unnoticed because **a pointer
+to a missing file fails silently**: the session simply does not get the guidance
+and nothing errors.
+
+*Generalisable, and the second instance this plan has hit:* **a dangling pointer
+is invisible by construction.** Invariant 8 exists because a dangling `Rests on:`
+id has no symptom; this is the same failure one layer up, in the framework's own
+files, and nothing checks it. **A convention-pointer resolver is a strong Phase 6
+candidate** — it is one `grep` against `ls .claude/conventions/`.
+
+### 4. Phase 5 shipped, and direct execution created a hazard the spec did not have
+
+`phase-5.md` was written assuming report-and-hand-over. **A re-run overwrites the
+artifact in place**, so the default posture change introduces a way to destroy
+work that the specced design could not.
+
+**The fix is a precondition, not a warning: the tree must be clean for every path
+the run will write, or the skill refuses.** Git is the undo, and an uncommitted
+artifact has none. Verified both ways — a hand-edited uncommitted output is
+refused and survives intact; the same check permits the run once committed.
+
+### 5. G9's ruling held, and implied something the phase file did not anticipate
+
+G9: *the correct granularity is not the finest.* Date-only screams when
+`git checkout` rewrites mtimes; date-plus-content was already proved noise
+because bare years match anything. So the skill compares **numbers**, not bytes
+and not timestamps — and invariant 10 already embodies this, comparing commit
+timestamps rather than mtimes, which is why `--stale` is a pure reuse.
+
+**The consequence: an image-only script is a `cannot compare`, not a pass.** The
+numbers in `## Measured` are not recoverable from a PNG, and byte-diffing an
+image reports every palette change as a finding. Look upstream for a numeric
+intermediate; report `cannot compare` if there is none. **Never report
+"unchanged" because a chart merely re-rendered** — that is a false green on
+exactly the artifact class the pilot's real failure involved.

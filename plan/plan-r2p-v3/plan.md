@@ -131,16 +131,21 @@ proceed on the recommendation if unanswered; each is reversible within its phase
   artifact; the chain walk is mechanical and enumerates every number in a
   document. Different shape, same ≤2k tier. The boundary between the two is now
   written into `/verify` itself (task 4.3). Phase 4 shipped — `log.md` **D7**.
-- **B. Do the stale v1 `docs/*-mechanism.md` files move to `docs/v1/`, or get
-  deleted?** *Recommend: `docs/v1/` with a one-paragraph README.* They are the
-  only record of why v1 was shaped that way, and the case study cites them. But
-  note this is not purely cosmetic: `.claude/conventions/project-conventions.md`
-  — a **live v2 convention** — references conventions that no longer exist, and
-  so do `docs/audience-and-philosophy.md` and `docs/verification-architecture.md`.
-  Those are bugs regardless of where the v1 docs land. Blocks Phase 7.
-- **C. Should `pipeline-check` ever run a script, or only ever report what is
-  stale and hand the researcher the command?** *Recommend: report-and-hand-over
-  by default, execute only on an explicit second confirmation.* Blocks Phase 5.
+- **B. ✅ ANSWERED 2026-09-09 — delete the 14 `docs/*-mechanism.md` files.**
+  Answered against the recommendation (`docs/v1/` + README), so **Phase 7 must
+  handle the citations that recommendation was protecting**: audit what still
+  points at them — `docs/v2-case-study-cordoba.md` at minimum — and repoint or
+  drop those references in the same commit. A deletion that leaves dangling
+  citations is the same defect class as the one below.
+  **The pointer bugs are separate, larger than D5 recorded, and unblocked** —
+  see `log.md` **D8** for the full seven-row inventory. All seven are plain
+  repaths; **D5's claim that `decision-records` has no v2 successor is wrong**
+  (`methods.md` line 1 absorbs it), so there is no convention-design question
+  here. Blocks Phase 7.
+- **C. ✅ ANSWERED 2026-09-09 — it runs the script directly.** Answered against
+  the recommendation (report-and-hand-over). `docs/audience-and-philosophy.md`
+  principle 7 was amended **first** (`c7543f5`) to carry a side-effect axis and
+  four bounds, per the constitution's own rule. Phase 5 shipped — `log.md` **D8**.
 - **D. ✚ ADDED 2026-08-05 — does v3 ship a `#nn → [C<n>]` conversion aid?**
   Measured on the pilot: **573 bare evidence references and zero claim references**
   across three drafts of one memo, against a ledger that already holds 42 claims.

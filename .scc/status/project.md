@@ -2,9 +2,11 @@
 
 A Claude Code harness for applied empirical, data-analytical, and policy research — adapts scc's planning/handoff/verification discipline to the realities of policy research and applied development economics.
 
-**Current focus: `plan/plan-r2p-v3` — checking the citation chain.** v3's thesis is that v2 established a `deliverable → claim → evidence → artifact → script → source` chain and checked almost none of it. Phases 1, 2, 2b, 3 and 4 are done. `lint-research.sh` has gone from 7 checks to 14, `.next-id` acquired the first tool that reads it (`r2p evidence new`), and `/cite-check` now walks the half of link 1 that no grep can see — a number carrying no citation at all.
+**Current focus: `plan/plan-r2p-v3` — checking the citation chain.** v3's thesis is that v2 established a `deliverable → claim → evidence → artifact → script → source` chain and checked almost none of it. **Phases 1, 2, 2b, 3, 4 and 5 are done, and all four researcher decisions are answered.** `lint-research.sh` has gone from 7 checks to 14, `.next-id` acquired the first tool that reads it (`r2p evidence new`), `/cite-check` walks the half of link 1 no grep can see, and `/pipeline-check` re-runs an evidence doc's producing script and diffs the numbers against `## Measured`.
 
-**Next: Phase 5 (`/pipeline-check`, needs decision C) or Phase 6 (harden the tooling, independent of everything).** Phase 7 — docs, constitution, release — is blocked on 5 and 6 and needs decision B. **Read `plan/plan-r2p-v3/handoff.md` first**; it carries the open decisions, the settled regexes, and the warning that the pilot repo is `~/research/cordoba`.
+**Next: Phase 6 (harden the tooling) — the only thing left before Phase 7.** Unblocked and independent. Phase 7 — docs, constitution, release — follows, and its scope grew when decisions B and C went against their recommendations. **Read `plan/plan-r2p-v3/handoff.md` first**; it carries the six Phase 6 candidates ranked, the seven-row dangling-pointer inventory, and the warning that the pilot repo is `~/research/cordoba`.
+
+**⚠ The constitution changed on 2026-09-09.** `docs/audience-and-philosophy.md` principle 7 now grades additions on a **side-effect axis** (read-only / derived files / source files) as well as token cost, because `/pipeline-check` is the first r2p tier that writes anything. A proposal wanting to write source files does not inherit that amendment.
 
 **⚠ This status file was five weeks stale until 2026-09-09** — it claimed `plan/` was empty while plan-r2p-v3 was mid-execution. It is the first thing a session reads. Update it when a phase lands, not when the plan does.
 

@@ -1,9 +1,14 @@
 # Phase 5 — `/pipeline-check`
 
+**✅ DONE 2026-09-09.** All four tasks, all five verification criteria. Commit
+`2e4f404`, preceded by the constitution amendment `c7543f5`.
+
+**⚠ Decision C was answered AGAINST the recommendation in this file: it runs the
+script directly**, no second confirmation (`log.md` **D8** §1). **Task 5.3 as
+written below is superseded** — read *Execution notes* before trusting it. The
+constitution was amended first, per CLAUDE.md.
+
 **Plan:** `plan/plan-r2p-v3/plan.md` · **Depends on:** Phases 2, 3 · **Blocks:** nothing
-**⚠ Gated on decision C** — may it execute project scripts at all?
-Recommendation on file: report-and-hand-over by default, execute only on an
-explicit second confirmation. Confirm before writing the execute path.
 **Session scope:** one session · **Estimated context:** ~35%
 
 ## Intent
@@ -74,3 +79,63 @@ Do not extend `/verify` — that boundary is Phase 4's to draw.
 ## Commit discipline
 
 By pathspec, one command.
+
+## Execution notes — 2026-09-09
+
+### 5.3 is superseded; what replaced it
+
+Specced as *report and hand over; execute only on a second confirmation*.
+Answered: **execute directly.** Reporting staleness and printing a command makes
+the researcher a copy-paste relay for a decision the check already made.
+
+**This introduced a hazard the specced design did not have.** A re-run
+overwrites the artifact in place, so the skill can now destroy work. The fix is
+a **precondition, not a warning**:
+
+> The working tree must be clean for every path the run will write, or the skill
+> refuses and names the dirty paths. **Git is the undo**, and an uncommitted
+> artifact has none.
+
+Everything else in 5.3 survived and matters more now, not less: it never runs a
+script whose header it cannot read, and **no `Seed:` means refuse the comparison**
+— an unseeded diff is indistinguishable from sampling noise.
+
+### The constitution was amended before the skill landed
+
+`c7543f5`. Principle 7 graded verification by **token cost** and all three
+shipped tiers were read-only — a posture that was never a stated principle, just
+a coincidence of the first three tiers all being *review* tools. It now carries a
+side-effect axis and four bounds. This section of the phase file predicted the
+need ("do not let this land as a silent exception") and was right.
+
+**Still owed to Phase 7:** `docs/verification-architecture.md` has not been
+updated with the axis. This file assigns that to Phase 7 and it stays there.
+
+### G9 held, and implied a case the tasks did not list
+
+*The correct granularity is not the finest.* Compare numbers, never bytes and
+never timestamps. Invariant 10 already embodies this — it compares **commit
+timestamps, not mtimes**, which sidesteps G9's `git checkout` objection entirely,
+so `--stale` is a pure reuse with nothing to reimplement.
+
+**The unanticipated consequence: an image-only script is a `cannot compare`, not
+a pass.** `## Measured` numbers are not recoverable from a PNG, and byte-diffing
+an image reports every palette change as a finding — the exact noise G9 rejects.
+Look upstream for a numeric intermediate; report `cannot compare` if there is
+none. **Never report "unchanged" because a chart merely re-rendered.**
+
+### Verification, criterion by criterion
+
+| Criterion | Result |
+|---|---|
+| chart re-rendered after the doc's `date:` — identified **without executing anything** | invariant 10 flagged `#2` from git alone; then classified `cannot compare — image-only output` |
+| deleted producing script → "cannot trace", no guess | `cannot trace — script deleted (analysis/03_gone.py)` |
+| no `Seed:` → refuses the comparison and says why | `cannot compare — unseeded run` |
+| token cost low where wall-clock is high; cap lists and print the dropped count | report is four fixed sections, every list capped with a stated drop count |
+| no installer edit | verified — symlink appears from an unmodified `installGlobals()` run |
+
+**Plus the happy path, which the criteria did not require and should have:** the
+traceable seeded numeric fixture walked the full chain, re-ran in 35ms, and
+caught the panel mean moving **4.2 → 5.05** and n **3 → 4** after `data/raw/` was
+refreshed. A refusal-only test set proves the skill declines correctly and
+nothing about whether it works.
