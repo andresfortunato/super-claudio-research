@@ -17,7 +17,7 @@
 # .claude/hooks/lint-research.sh, which checks the real invariants and is
 # run manually or from CI rather than on every Stop.
 #
-# See .claude/conventions/plan-lifecycle.md and docs/plan-archival-mechanism.md.
+# See .claude/conventions/plan-lifecycle.md, Stage 4.
 # SILENT unless a completed-but-unarchived plan exists.
 
 set -euo pipefail

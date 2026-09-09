@@ -109,8 +109,8 @@ content_sha256, title) and bumps `last_scraped` in the registry. Both
 are committed normally. To reconstruct what was fetched when:
 
 ```bash
-git log -- wiki/raw/registry.yaml          # registry edits, including last_scraped bumps
-git log -- wiki/raw/scraped/                   # every fresh-content commit
+git log -- research/wiki/raw/registry.yaml   # registry edits, including last_scraped bumps
+git log -- research/wiki/raw/scraped/        # every fresh-content commit
 ```
 
 Failures and duplicates show up in the per-run report (stderr / chat
@@ -224,7 +224,7 @@ structure. It's worth it.
   broken URL but also means a chronically-broken source isn't
   obvious from the registry alone — the researcher must read the
   per-run reports. The summary mitigates this in the common case;
-  for systematic monitoring, scan `git log -- wiki/raw/registry.yaml`
+  for systematic monitoring, scan `git log -- research/wiki/raw/registry.yaml`
   for entries whose `last_scraped` keeps advancing without matching
   commits under `wiki/raw/scraped/<slug>/`.
 - **No locking on parallel runs.** Two `/scan-sources` invocations

@@ -332,6 +332,8 @@ document merge, print the heading tree.**
   retractions.** `claims.md` promotes their conclusions; the detail stays there
   until someone decides whether the 128 flags belong in the ledger or in the
   methods files.
-- **r2p is on `v2-consolidation`, unmerged.** `docs/*-mechanism.md` for the merged
+- ~~**r2p is on `v2-consolidation`, unmerged.** `docs/*-mechanism.md` for the merged
   conventions still describe v1 — deliberately, as historical record, but the
-  live docs set should be pruned before a release.
+  live docs set should be pruned before a release.~~ **Closed in v3** (decision B):
+  the eight docs describing merged-away conventions are deleted; the six describing
+  live conventions stay. See `docs/v2-to-v3.md`.

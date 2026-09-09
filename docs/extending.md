@@ -94,6 +94,8 @@ Wire it into `.claude/settings.json`:
 
 `docs/<name>-mechanism.md` explains *why* the convention exists, the tradeoffs of the chosen approach, and where it can be tuned. This is documentation for future framework users (and AI assistants reading the framework). Length target: 80–150 lines.
 
+**When a convention is merged away, its design doc goes with it.** v2 folded thirteen conventions into seven, and v3 deleted the eight design docs left describing conventions that no longer exist — they were accurate about v1 and misleading about the framework. The rationale that outlived the merge moves into the surviving convention file, where the reader who needs it is already looking. A design doc is not an archive; `archive/` is.
+
 Standard sections:
 - The problem this solves
 - The pieces (convention + hook + pointer)

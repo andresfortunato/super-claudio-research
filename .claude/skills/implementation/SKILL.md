@@ -172,4 +172,4 @@ The archivist:
 - Optionally edits `CLAUDE.md` if the plan changed scaffolding architecturally
 - Deletes the plan directory
 
-See `docs/plan-archival-mechanism.md` and `.claude/agents/archivist.md` for the full archival contract.
+See `.claude/conventions/plan-lifecycle.md` (Stage 4) and `.claude/agents/archivist.md` for the full archival contract.

@@ -28,7 +28,7 @@ flat stays default, no declaration is required, hooks accept both
 shapes:
 
 ```
-evidence/
+research/evidence/
 ├── INDEX.md
 ├── 01_overall_macro_priors.md          # cross-cutting
 ├── spatial-equilibrium/
@@ -67,7 +67,7 @@ commitment that drifts: themes get renamed, retired, or split, and
 the declaration file becomes either a chore to maintain or a
 silent liar.
 
-Subfolders make the theme set self-documenting — `ls evidence/`
+Subfolders make the theme set self-documenting — `ls research/evidence/`
 shows the live themes, no second source of truth. Adding a theme is
 `mkdir`; retiring one is leaving an empty folder (or removing it if
 nothing references it). Theme strings stay free-form

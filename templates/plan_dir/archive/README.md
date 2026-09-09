@@ -34,8 +34,7 @@ piece of work in 100 lines instead of reconstructing from 30 commits
 and a deleted plan directory. Without the archive, completed plans
 would either pile up under `plan/` (signal-to-noise erodes as count
 grows) or vanish entirely (decisions become uninherited). Full
-rationale: `docs/plan-archival-mechanism.md` in the framework
-repo, which `r2p init` does not install.
+rationale: `.claude/conventions/plan-lifecycle.md`, Stage 4.
 
 ## What does NOT live here
 

@@ -39,9 +39,9 @@ nothing surprises the user.
 docs/migrate-source-mechanism.md        ← this file (design rationale)
 ```
 
-Plus one-line cross-references in `.claude/conventions/data-access.md`
-and `.claude/conventions/data-sources.md` ("Adding a new source"
-recipes), and a row in the README's skill table.
+Plus a one-line cross-reference in `.claude/conventions/sources.md`
+(the "Adding a new source" recipe), and a row in the README's skill
+table.
 
 No installer changes — skills auto-mirror to `~/.claude/skills/` via
 the existing `install-globals.js` step of `r2p init`.
@@ -62,11 +62,11 @@ Reasons rejected:
 - **Bootstrap-impossible.** cambodia-growth doesn't have markers
   today. Retroactively adding them everywhere is itself a
   migration problem.
-- **The `data-access` convention already provides enough
+- **The `sources` convention already provides enough
   scaffolding.** Source-prefixed filenames (`imf_*.md`,
   `atlas_*.md`), source-prefixed env vars (`ATLAS_DB_*`,
   `IMF_*`), wrapper docstring back-links (`Full guide:
-  data_sources/<file>.md`), and the required INDEX
+  research/sources/<file>.md`), and the required INDEX
   Helper-functions table — these are *runtime* anchors the LLM
   can use to do discovery. No second discipline layer needed.
 
@@ -146,7 +146,7 @@ they're walking into before approving apply.
 ## Why refuse on missing target convention, not auto-install
 
 Considered and rejected: if the target lacks
-`.claude/conventions/data-access.md`, install it on the fly (copy
+`.claude/conventions/sources.md`, install it on the fly (copy
 from the framework) and proceed.
 
 Reasons rejected:
@@ -236,7 +236,7 @@ different inputs and produce different outputs:
 | **Output proposal** | `ADOPTION_PROPOSAL.md` (full repo audit) | `MIGRATION_PROPOSAL.md` (one source's data layer) |
 | **Scope** | Whole-project classification against framework slots | One source's ref doc + wrapper + env + INDEX + cache entry |
 | **Frequency** | Once per project, at adoption | A handful per project lifecycle, as sources are added |
-| **Donor-side prep** | N/A (legacy by definition) | Donor follows the data-access + data-sources conventions |
+| **Donor-side prep** | N/A (legacy by definition) | Donor follows the `sources` convention |
 
 They're kept separate because conflating them — making `/r2p-adopt`
 also do source transplants, or making `/r2p-migrate-source` also do

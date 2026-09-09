@@ -140,4 +140,4 @@ Bad: `"data error wave fix"` — generic; will misfire on unrelated work.
 - **`research/methods/`** is peer-reviewable methodology calls (`research/methods/<topic>.md`). A learning that surfaces a methodology choice (use `rgdpe`, not `rgdpo`) graduates to a decision record once the team agrees. The learning records the discovery; the decision record is the citable form.
 - **`plan/brainstorms/`** is decisions-pre-planning (the conversation that produces a `research/methods/` record). Learnings are not brainstorms — they're tacit knowledge from execution, not deliberation.
 
-Full rationale and the three-bucket model: `docs/learning-capture-mechanism-v1.md`. Format and retrieval contract: `.claude/conventions/methods.md`.
+Format, retrieval contract and the reason the three v1 buckets became one topic file: `.claude/conventions/methods.md`.

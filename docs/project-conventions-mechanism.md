@@ -234,8 +234,8 @@ Project conventions evolve in place; their history lives in
 git:
 
 ```bash
-git log -- project_conventions/visualization.md     # this rule's history
-git log -- project_conventions/                     # all conventions
+git log -- .claude/conventions/project/visualization.md   # this rule's history
+git log -- .claude/conventions/project/                   # all of them
 ```
 
 No anchor, no `Status` line, no separate log. The doc reads
