@@ -20,7 +20,8 @@ rule nothing checks decays to whatever the last session felt like doing.
 
 | Link | Expressed as | Checked by |
 |---|---|---|
-| deliverable → claim | `[C12]` in the deliverable body | `/cite-check` · lint **invariant 13** *(proposed — see Gaps)* |
+| deliverable → claim | `[C12]` in the deliverable body | `/cite-check` · lint **invariant 13** — WARN |
+| deliverable → evidence *(legacy)* | bare `#nn` in the deliverable body | lint **invariant 14** — WARN |
 | claim → evidence | `Rests on: #71, #72` in `research/claims.md` | lint **invariant 8** — FAIL |
 | evidence → artifact | `artifacts:` frontmatter key on the evidence doc | lint **invariants 9, 12** — FAIL |
 | artifact → script | commit message `Run:` / `Out:` (`provenance.md`) | `/verify` — **advisory** in lint |
@@ -75,7 +76,8 @@ external source needs that source named inline, in the sentence.
 
 | Symptom | Broken link | Where it surfaces |
 |---|---|---|
-| `[C12]` matches no `#{2,3} C12` heading | deliverable → claim | invariant 13 *(proposed)*, `/cite-check` |
+| `[C12]` matches no `#{2,3} C12` heading | deliverable → claim | invariant 13, `/cite-check` |
+| a bare `#nn` names no evidence doc and no renumber banner | deliverable → evidence | invariant 14 |
 | `Rests on:` names an id with no file | claim → evidence | invariant 8 |
 | a chart in a deliverable that no evidence doc lists in `artifacts:` | evidence → artifact | invariant 9 |
 | an `artifacts:` path that does not exist on disk | evidence → artifact | invariant 12 |
@@ -182,11 +184,30 @@ leaves a window in which the INDEX points at a file that does not exist.
 
 ## Gaps — stated, not hidden
 
-**Invariant 13 is proposed, not shipped.** Links 2 and 3 have cheap checks; link 1
-currently has only the expensive one. The framework's own rule is that no mechanism
-ships only its expensive half, so `[C<n>]` resolving to a `## C<n>` heading should
-be a lint invariant — it is one grep against one file. Until it exists, treat the
-first table row's lint column as a promise, not a fact.
+**Invariant 13 shipped.** Link 1 no longer has only its expensive half. Every
+row's lint column above is a fact.
+
+**What the cheap half still cannot do, and why it matters here.** Invariant 14
+resolves a bare `#nn` against the evidence corpus, and evidence ids are allocated
+contiguously — measured on the pilot, 285 docs over 1..285 with **zero gaps**. So a
+reference can only be caught when it lands *above* the high-water mark. A
+transposed `#71` → `#17` resolves silently to the wrong doc, and no version of this
+check will ever see it.
+
+That is the ceiling of the `#nn` form itself, not a defect in the check, and it is
+the strongest argument for converting: claim ids are sparse and hand-curated, so
+`[C99]` against a ledger holding C12–C48 is caught immediately where `#99` is not.
+**Convert-on-touch buys real checkability, not just tidiness.**
+
+Both 13 and 14 are WARN. 14 stays WARN permanently — convert-on-touch keeps `#nn`
+legal indefinitely, so the check reports at adoption volume by design. 13's tier is
+worth revisiting: an unresolvable `[C<n>]` is as mechanical as invariant 8, which
+is FAIL, and unlike 14 it has no legacy population to drown in.
+
+**The last row of the table above stays expensive.** A headline number carrying no
+citation at all is invisible to every grep — there is nothing to resolve. Finding
+every number in a document and asking whether it is *yours* is `/cite-check`'s
+judgement walk.
 
 Links 4 and 5 are **advisory on purpose**: `provenance.md` already makes them
 `git log`-discoverable, and a lint that parsed every script header would duplicate

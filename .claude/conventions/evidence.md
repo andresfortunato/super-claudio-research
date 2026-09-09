@@ -181,8 +181,14 @@ with no evidence doc" becomes a `test -f` rather than a judgement call.
 - **Absent is a legitimate, common state** — a doc that measures something with
   no chart has nothing to bind. Absent means "not stated", never "none exist".
 - Paths are repo-relative, exactly as they appear on disk. Lint checks both
-  directions: a deliverable's chart with no doc listing it (invariant 9) and a
-  listed path that does not exist (invariant 12).
+  directions, and the inbound direction is graded by whether the corpus knows
+  the chart at all: a chart used in `deliverables/` that appears **nowhere** in
+  `research/evidence/` is **invariant 9, FAIL** — that is a headline number with
+  no evidence behind it. A chart an evidence doc discusses but has not listed
+  here is **invariant 9b, WARN** — an unfilled binding, not a missing finding,
+  and the grading exists because this key is new: on a project that predates it
+  every chart is unbound by construction. Outbound, a listed path that does not
+  exist is **invariant 12, FAIL**.
 
 See `.claude/conventions/citation-discipline.md` for the full chain this key is
 one link of.
