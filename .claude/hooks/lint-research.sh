@@ -432,6 +432,12 @@ if [[ -d deliverables ]]; then
       show "$badc"
     elif (( nc )); then
       note "ok   every [C<n>] in deliverables/ resolves ($nc distinct)"
+    elif [[ -s research/claims.md ]] && [[ -n "$(deliverable_docs | xargs -0 -r grep -l . 2>/dev/null)" ]]; then
+      # Deliverables exist and a ledger exists, but nothing cites a claim. Saying
+      # so is the point of the check: on the pilot that is 48 claims and zero
+      # references, which is the adoption gap convert-on-touch is meant to close.
+      # Silence here would read as a pass.
+      note "--   no [C<n>] claim references in deliverables/ yet (see citation-discipline.md)"
     fi
   fi
 
