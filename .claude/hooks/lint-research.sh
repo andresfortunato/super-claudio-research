@@ -771,8 +771,25 @@ fi
 #          is the case that motivated this: it fires automatically when context
 #          fills and named two conventions that had not existed since v2, in
 #          every installed project.
-#   WARN — documentation. A stale pointer in `docs/` misleads a reader who can
-#          see the file is missing; one in a hook misleads a session that cannot.
+#   FAIL — **documentation, promoted 2026-09-09.** It shipped WARN on the
+#          script's own rule — FAIL only if a green run on a correct project is
+#          reachable today — and at that moment it was not: this repo carried 25
+#          findings, of which 18 were live. Phase 7 resolved them (8 stale design
+#          docs deleted, `r2p-adopt.md` and `verification-architecture.md`
+#          repathed, the constitution's v1 examples fixed), the count outside
+#          `plan/` reached zero, and the condition the tier was waiting on was
+#          met. A stale pointer in `docs/` misleads a reader who can at least see
+#          the file is missing; one in a hook misleads a session that cannot —
+#          which is why the two still print separately even though both exit 1.
+#   WARN — `plan/**` only, and permanently. A plan file that quotes a dead
+#          convention *while describing the defect* is correct, and there is no
+#          edit that would make it both accurate and resolvable. The noise is
+#          also self-clearing: when the plan completes it moves to `archive/`,
+#          which is exempt. Same judgement invariant 14 makes when it honours a
+#          renumber banner — context can make an unresolvable reference correct —
+#          and it is the reason the doc tier could be promoted at all. Collapsing
+#          `plan/` into FAIL would leave green unreachable for as long as any
+#          plan is open, which is always.
 #
 # Two directories are exempt, and the reason is not convenience: `archive/` and
 # `brainstorms/` are the historical record. An archived plan that cites a v1
@@ -787,11 +804,12 @@ fi
 # somebody's writing, a different check with a different population, and mixing
 # them in is how a WARN tier trains people to ignore it. In scope: `.claude/**`,
 # `templates/**`, `src/**`, `CLAUDE.md` (FAIL); `docs/**`, `README.md`,
-# `TODO.md`, `plan/**` (WARN). Out of scope: everything a researcher authors.
+# `TODO.md` (FAIL since 2026-09-09), `plan/**` (WARN). Out of scope: everything
+# a researcher authors.
 #
-# The `plan/**` entries are self-clearing and need no exemption: a plan file that
-# quotes a dead convention name while *describing* the defect is correct, and
-# when the plan completes it moves to `archive/`, which is already exempt.
+# In scope, all FAIL: `.claude/**`, `templates/**`, `src/**`, `CLAUDE.md`
+# (runtime tier) and `docs/**`, `README.md`, `TODO.md` (documentation tier).
+# WARN: `plan/**`. Out of scope: everything a researcher authors.
 # Two stated exclusions, in the spirit of `03_linkcheck.py`'s BASELINE_PAT —
 # filtered out loud, not silently:
 #
@@ -805,23 +823,24 @@ fi
 #      when it honours a renumber banner.
 LINT_PTR_ALLOW=${LINT_PTR_ALLOW:-'(^src/lib/upgrade\.js:.*/x\.md$)|(:\.claude/conventions/project/)'}
 if [[ -d .claude || -d docs ]]; then
-  ptr_run=""; ptr_doc=""; nptr=0
+  ptr_run=""; ptr_doc=""; ptr_plan=""; nptr=0
   while IFS= read -r hit; do
     [[ -n "$hit" ]] || continue
     file=${hit%%:*}; rest=${hit#*:}; lineno=${rest%%:*}; ref=${rest#*:}
     case "$file" in
       .claude/*|templates/*|src/*|CLAUDE.md) tier=run ;;
-      docs/*|plan/*|README.md|TODO.md)       tier=doc ;;
+      docs/*|README.md|TODO.md)              tier=doc ;;
+      plan/*)                                tier=plan ;;
       *)                                     continue ;;   # researcher-authored
     esac
     nptr=$((nptr+1))
     [[ -f "$ref" ]] && continue
     [[ "$file:$ref" =~ $LINT_PTR_ALLOW ]] && continue
-    if [[ $tier == run ]]; then
-      ptr_run="${ptr_run}${file}:${lineno} -> ${ref} (gone)"$'\n'
-    else
-      ptr_doc="${ptr_doc}${file}:${lineno} -> ${ref} (gone)"$'\n'
-    fi
+    case $tier in
+      run)  ptr_run="${ptr_run}${file}:${lineno} -> ${ref} (gone)"$'\n' ;;
+      doc)  ptr_doc="${ptr_doc}${file}:${lineno} -> ${ref} (gone)"$'\n' ;;
+      plan) ptr_plan="${ptr_plan}${file}:${lineno} -> ${ref} (gone)"$'\n' ;;
+    esac
   done < <(grep -rnoE '(\.claude|docs)/[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*\.md' \
              --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=archive \
              --exclude-dir=brainstorms --exclude-dir=.venv --exclude-dir=venv \
@@ -838,11 +857,21 @@ if [[ -d .claude || -d docs ]]; then
     show "$ptr_run"; fail=1
   fi
   if [[ -n "$ptr_doc" ]]; then
-    warn "$(grep -c . <<< "$ptr_doc") doc pointer(s) in documentation resolve to nothing (archive/ and brainstorms/ exempt):"
-    show "$ptr_doc"
+    note "FAIL $(grep -c . <<< "$ptr_doc") doc pointer(s) in documentation resolve to nothing (archive/ and brainstorms/ exempt):"
+    show "$ptr_doc"; fail=1
+  fi
+  # Printed even when the two FAIL tiers are clean: an unaccounted-for pass is
+  # indistinguishable from a check that did not run (principle 10).
+  if [[ -n "$ptr_plan" ]]; then
+    warn "$(grep -c . <<< "$ptr_plan") pointer(s) in plan/ resolve to nothing — correct where the plan is describing the defect; self-clears at archival:"
+    show "$ptr_plan"
   fi
   if [[ -z "$ptr_run" && -z "$ptr_doc" ]] && (( nptr )); then
-    note "ok   every .claude/** and docs/** pointer resolves ($nptr reference(s))"
+    if [[ -z "$ptr_plan" ]]; then
+      note "ok   every .claude/** and docs/** pointer resolves ($nptr reference(s))"
+    else
+      note "ok   every .claude/** and docs/** pointer outside plan/ resolves ($nptr scanned)"
+    fi
   fi
 fi
 
