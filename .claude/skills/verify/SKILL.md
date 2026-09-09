@@ -98,7 +98,10 @@ every check — the budget is ≤2k tokens. Choose by artifact:
    that's the bug verify exists to catch.
 3. **Source citation discipline.** Every external claim (e.g. "the World
    Bank reports...") must cite a source page in `research/wiki/sources/` or a
-   file in `raw/`. Flag uncited claims.
+   file in `raw/`. Flag uncited claims. **Scope: this paragraph only.** If the
+   question is whether the *whole* deliverable's chain holds — every number to a
+   claim, every claim to live evidence — that is `/cite-check`, not a wider
+   sweep here.
 4. **Tense and scope honesty.** A paragraph claiming "we find that X
    causes Y" when the underlying analysis is correlational is the
    most expensive class of error. Find the producing script via
@@ -204,6 +207,7 @@ Skill will:
 - `.claude/conventions/provenance.md` — commit-message format verify parses.
 - `.claude/conventions/evidence.md` — paragraph checks may
   cross-reference evidence docs.
+- `.claude/skills/cite-check/SKILL.md` — the whole-deliverable citation walk.
 - `docs/verification-architecture.md` — how /verify fits with the
   evidence Stop hook and `/deliverable-review`.
 
@@ -211,6 +215,12 @@ Skill will:
 
 - Does not run a full deliverable review. That's `/deliverable-review`,
   ≤12k tokens, parallel-lens.
+- Does not walk a deliverable's citation chain. That's `/cite-check`, same ≤2k
+  tier. **The boundary is scope, not depth:** `/verify` asks *does this one
+  paragraph cite something?* and `/cite-check` asks *does this whole
+  deliverable's chain hold — every number to a claim, every claim to live
+  evidence?* Stated because without it the two drift into overlapping and the
+  one a researcher remembers second stops being run.
 - Does not auto-fire on file writes. User-invoked only.
 - Does not re-execute scripts to reproduce outputs. That's a separate
   audit ritual.
