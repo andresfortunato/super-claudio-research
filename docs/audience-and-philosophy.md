@@ -60,21 +60,20 @@ CLAUDE.md is loaded into every session. Long-form rules in CLAUDE.md cost tokens
 
 The pointer block names the convention, says when it applies, and points at `.claude/conventions/<name>.md` for the protocol. Claude reads the full protocol on demand when the situation matches the trigger. This pattern is the single biggest token-cost lever in the framework.
 
-v1 shipped ten pointer blocks: Evidence Logging, Wiki, Script Headers, Analytical Commit Format, Handoff Format, Plan Structure, Decision Records, Methods, Source Registry, Data Sources. **v2 consolidated them to seven mandatory plus two optional**, and the merges are the argument for the principle rather than against it — four of the ten were always read together and each restated the others' halves:
+v1 shipped ten pointer blocks: Evidence Logging, Wiki, Script Headers, Analytical Commit Format, Handoff Format, Plan Structure, Decision Records, Methods, Source Registry, Data Sources. v2 consolidated them to **seven promoted plus two optional**, and v3 added one, for eight. The merges are the argument for the principle rather than against it — several of the ten were always read together and each restated the others' halves:
 
-| v2 convention | Absorbs |
+| Convention | Absorbs |
 |---|---|
 | `evidence.md` | Evidence Logging |
 | `claims.md` | ✚ new in v2 — the curated layer above append-only evidence |
 | `citation-discipline.md` | ✚ new in v3 — the chain the other three resolve against |
 | `methods.md` | Methods, Decision Records, Learnings |
+| `sources.md` | Data Sources, Data Access |
 | `provenance.md` | Script Headers, Analytical Commit Format |
 | `plan-lifecycle.md` | Plan Structure, Handoff Format, Brainstorm Format, Plan Archival |
 | `project-conventions.md` | ✚ the project's own local namespace |
-| `sources.md` *(optional)* | Data Sources, Data Access |
-| `source-registry.md` *(optional)* | Source Registry — installed with `r2p init --with-wiki` |
 
-The two optional ones ship only where the wiki does. A project that never scrapes never reads them.
+**"Optional" means not promoted, not "not installed"** — a distinction worth stating, because getting it backwards is easy. All nine files land in `.claude/conventions/` on every `r2p init`, with or without `--with-wiki`. What the two optional mechanisms lack is a **pointer block in `CLAUDE.md`**, which is the per-session cost this principle is about: `source-registry.md` and `research/wiki/SCHEMA.md` (not a conventions file at all) are read only if a project reaches for them, and their *scaffolding* is what `--with-wiki` gates. On the pilot they held two full CLAUDE.md sections for six months and produced zero pages and zero scrapes, which is what demoted them.
 
 ### 6. Markdown-first, language-neutral core
 

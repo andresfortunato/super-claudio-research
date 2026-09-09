@@ -31,7 +31,7 @@ which "how to explain" starts being relevant, because it always is.
 ## Layout
 
 ```
-.claude/conventions/   the 7 mandatory + 2 optional protocols r2p installs
+.claude/conventions/   the 8 mandatory + 2 optional protocols r2p installs
 .claude/{hooks,skills,agents}/   enforcement, user-invoked skills, subagents
 templates/             what init/upgrade copies into a target project
 templates/migration/   the v1→v2 scripts — read-and-adapt, not a library
@@ -43,7 +43,7 @@ plan/ · brainstorms/ · archive/    this repo's own plan lifecycle
 ## Rules specific to this repo
 
 - **The constitution binds every addition.** `docs/audience-and-philosophy.md`
-  holds nine principles and a table of questions to run a proposal past. A
+  holds ten principles and a table of questions to run a proposal past. A
   change that fails one revises that document explicitly, first — it is never
   silently bypassed. `docs/extending.md` has the concrete steps.
 - **There are two installers.** `src/lib/install-project.js` (init) and

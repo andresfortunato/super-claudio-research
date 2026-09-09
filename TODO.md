@@ -15,7 +15,8 @@ Project-development backlog for the framework itself. Researchers *using* the fr
 each one's entry records *why* it existed. Three closed in Phase 6:
 
 - ~~**Repath `.claude/skills/migrate-source/SKILL.md` to v2.**~~ → `3e20032`. Its
-  smoke test was redesigned rather than fixed; see `plan/plan-r2p-v3/log.md` D9.5.
+  smoke test was redesigned rather than fixed — a two-stage check, `ast`-parse
+  then a real import as informational; see `archive/plan-r2p-v3.md`.
 - ~~**Integration-test `--upgrade`, not just `init`.**~~ → `d195621`.
   `test/upgrade-integration.sh`, wired to `npm test`.
 - ~~**A duplicate-path-per-line detector for migrations.**~~ → `41a68d9`. Found a

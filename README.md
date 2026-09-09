@@ -202,7 +202,7 @@ The framework's own internals — useful if you're proposing a new convention, h
 
 ```text
 .claude/
-├── conventions/                       ← 7 mandatory + 2 optional (long-form rules, on-demand reads)
+├── conventions/                       ← 8 promoted + 2 optional; "optional" = no CLAUDE.md pointer block, not uninstalled
 ├── hooks/
 │   ├── check-archival.sh              ← Stop hook: archival tripwire
 │   ├── lint-research.sh               ← research-record invariants; manual / CI, not wired
