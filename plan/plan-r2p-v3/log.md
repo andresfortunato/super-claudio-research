@@ -567,3 +567,159 @@ image reports every palette change as a finding. Look upstream for a numeric
 intermediate; report `cannot compare` if there is none. **Never report
 "unchanged" because a chart merely re-rendered** — that is a false green on
 exactly the artifact class the pilot's real failure involved.
+
+## D9 — Phase 6 executed at full scope; five checks found five live defects nobody had listed (2026-09-09)
+
+**Researcher decisions taken this session, both at the top:**
+
+1. **Scope: all six candidates**, not the ranked top five. The four original
+   6a–6d items and the five new ones all landed.
+2. **Invariant 15's tier: split by citing surface** — FAIL for a shipped runtime
+   surface, WARN for documentation — and the runtime-surface rows fixed in the
+   same commit rather than deferred to Phase 7, so FAIL is green immediately.
+
+### 1. Execution order was changed on a measurement, before any code
+
+The handoff ranked the runtime fix third. It was executed **first**, because the
+other four new candidates add checks to `lint-research.sh` and the cost being
+removed is per-document: `find` re-running on each of ten `ev_docs` calls,
+`ev_id` spawning three processes per doc inside four loops, `ev_artifacts`
+spawning an awk per doc from three invariants. Roughly 3,400 processes to build a
+list of numbers that cannot change during a run. Adding four checks first would
+have multiplied that into four more places.
+
+**Re-measuring first also corrected the number.** The record said ~9s; it was
+**11.0s**. Now 2.26s with 18 checks instead of 14.
+
+**The performance commit was held to byte-identical output** on the pilot, on
+this repo, and on a purpose-built fixture — and the fixture was necessary, not
+belt-and-braces: the pilot has zero `artifacts:` keys, so invariants 9b, 10 and
+12 are invisible to a pilot diff, and those are the three the commit changed most.
+A green diff there would have proved nothing about them.
+
+Two behaviour changes were deliberately **excluded** from that commit and made in
+the next one, where the delta could be stated: invariants 4 and 5 each owning one
+defect. Invariant 4 reported 11 findings on the pilot and all 11 were invariant
+3's — a `break` exits the `for` over keys, not the `while` over docs, so a doc
+with no `id:` key fell through to an id comparison that compared nothing to 252
+and called it a mismatch. Invariant 5 was skipping all 45 pre-frontmatter docs
+for a check that has nothing to do with frontmatter.
+
+### 2. The point of a mechanical check is that the hand-built list is wrong
+
+**D5 recorded five dangling pointers. The last handoff recorded seven. Resolving
+every pointer found ten in this repo and seven in the pilot, and the two sets of
+seven were not the same seven.** The hand-built inventory had missed
+`insights-logging.md`, `brainstorm-format.md`, `evidence-logging.md` and
+`plan-structure.md`. An inventory of invisible defects is itself incomplete —
+which is the whole argument, stated twice now and finally acted on.
+
+**Widening the target pattern was nearly free and found four more.** Scoping it
+to `.claude/conventions/` was arbitrary; a `docs/<name>.md` pointer dangles just
+as silently. And the generalisation is what makes Phase 7's deletion safe: the
+moment a `docs/*.md` file is removed, every pointer at it becomes this defect.
+
+**Widening the *citing* set was the opposite.** A first pass read everything and
+reported 22 findings on the pilot, mostly the researcher's own prose. Those are
+broken links in somebody's writing, a different population, and mixing them in is
+how a WARN tier teaches people to ignore it. **A check's precision lives in which
+files it reads, not in what it looks for.**
+
+### 3. In three of four cases the dangling pointer was not the defect
+
+It was a thread attached to a live v1 instruction underneath:
+
+- **`precompact-handoff.sh`** named two conventions gone since v2 — and around
+  them still told every session to write learnings to `learnings/<slug>.md` plus
+  an `index.yaml` row. Neither exists in v2, and `retrieve-learnings.sh` *was*
+  correctly migrated to glob `triggers:` across `research/methods/`. So the hook
+  has been routing learnings to a directory the retrieval hook does not read, in
+  every installed project, since v2.
+- **`learning-capture/SKILL.md`** said "## index.yaml entry / Every learning MUST
+  have a corresponding entry" eighty lines after its own heading "How it works
+  (v2 — there is no `learnings/` directory)".
+- **`project-conventions.md`**, installed into every project, described the v1
+  layout in nine places and named the wrong required-section counts for both
+  neighbours.
+
+**Repathing only the pointers would have produced the half-repathed state
+`phase-6.md` itself identifies as worse than v1** — passes a spot-check, fails
+mid-task. Each file was read through and fixed whole.
+
+**Two defect classes are invisible in this repo by construction** and appeared
+only when the check ran against the pilot: five installed files pointing into
+`docs/`, which `r2p init` never installs, and two conventions referencing skills
+by `.claude/skills/<x>/SKILL.md`, which v2 made global. Both resolve here and
+nowhere else. `install-project.js:302` already had the fix — it says "in the
+framework repo".
+
+### 4. Every new tier rests on a population measured this session
+
+| Check | Population | Tier | Why |
+|---|---|---|---|
+| 16 retired | 0 | FAIL | mechanical; no adoption backlog |
+| 16 revised | 21 | WARN | which leg was retired needs an eye |
+| 17 no ids | 0 | FAIL | `claims.md` states it as an imperative |
+| 18 other legs | 42 checked, 0 broken | FAIL | prospective, like invariant 11 |
+
+That discipline is the direct correction of invariant 13, which shipped WARN
+citing a count belonging to invariant 14.
+
+**Invariant 18 also corrects a deliberate limitation, and the volume argument
+against the old approach is stronger than the principled one.** Invariant 8 read
+only the ids before the first `·`, and the comment was honest about why —
+checking the later legs "reports the wrong field name". Tracking which field is
+in force costs one variable. But the ledger's `Contested by:` values *wrap across
+lines*, so a line scan sees **10 of the 34** ids in those legs. It was missing
+70% of its own population.
+
+### 5. Two specs could not be met as written, and both were corrected in the phase file
+
+- **6a's "does not fire on a line that legitimately repeats a path"** contradicts
+  the rule 6a states. "2+ matches with fewer distinct values" fires on 11 lines
+  here and 8 are legitimate. Gap alone does not separate them — the tightest
+  legitimate gap (16) is *closer* than the widest real one (18). Gap ≤20 **and**
+  no sentence boundary between separates all fourteen.
+- **6c's smoke test needed redesigning, not a venv.** The phase file inherited
+  the archive's fix, "bootstrap a venv at the test target". A venv in someone's
+  project is a side effect nobody asked for, and every real r2p project already
+  has one — a target without a venv resembles no actual user, which was the
+  original planning gap. **The criterion was the problem**: it required the
+  target's dependencies installed, so it could never pass in a throwaway target.
+  Stage 1 is now an `ast` parse needing nothing installed and it is the half that
+  counts; stage 2 is the real import, informational. This is the archive's own
+  learning — "'classified correctly' is not 'succeeded', and a plan should say
+  which one it means" — applied to the check that produced it.
+
+### 6. Five checks, five live defects that were on nobody's list
+
+Every new mechanism found something on first run. That is the return on Phase 6
+and it is worth stating as a number:
+
+| Check | Found |
+|---|---|
+| invariant 15 | 5 runtime-surface pointers, + 4 more once widened, + 2 classes invisible here |
+| duplicate-path detector | a **third** collapse instance, live in `README.md:24` since v2 |
+| heading-tree audit | a defect shape (duplicated heading) that its own two rules missed |
+| `--upgrade` test | nothing new — but shown red on four reverted fixes |
+| invariants 16–18 | population zero today; the value is prospective |
+
+**The `--upgrade` test finding nothing is the one worth reading twice.** It is
+the only new mechanism here whose green run is meaningful, because it was made
+to go red four separate ways first. The other four had live defects to find, so
+their red was free.
+
+### 7. Deliberately left for Phase 7, stated so it is not lost
+
+- **`templates/research/sources/EXAMPLE_world_bank_api.md`** has v2 frontmatter
+  and v1 section headings — the framework's worked example fails its own required
+  shape. Reshaping it is editorial work about the World Bank API, not a repath.
+  The INDEX recipe now says in one line to follow the list and not that file.
+- **The 24 WARN-tier doc pointers** are Phase 7's sweep. Six of them live in
+  `plan/` and are *correct* — a plan file quoting a dead convention while
+  describing the defect. They need no exemption: when the plan completes it moves
+  to `archive/`, which is already exempt. The noise is self-clearing.
+- **A project's own `CLAUDE.md` goes stale** and `--upgrade` does not touch it.
+  The pilot's still lists `.claude/skills/` and a Stop hook that no longer
+  exists. A warning is the same cheap fix as the orphaned-hook one.
+- **`.scc/status/project.md` staleness** still has nothing checking it.

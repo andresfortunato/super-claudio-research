@@ -10,10 +10,50 @@ Project-development backlog for the framework itself. Researchers *using* the fr
 
 ## v2.1 — carried over from the v2 ship
 
-- **Prune the `docs/*-mechanism.md` set.** v2 kept them on v1 paths deliberately — they describe v1 accurately — but the live docs set now documents merged conventions. Present duplicates: `data-access-mechanism.md` + `data-sources-mechanism.md` (both → `sources.md`); `brainstorm-mechanism.md` + `handoff-mechanism.md` + `plan-structure-mechanism.md` (all → `plan-lifecycle.md`); `learning-capture-mechanism-v1.md` + `methods-mechanism-v1.md` (both → `methods.md`). Decide per file: fold into a v2 mechanism doc, move under a `docs/v1/` shelf, or delete. Flagged in `docs/v2-case-study-cordoba.md` §7.
+**Three of the four below landed in v3 Phase 6 on 2026-09-09** and are struck
+through rather than deleted, because each one's entry records *why* it existed:
+
+- ~~**Repath `.claude/skills/migrate-source/SKILL.md` to v2.**~~ → `3e20032`. Its
+  smoke test was redesigned rather than fixed; see `plan/plan-r2p-v3/log.md` D9.5.
+- ~~**Integration-test `--upgrade`, not just `init`.**~~ → `d195621`.
+  `test/upgrade-integration.sh`, wired to `npm test`.
+- ~~**A duplicate-path-per-line detector for migrations.**~~ → `41a68d9`. Found a
+  third live instance in `README.md` that the two-instance history did not know
+  about.
+
+Still open, and now Phase 7's:
+
+- **Prune the `docs/*-mechanism.md` set.** ⚠ Decision **B** (2026-09-09) chose
+  **delete**, against the recommendation to shelve under `docs/v1/`. Phase 7 must
+  audit and repoint or drop every reference **in the same commit as the
+  deletion** — `lint-research.sh` invariant 15 now reports those pointers, so
+  the sweep is checkable rather than a hand-built list. v2 kept them on v1 paths deliberately — they describe v1 accurately — but the live docs set now documents merged conventions. Present duplicates: `data-access-mechanism.md` + `data-sources-mechanism.md` (both → `sources.md`); `brainstorm-mechanism.md` + `handoff-mechanism.md` + `plan-structure-mechanism.md` (all → `plan-lifecycle.md`); `learning-capture-mechanism-v1.md` + `methods-mechanism-v1.md` (both → `methods.md`). Decide per file: fold into a v2 mechanism doc, move under a `docs/v1/` shelf, or delete. Flagged in `docs/v2-case-study-cordoba.md` §7.
 - **Repath `.claude/skills/migrate-source/SKILL.md` to v2.** It hard-refuses unless `.claude/conventions/data-access.md` and `<donor>/data_sources/INDEX.md` exist, neither of which a v2 project has, and its Globs target the old paths throughout. Port to `sources.md` + `research/sources/`, then re-run validation with a venv at the test target (the old blocker: the post-apply smoke test never literally passed). Both plans were archived as superseded on 2026-08-04 — see `archive/plan-migrate-source-skill.md` for the decisions and the five discovery findings, so they don't get re-derived.
 - **Integration-test `--upgrade`, not just `init`.** v2's own lesson was that scaffolding changes get verified by running `r2p init` into a temp repo — but `--upgrade` is a second installer with its own path logic, and three v2 defects lived only there (stale `EXCLUDE`, unmapped `templates/plan_dir`+`claude_conventions_project`, ungated wiki). All three were invisible to an `init` test. Worth a script: init a temp project, dirty the append-only files, upgrade, and assert on sidecar count and root-dir list.
 - **A duplicate-path-per-line detector for migrations.** `02_repath.py`'s `EXCLUDE_PREFIXES` guard cannot catch a many-to-one collapse — when three v1 dirs map to one v2 dir, an enumerating sentence becomes the same *valid* path three times, so linkcheck passes. Two instances shipped in v2 and were fixed by hand. The check is three lines: flag any line where a path pattern matches 2+ times with fewer distinct values than matches. Belongs in `03_linkcheck.py`.
+
+## Added by v3 Phase 6 — small, diagnosed, not scheduled
+
+- **`templates/research/sources/EXAMPLE_world_bank_api.md` fails the v2 required
+  shape.** v2 frontmatter, v1 section headings (Endpoints / Query shape / Parsing
+  / Pitfalls) where `sources.md` defines What it gives you / Access / Headline
+  anchor / Gotchas / Coverage limits. The framework's own worked example does not
+  follow its own convention. Reshaping it is editorial work about the World Bank
+  API rather than a repath, which is why Phase 6 left it; `research/sources/INDEX.md`
+  now warns readers to follow the list and not the example.
+- **A shipped runtime surface must not point into `docs/`.** `r2p init` does not
+  install `docs/`, so a template or convention citing `docs/<name>.md` dangles in
+  every project while resolving fine in the framework repo. Five instances were
+  fixed in `411ec33` by naming the framework repo, the way
+  `install-project.js:302` already did. Not mechanised: the judgement is whether
+  the reference is *qualified*, which a grep cannot decide.
+- **`--upgrade` could warn about a stale project `CLAUDE.md`.** The pilot's still
+  lists `.claude/skills/` (global since v2) and describes a Stop hook that no
+  longer exists. `--upgrade` does not touch project `CLAUDE.md` and probably
+  should not; a warning is the same cheap fix as the orphaned-hook one in
+  `d195621`.
+- **Nothing checks `.scc/status/project.md` for staleness.** It is the first
+  thing a session reads, and it sat five weeks wrong at the top of every session.
 
 ## v1.3 and beyond
 

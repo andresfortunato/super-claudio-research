@@ -1,8 +1,9 @@
 # Handoff — plan-r2p-v3
 
-**Session:** 2026-09-09 (Phases 4 and 5, plus a constitution amendment)
-**Prior sessions:** 2026-08-05, 2026-08-17, 2026-09-09 (2b), 2026-09-09 (3)
-**Last content commit:** `2e4f404` — **this handoff is committed on top of it**,
+**Session:** 2026-09-09 (Phase 6, all six items, at the researcher's call)
+**Prior sessions:** 2026-08-05, 2026-08-17, 2026-09-09 (2b), 2026-09-09 (3),
+2026-09-09 (4+5)
+**Last content commit:** `d195621` — **this handoff is committed on top of it**,
 so `HEAD` is the handoff commit. (A handoff cannot name its own commit; verify
 with `git log --oneline -5`.)
 **Branch:** `main` · **Working tree:** clean.
@@ -15,151 +16,161 @@ with `git log --oneline -5`.)
 | 2 | State the chain once | **done** (**D2**) |
 | 2b | Graduate the Córdoba fixes | **done** (**D5**) |
 | 3 | Lint the chain | **done** — 7 checks → 14 (**D6**) |
-| 4 | `/cite-check` | **done 2026-09-09** — decision **A** (**D7**) |
-| 5 | `/pipeline-check` | **done 2026-09-09** — decision **C** (**D8**) |
-| 6 | Harden the tooling | **next — unblocked, independent of everything.** The list has grown to six |
-| 7 | Docs, constitution, release | blocked on 6 only. Decision **B** answered; **scope grew** |
+| 4 | `/cite-check` | **done** — decision **A** (**D7**) |
+| 5 | `/pipeline-check` | **done** — decision **C** (**D8**) |
+| 6 | Harden the tooling | **done 2026-09-09** — all six items (**D9**) |
+| 7 | Docs, constitution, release | **the only phase left.** Unblocked |
 
-**All four researcher decisions are now answered.** A and the invariant 13 tier
-went as recommended; **B and C went against the recommendation**, and both
-reversals moved work rather than removing it — read *What the reversals cost*.
+**No researcher calls are outstanding.** Two were taken this session, both
+before any code: scope (all six candidates, not the top five) and invariant 15's
+tier (split by citing surface, with the runtime rows fixed now).
 
-**⚠ The pilot repo is `~/research/cordoba`.** Fifth handoff carrying this.
+**⚠ The pilot repo is `~/research/cordoba`.** Sixth handoff carrying this. It is
+a *mixed* v1/v2 install — it still has `check-evidence.sh` wired and firing, and
+`.claude/conventions/data-access.md` on disk — which is why it is a good donor
+for lint work and a bad one for "what a clean v2 project looks like".
 
-**⚠ `phase-3.md`'s §5 lint baseline is the `⚠ CORRECTED 2026-09-09` block.**
-Re-measure before diffing; a baseline against a live engagement decays in weeks.
+**⚠ Do not carry a phase's new scope in this file again.** The last handoff
+listed five Phase 6 candidates that were in no task list, and `phase-6.md`'s own
+header says corrections and additions are patched *there*, because that is the
+file a worker on the phase reads. Those five are now recorded in `phase-6.md` as
+6e–6i. This handoff points; it does not own.
 
 ## What landed
 
 | Commit | What |
 |---|---|
-| `34b77af` | invariant 13 WARN → **FAIL**. Its WARN rationale cited another check's population |
-| `703821f` | **Phase 4** — `/cite-check`, refuse-early, the `/verify` boundary |
-| `c7543f5` | **constitution** — principle 7 gains a side-effect axis and four bounds |
-| `2e4f404` | **Phase 5** — `/pipeline-check`, executes directly, refuses on a dirty tree |
+| `6a0086d` | **6e** — lint reads the corpus once. 11.0s → 2.0s, output byte-identical |
+| `411ec33` | **6f** — invariant 15, every `.claude/**` / `docs/**` pointer, + 6 files fixed |
+| `fe96465` | **6g/h/i** — invariants 16, 17, 18 on the claims ledger |
+| `89d6ba0` | invariants 4 and 5 each own one defect (11 false reports gone) |
+| `41a68d9` | **6a** — linkcheck `--baseline` + collapse detector; a third live instance |
+| `ddd74ae` | **6b** — merge prints its heading tree; stops truncating its report |
+| `3e20032` | **6c** — migrate-source repathed to v2; smoke test redesigned |
+| `d195621` | **6d** — `test/upgrade-integration.sh` + the orphaned-hook warning |
 
-Plus `f85425a` (D7 + phase-4 notes) and this handoff. `.scc/status/project.md`
-was corrected — it had claimed `plan/` was empty for five weeks.
+Plus this handoff, which also carries `log.md` D9, `phase-6.md`'s outcomes, and
+`TODO.md`.
 
-## What the reversals cost — read before Phase 7
+## Where the numbers are now
 
-**Decision C (execute directly) forced a constitution amendment**, and correctly:
-principle 7 graded verification by *token* cost and every shipped tier was
-read-only. That posture was never a stated principle — just a coincidence of the
-first three tiers all being *review* tools. Principle 7 now carries a
-side-effect axis (read-only / derived / source) and four bounds. **A future
-proposal that wants to write source files does not inherit this** and revises the
-document again.
-
-*Say this accurately:* the binding table already said "or invent a new one with
-reason", so the amendment **extends** principle 7 rather than reversing it.
-Overstating a decision as a constitutional violation is its own kind of drift.
-
-**Decision B (delete the mechanism docs) transferred work into Phase 7.** The
-recommendation to move them to `docs/v1/` existed because
-`docs/v2-case-study-cordoba.md` cites them. Deleting makes those citations
-dangle — the same defect class Phase 7 is cleaning up. **Phase 7 must audit and
-repoint or drop every reference in the same commit as the deletion.** A phase
-that deletes 2,695 lines and leaves the citations is not done.
-
-## The pointer inventory — bigger than D5 said, and D5 was wrong about it
-
-D5 recorded five dangling pointers and said **`decision-records` has no v2
-successor**, which is what made the sweep a convention-design question needing a
-researcher call. **That is wrong.** `methods.md` line 1: *"Methods — Protocol
-(v2, absorbs decision-records and learning-capture)."* The v2 conventions carry
-their merge history in their own titles. All seven are plain repaths:
-
-| Dead pointer | v2 home | Cited from |
+| | Session start | Now |
 |---|---|---|
-| `script-header.md` | `provenance.md` | `docs/verification-architecture.md:53`, `docs/r2p-adopt.md` ×4 |
-| `analytical-commit-format.md` | `provenance.md` | `docs/verification-architecture.md:54`, `docs/r2p-adopt.md:516` |
-| `data-sources.md` | `sources.md` | **`.claude/conventions/project-conventions.md:26`**, `docs/audience-and-philosophy.md:99` |
-| `data-access.md` | `sources.md` | **`templates/.env.example:7`** — installs into every project |
-| `handoff-format.md` | `plan-lifecycle.md` | **`.claude/hooks/precompact-handoff.sh:36`** |
-| `learning-capture.md` | `methods.md` | **`.claude/hooks/precompact-handoff.sh:40`** |
-| `decision-records.md` | `methods.md` | **`.claude/conventions/project-conventions.md:179`** |
+| lint checks | 14 | **18** |
+| lint runtime, pilot (285 docs) | **11.0s** (recorded as ~9s) | **2.26s** |
+| lint verdict, this repo | PASS | PASS, 1 warning |
+| lint verdict, pilot | FAIL, 3 warnings | FAIL, 5 warnings |
+| `--upgrade` test coverage | none | 21 assertions, `npm test` |
 
-**Three of the citing files are shipped runtime surfaces**, not docs.
-`precompact-handoff.sh` is the worst: it fires automatically when context fills
-and tells the session to read two conventions that do not exist, in every
-installed project. **It went unnoticed because a pointer to a missing file fails
-silently** — the session just does not get the guidance and nothing errors.
+The pilot gained findings because the new checks found real defects there, not
+because anything regressed. **Re-measure before diffing** — a baseline against a
+live engagement decays in weeks. `phase-3.md` §5's baseline is now two
+generations old; the numbers above supersede it.
 
-*Second instance this plan has hit of the same shape:* **a dangling pointer is
-invisible by construction**, which is why invariant 8 exists. This is that
-failure one layer up, in the framework's own files, and nothing checks it.
+## Phase 7 — everything it now owns
+
+Its scope grew twice: once when decisions B and C went against their
+recommendations, and once from what Phase 6 found.
+
+1. **Delete the 14 `docs/*-mechanism.md` files (decision B) — and repoint or drop
+   every citation in the same commit.** A phase that deletes 2,695 lines and
+   leaves the citations is not done. **This is now checkable rather than
+   hand-built:** invariant 15 reports exactly those pointers, so the sweep has a
+   green condition.
+2. **The 24 WARN-tier doc pointers.** Run `bash .claude/hooks/lint-research.sh`
+   and read the list. Six live in `plan/` and are *correct* — a plan file quoting
+   a dead convention while describing the defect. **They need no exemption:**
+   when the plan completes it moves to `archive/`, which is exempt, so the noise
+   is self-clearing.
+3. **`docs/verification-architecture.md` gains principle 7's side-effect axis**
+   (from decision C, `c7543f5`).
+4. **Promote invariant 15's WARN tier to FAIL** once (1) and (2) land. Green
+   becomes reachable at that point, which is the script's own stated condition
+   for choosing FAIL.
+5. **`templates/research/sources/EXAMPLE_world_bank_api.md`** has v2 frontmatter
+   and v1 section headings, so the framework's worked example fails its own
+   required shape. Phase 6 left it deliberately: reshaping it is editorial work
+   about the World Bank API rather than a repath. `research/sources/INDEX.md` now
+   warns readers to follow the list and not the example.
+6. **`package.json` is still `0.2.0`.** Decision 5 says v3 = `0.3.0`, with the
+   release notes, not opportunistically. Since that decision was written, v3 has
+   also added four lint checks, a CLI subcommand, two skills and a test.
+7. **Write down "silence reads as a pass" somewhere shared.** Four phases have
+   now reached it independently — 3.5 (inapplicable invariants print), Phase 4
+   (*Not flagged*), Phase 5 (*Reproduced unchanged*), Phase 6 (`noted` in
+   linkcheck, and `--` lines in the lint). Four times is a principle, not a
+   coincidence.
 
 ## Surprises
 
-**1. A tier decision rested on another check's count.** Invariant 13 shipped WARN
-on "573 references"; those are invariant **14**'s population, counted before 14
-existed. Its own population is zero. Now FAIL. *Re-measure before citing a number
-back at a decision, including one you took yourself last session.*
+**1. Every new mechanism found a live defect on its first run, except the one
+that was made to fail first.** Invariant 15 found 5 runtime-surface pointers,
+then 4 more once widened, then 2 whole classes invisible in this repo. The
+duplicate-path detector found a **third** collapse instance in `README.md:24`,
+live since v2, that the two-instance history did not know about. The heading-tree
+audit found a defect shape its own two rules missed. **The `--upgrade` test found
+nothing — and it is the only one whose green run means anything, because it was
+shown red four separate ways first.** The other four had live defects to find, so
+their red was free.
 
-**2. The first fixture was red for two unrelated reasons.** "The lint went red"
-would have read as confirmation while proving nothing. **A fixture is only a test
-once it is green-except-one.** Pair this with "build the broken fixture, watch it
-go red" — that phrasing alone is not sufficient.
+**2. A hand-built inventory of invisible defects is itself incomplete — twice
+over.** D5 said five pointers; the last handoff said seven; resolving them all
+found ten here and seven in the pilot, and the two sets of seven were not the
+same seven. *This was already the stated thesis and it still took a third pass to
+act on. When the argument for a check is "the defect is invisible", stop
+enumerating and write the check.*
 
-**3. A skill's precondition refused its own fixture.** `/cite-check` had
-inherited `/deliverable-review`'s ≥800-word floor and turned away a *finished*
-127-word memo. That floor exists because a seven-lens fan-out is expensive; a
-≤2k check has no such excuse, and short is the shape of a ministerial briefing
-note. **General form: copying a neighbour's precondition without its reason.**
+**3. Widening what a check looks for was nearly free; widening what it reads was
+a mistake.** Broadening invariant 15's target pattern from `conventions/` to all
+`.claude/**` + `docs/**` found 4 more real defects. Broadening its *citing* set
+to the whole tree produced 22 pilot findings that were mostly the researcher's
+own prose. **A check's precision lives in which files it reads, not in what it
+looks for.**
 
-**4. Changing a default created a way to destroy work.** Report-and-hand-over
-could not overwrite anything; executing directly overwrites the artifact in
-place. Hence the clean-tree **refusal** — git is the undo, and an uncommitted
-artifact has none. *When a decision flips a posture, re-ask what the old posture
-was silently protecting.*
+**4. In three of four cases the dangling pointer was not the defect.** It was a
+thread attached to a live v1 instruction underneath — `precompact-handoff.sh`
+routing learnings to a directory `retrieve-learnings.sh` does not read, a skill
+demanding an `index.yaml` its own heading says does not exist. **Repathing only
+the pointer produces the half-repathed state `phase-6.md` calls worse than v1.**
 
-**5. G9's granularity ruling implied a case nobody listed.** Compare numbers, not
-bytes — so **an image-only script is a `cannot compare`, not a pass.** `##
-Measured` numbers are unrecoverable from a PNG, and byte-diffing reports every
-palette change. **Never report "unchanged" because a chart merely re-rendered.**
+**5. Two defect classes are invisible in this repo by construction.** A shipped
+file pointing into `docs/` (never installed) or at `.claude/skills/` (global
+since v2) resolves here and nowhere else. Both showed up only when the check ran
+against the pilot. *A framework cannot check itself against itself.*
 
-**6. Two phases reached the same rule independently.** 3.5 made inapplicable
-invariants print rather than vanish; Phase 4 needed a *Not flagged* section;
-Phase 5 needed *Reproduced unchanged*. Three times now: **silence reads as a
-pass.** It should be written down somewhere shared — Phase 7 or the constitution.
+**6. Two phase-file specs could not be met as written.** 6a's "does not fire on a
+legitimate repeat" contradicts the rule 6a states — measured, the tightest
+legitimate gap (16 chars) is *closer* than the widest real one (18), so gap alone
+cannot separate them. 6c inherited "bootstrap a venv at the test target" from the
+archive; the criterion was the problem, not the environment. Both corrections are
+in `phase-6.md`, marked.
+
+**7. A performance commit needed a fixture the pilot could not provide.** The
+pilot has zero `artifacts:` keys, so invariants 9b, 10 and 12 — the three the
+refactor touched most — are invisible to a pilot diff. A byte-identical diff
+there would have proved nothing about them.
+
+**8. The order in a ranked list is not the order to execute it.** The runtime fix
+was ranked third and went first, because the other four candidates add checks to
+the script whose per-document cost was being removed.
 
 ## What didn't work
 
-Nothing abandoned. Every error this session was caught by running rather than
-reading, and all are in *Surprises*.
+Nothing abandoned. Two things were attempted and rejected on measurement rather
+than taste, both recorded above: a gap-only duplicate-path rule (6a), and
+bootstrapping a venv to make the migrate-source smoke test pass (6c).
 
-## Next
+One item was **deliberately not finished** and is item 5 of Phase 7's list:
+reshaping the World Bank example doc. It is editorial content work, not a repath,
+and doing it badly would ship a worse example than the stale one.
 
-**Phase 6 is the only thing between here and Phase 7**, is unblocked, and is
-independent of everything. **Phase 7's scope grew** (see *What the reversals
-cost*) — it now owns the deletion *and* its citation audit, the seven-row pointer
-sweep, and `docs/verification-architecture.md`'s side-effect axis.
+## How to verify all of it in one go
 
-**No researcher calls are outstanding.**
+```
+bash .claude/hooks/lint-research.sh                     # PASS, 1 warning
+npm test                                                # 21 passed, 0 failed
+python3 templates/migration/03_linkcheck.py --baseline HEAD   # 0 new breaks, 0 collapses
+```
 
-### Phase 6 candidates — now six, none in any task list
-
-Ranked. The first two are new this session and both are stronger than the
-pre-existing 6a remainder.
-
-1. **A convention-pointer resolver.** One `grep` of every
-   `.claude/conventions/<name>.md` reference against `ls .claude/conventions/`.
-   It would have caught all seven rows above, including the hook. **Cheapest
-   real defect-finder left**, and it defends a vector that is invisible by
-   construction.
-2. **`status: retired` under a cited claim** → **invariant 15**. Fully mechanical;
-   lives in `/cite-check` only because `phase-4.md` put it there. Closes the one
-   class in that skill that does not need judgement.
-3. **The lint's runtime** — ~9s on the pilot, ~8.9s of it predating Phase 3. Six
-   subprocesses per doc across 285 docs; one awk pass fixes it. A nine-second
-   linter is an adoption risk by the same reasoning that produced the WARN tier.
-4. `claims.md` says *"a claim with no ids is an assertion — delete it."* Nothing
-   checks it. One `grep`.
-5. A dangling `**Supersedes the reading of:** #62` is a broken link. Invariant 8
-   reads only ids before the first `·`, so it does not see it. One `grep`.
-6. The pre-existing 6a remainder: the duplicate-path-per-line detector and the
-   `--upgrade` integration test.
-
-**Also noted, not sized:** nothing checks `.scc/status/project.md` for staleness,
-which is how it sat five weeks wrong at the top of every session.
+The merge script (6b) needs mapping CSVs and a `research/_legacy/` tree, so it
+has no in-repo invocation; `log.md` D9 records the fixture shape.
