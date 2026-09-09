@@ -17,7 +17,7 @@ The skill is **proposal-then-apply**. It writes
 says "apply," and only then do files land. Adaptation
 (country-specific constants, utility-module rename, headline-anchor
 strip) happens at migration time via the LLM — no donor-side prep is
-required beyond the `data-access` and `data-sources` conventions.
+required beyond the `sources` convention.
 
 This is the r2p-→-r2p transplant counterpart to `/r2p-adopt`
 (legacy-→-r2p). They share the proposal-then-apply pattern but
@@ -37,7 +37,7 @@ The user types one of:
 
 - The user wants to *adopt* a non-r2p legacy project — that's
   `/r2p-adopt`. This skill assumes both donor and target follow the
-  `data-access` and `data-sources` conventions.
+  `sources` convention.
 - The user wants to refresh an *already-migrated* source against a
   newer donor version. Not in v1; for now, re-run the skill and
   accept the conflict markers.
@@ -51,18 +51,20 @@ Run these as a single pre-flight block. Stop with a one-line message
 on any failure.
 
 1. **Donor exists and is a directory.** `--from <donor-path>` resolves.
-2. **Donor has the data-access convention.**
-   `<donor>/.claude/conventions/sources.md` exists.
+2. **Donor has the sources convention.**
+   `<donor>/.claude/conventions/sources.md` exists. (v2 merged the v1
+   `data-access` and `data-sources` conventions into this one file; a
+   donor still carrying the v1 pair needs `r2p init --upgrade` first.)
 3. **Donor has an INDEX with a Helper-functions table.**
-   `<donor>/data_sources/INDEX.md` exists and contains a section
+   `<donor>/research/sources/INDEX.md` exists and contains a section
    matching `^#+ +Helper functions` (case-insensitive).
 4. **Donor has the named source.** For each slug in `--source`, at
    least one of: a row in the Helper-functions table whose Source
    column mentions the slug, OR a file matching
-   `<donor>/data_sources/<slug>*`.
-5. **Target has the data-access convention.**
+   `<donor>/research/sources/<slug>*`.
+5. **Target has the sources convention.**
    `<target>/.claude/conventions/sources.md` exists. If absent:
-   stop with `"Target lacks data-access convention; run 'r2p init
+   stop with `"Target lacks the sources convention; run 'r2p init
    --upgrade' first."` Do **not** auto-install.
 6. **Target is a git repo.** `git -C <target> rev-parse --git-dir`
    succeeds. The user will review proposals via diff; we don't want
@@ -98,7 +100,7 @@ Walk the donor and locate every artifact tied to this source. Use
 filename prefixes, INDEX rows, wrapper docstring back-links, and
 env-var prefixes as anchors.
 
-1. **Reference doc(s)** — `Glob` `<donor>/data_sources/<slug>*.md`.
+1. **Reference doc(s)** — `Glob` `<donor>/research/sources/<slug>*.md`.
    Excludes `INDEX.md`, `README.md`, `EXAMPLE_*`. There may be more
    than one (`imf_sdmx_api.md`, `imf_weo_api.md`,
    `imf_dataflow_inventory.md`). Capture each. If the glob returns
@@ -108,7 +110,7 @@ env-var prefixes as anchors.
    research/sources/<slug>.md`) is load-bearing for the INDEX bridge, so
    even a pre-convention donor's bundle lands in convention-compliant
    shape at the target.
-2. **Companion files** — `Glob` `<donor>/data_sources/<slug>*` for
+2. **Companion files** — `Glob` `<donor>/research/sources/<slug>*` for
    non-`.md` extensions: `.yaml` / `.yml` (OpenAPI specs), `.csv` /
    `.xlsx` (codelists like `pwt110_data.csv`), etc.
 3. **Wrapper function(s)** — find the donor utility module:
@@ -147,7 +149,7 @@ env-var prefixes as anchors.
    `# ` if present, so the target ships them in the same commented
    shape.
 5. **INDEX row** — `grep` the Helper-functions table in
-   `<donor>/data_sources/INDEX.md` for rows mentioning the slug.
+   `<donor>/research/sources/INDEX.md` for rows mentioning the slug.
    Capture the row text verbatim (will be re-emitted at target).
 6. **`data/README.md` entry** — if `<donor>/data/README.md` exists,
    grep for the slug or any captured wrapper name. Capture the
@@ -220,7 +222,7 @@ On explicit user approval:
 
 1. **Bootstrap missing files if needed.**
    - If `<target>/<X>_utils.py` is absent, create it from the
-     `data-access` convention's worked example: boot block
+     `sources` convention's runtime half: boot block
      (`from pathlib import Path`, `import os`, `from dotenv import
      load_dotenv`, `load_dotenv(Path(__file__).parent / '.env')`),
      a placeholder constants section (`# ── Country constants ──`
@@ -229,7 +231,7 @@ On explicit user approval:
      file is being created.
    - If `<target>/.env.example` is absent, create it with the
      captured env-var lines.
-   - If `<target>/data_sources/INDEX.md` lacks a Helper-functions
+   - If `<target>/research/sources/INDEX.md` lacks a Helper-functions
      section, append one with the lifted row(s).
    - If `<target>/data/README.md` is absent and the donor had an
      entry, create it from the template seed and append the
@@ -238,27 +240,47 @@ On explicit user approval:
 2. **Write reference docs and companion files.** For each captured
    `research/sources/<slug>*` file:
    - If the target path doesn't exist: write the donor's content,
-     adapted — strip the `Status: verified <date>` line; replace
-     headline-anchor values with
-     `TODO(migrate): verify against <target-context>`; keep every
+     adapted — set the frontmatter to `status: stale` (v2 carries
+     freshness in the `status:` key, not a `Status:` prose line;
+     a donor-verified date is not a target-verified date), clear
+     `wrapper:` and `env:` only if the wrapper did not come across,
+     replace headline-anchor values with
+     `TODO(migrate): verify against <target-context>`, and keep every
      other section verbatim.
+     A pre-convention donor doc may have no frontmatter at all; add
+     the five keys (`source`, `status`, `triggers`, `wrapper`, `env`)
+     rather than lifting a bare body. `triggers:` is load-bearing —
+     `retrieve-learnings.sh` globs it, so a doc without one is
+     invisible to retrieval at the target.
    - If the target path *does* exist: write a git-style merge file
      (`<<<<<<<` HEAD section / `=======` / `>>>>>>>` migrated
      section). Surface in the proposal's Conflicts list.
 
    **If discovery found no donor ref doc** (Phase A step 1 returned
-   nothing), bootstrap a stub at `<target>/data_sources/<slug>.md`:
+   nothing), bootstrap a stub at `<target>/research/sources/<slug>.md`:
 
    ```markdown
-   # <Slug>
+   ---
+   source: <slug>
+   status: stale                    # never `verified` — nothing was verified
+   triggers: "<slug> TODO-add-4-to-8-concrete-keywords"
+   wrapper: <wrapper name, or none>
+   env: [<captured env vars, or none>]
+   ---
 
-   Status: pending — migration stub, fill before use
+   # <Slug> — TODO(migrate): what it gives you
 
    This file was created by /r2p-migrate-source because the donor
-   (`<donor-path>`) did not ship a ref doc for `<slug>`. Populate
-   the standard sections (Headline anchor, Endpoint shape, Worked
-   example, Gotchas) per `.claude/conventions/sources.md`.
+   (`<donor-path>`) did not ship a ref doc for `<slug>`. Populate the
+   five required sections per `.claude/conventions/sources.md`:
+   `## What it gives you`, `## Access`, `## Headline anchor`,
+   `## Gotchas`, `## Coverage limits`.
    ```
+
+   The section names are the v2 five, not v1's Status / Headline
+   anchor / Endpoints / Query shape / Parsing / Pitfalls. A stub that
+   names the wrong sections is worse than no stub: it looks
+   authoritative and fails the convention it cites.
 
    Leave the leading `MIGRATION_TODO.md` step "write
    `research/sources/<slug>.md` from scratch" to remind the receiving
@@ -284,7 +306,7 @@ On explicit user approval:
    any project-specific path references.
 
 6. **Add INDEX row(s)** to the Helper-functions table in
-   `<target>/data_sources/INDEX.md`. Use the same row format the
+   `<target>/research/sources/INDEX.md`. Use the same row format the
    table already uses.
 
 7. **Add CLAUDE.md mention** if the donor had one *and* the
@@ -292,41 +314,84 @@ On explicit user approval:
    Otherwise skip (don't introduce new sections — the user can
    promote later if the source is core).
 
-8. **Smoke test.** Pick the target's project interpreter via this
-   fallback chain (first hit wins):
+8. **Smoke test, in two stages — and only the first one is a
+   pass-criterion.** This split exists because the previous single-stage
+   version never literally passed. Its criterion was `from <target>_utils
+   import <wrapper>` *succeeding*, which needs the target's dependencies
+   installed; across two validation sessions it always died on
+   `psycopg2` or `dotenv` in a throwaway target with no virtualenv. The
+   skill classified that correctly as an env gap, a session read
+   "classified correctly" as "passed", and the archive commit had to be
+   reverted. **Where a check can partially pass, say which half counts.**
+
+   **Stage 1 — structural. Runs always, needs nothing installed, and
+   this is the half that must pass.** Parse the target utility module
+   without executing it:
+   ```bash
+   cd <target> && python3 - <<'EOF'
+   import ast, sys
+   src = open("<target>_utils.py").read()
+   tree = ast.parse(src)                       # syntax
+   top = {n.name for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+   want = {"<wrapper_1>", "<wrapper_2>"}
+   missing = want - top
+   scope = [n for n in tree.body if not isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))]
+   placeholders = sorted({x.id for n in scope for x in ast.walk(n)
+                          if isinstance(x, ast.Name) and x.id.startswith("TODO_TARGET_")})
+   print("missing wrappers:", sorted(missing) or "none")
+   print("TODO_TARGET_ at module scope:", placeholders or "none")
+   sys.exit(1 if (missing or placeholders) else 0)
+   EOF
+   ```
+   It answers exactly the three questions a migration can break: does
+   the lifted code parse, did every wrapper arrive as a module-level
+   `def`, and is a `TODO_TARGET_*` placeholder sitting where import
+   will hit it. All three are properties of the transplant, so all
+   three are checkable with no venv, no `.env` and no network. A
+   failure here is a **migration failure** — report the verbatim error
+   and re-review the proposal.
+
+   **Stage 2 — real import. Best-effort, informational, never a
+   pass-criterion.** Pick the target's interpreter, first hit wins:
    1. `<target>/.venv/bin/python` if it exists and is executable
    2. `<target>/venv/bin/python` if it exists and is executable
    3. `python3` on `PATH`
 
-   Then run:
+   Run it with every captured env var set to a dummy value **in the
+   subprocess environment only** — a module whose boot block does
+   `os.environ['ATLAS_DB_HOST']` raises `KeyError` at import time, and
+   that is an unset variable, not a bad migration. This never touches
+   `.env`; the no-`.env`-writes rule is absolute.
    ```bash
-   cd <target> && <interpreter> -c "from <target>_utils import <wrapper_1>, <wrapper_2>, ..."
+   cd <target> && env <SLUG>_FOO=dummy <SLUG>_BAR=dummy \
+     <interpreter> -c "from <target>_utils import <wrapper_1>, <wrapper_2>"
    ```
 
-   Report which interpreter was used as one line:
-   `Smoke test via: <target>/.venv/bin/python` (or
-   `system python3 (no project venv found)`).
+   Report one line naming the interpreter: `Stage 2 via:
+   <target>/.venv/bin/python`, or `system python3 (no project venv
+   found)`.
 
-   **Classify any failure**:
-   - `ModuleNotFoundError: No module named '<dep>'` where `<dep>` is
-     in the framework-deps allowlist (`dotenv`, `pandas`, `requests`,
-     `psycopg2`, `pyyaml`, `numpy`, `pandasdmx`) — report as
-     **env-setup gap, not migration failure**. The migration files
-     are in place; the target's venv isn't populated. Point at
-     `MIGRATION_TODO.md` step 1 (fill `.env`) and the project's own
-     dependency-install path.
-   - Any other import error (the wrapper name itself missing,
-     syntax error in the lifted code, `TODO_TARGET_*` placeholder
-     hit at module scope) — report as **migration failure**, with
-     the verbatim error. The proposal should be re-reviewed.
+   **Classify a stage-2 failure, and never call it a migration
+   failure on its own**:
+   - `ModuleNotFoundError` for a dep in the allowlist (`dotenv`,
+     `pandas`, `requests`, `psycopg2`, `pyyaml`, `numpy`,
+     `pandasdmx`) — **env-setup gap**. The files are in place and the
+     target's venv is not populated. Point at the project's own
+     dependency-install path. Every real r2p project has a
+     virtualenv; a target that does not resembles no actual user, and
+     the skill must not create one — a venv in someone's project is a
+     side effect nobody asked for.
+   - Any other error — **worth re-reading**, but stage 1 has already
+     told you whether the transplant is sound. Report it verbatim and
+     say which stage it came from.
 
-   Do **not** call any wrapper with arguments — that requires `.env`
-   populated and is a v1.x extension.
+   Do **not** call any wrapper with arguments in either stage — that
+   needs a populated `.env` and live credentials.
 
 9. **Write `<target>/MIGRATION_TODO.md`** from the template below.
-   This is the receiving project's checklist for restoring the
-   `Status: verified` line (re-run headline anchor, fill `.env`,
-   smoke test, real fetch).
+   This is the receiving project's checklist for getting the doc's
+   frontmatter from `status: stale` to `status: verified <date>`
+   (re-run the headline anchor, fill `.env`, smoke test, real fetch).
 
 10. **Final report.** One block to the user:
     - Files created / appended / merge-conflicted
@@ -345,7 +410,7 @@ On explicit user approval:
   merge markers; never blind-replace.
 - **Never edit `.env`.** Only `.env.example`. Real secrets are the
   user's job.
-- **Never auto-install the data-access convention.** Refuse with the
+- **Never auto-install the sources convention.** Refuse with the
   one-line message if missing; the user runs `r2p init --upgrade`.
 - **One source per proposal-apply cycle.** Multi-source invocations
   iterate sequentially. Don't batch proposals; each source needs its
@@ -384,7 +449,7 @@ heading is misleading).
 Emit each that applies; omit the section if none:
 
 - `⚠ Donor has no research/sources/<slug>*.md ref doc. Will bootstrap a
-  stub at <target>/data_sources/<slug>.md — fill in before
+  stub at <target>/research/sources/<slug>.md — fill in before
   considering the source documented.`
 - `⚠ Banner '<text>' matched by multiple slugs (<list>). Defs in
   this block included with <first-slug>; tell me which slug owns
@@ -436,13 +501,13 @@ Out-of-block references the wrappers make:
 
 | Path | Action | Notes |
 |---|---|---|
-| `<target>/data_sources/<slug>_thing.md` | create | Status line stripped; headline anchor → TODO |
-| `<target>/data_sources/<slug>_other.md` | create | (...) |
-| `<target>/data_sources/<slug>.md` | bootstrap stub | only when donor had no ref doc — 5-line stub, fill before use |
-| `<target>/data_sources/<slug>_openapi.yaml` | create | copy as-is |
+| `<target>/research/sources/<slug>_thing.md` | create | Status line stripped; headline anchor → TODO |
+| `<target>/research/sources/<slug>_other.md` | create | (...) |
+| `<target>/research/sources/<slug>.md` | bootstrap stub | only when donor had no ref doc — 5-line stub, fill before use |
+| `<target>/research/sources/<slug>_openapi.yaml` | create | copy as-is |
 | `<target>/<X>_utils.py` | bootstrap + append | new file — see below |
 | `<target>/.env.example` | append | adds `<SLUG>_*` block |
-| `<target>/data_sources/INDEX.md` | edit | new Helper-functions row(s) |
+| `<target>/research/sources/INDEX.md` | edit | new Helper-functions row(s) |
 | `<target>/data/README.md` | append | new section for `<slug>` |
 | `<target>/CLAUDE.md` | edit | add one-line mention — OR `(skip)` |
 
@@ -450,13 +515,13 @@ Out-of-block references the wrappers make:
 
 | Target path | Reason |
 |---|---|
-| `<target>/data_sources/<slug>_thing.md` | already exists at target |
+| `<target>/research/sources/<slug>_thing.md` | already exists at target |
 
 OR: `(none)`
 
 ## TODOs that will land in `MIGRATION_TODO.md`
 
-- Re-run headline anchor query for `<slug>`; restore `Status: verified <date>` line in `<ref-doc>`.
+- Re-run headline anchor query for `<slug>`; set `status: verified <date>` in `<ref-doc>`'s frontmatter.
 - Fill `<SLUG>_FOO`, `<SLUG>_BAR` in `.env` with target-environment values.
 - Replace `TODO_TARGET_COUNTRY_IDS` in `<X>_utils.py` with the target's country-id map.
 - Smoke-test: `python -c "from <X>_utils import <wrapper>"` should succeed (will be run automatically on apply).
@@ -486,18 +551,21 @@ The receiving project owns these re-verification steps.
 **Include only if Phase D bootstrapped a stub (donor had no ref
 doc).** Omit this section otherwise.
 
-The migration created a 5-line stub at
-`research/sources/<slug>.md`. Populate the standard sections per
+The migration created a frontmatter-only stub at
+`research/sources/<slug>.md`. Populate the five required sections per
 `.claude/conventions/sources.md`:
 
-- Headline anchor (a concrete value the documented procedure
-  produces)
-- Endpoint shape (URL, params, auth)
-- Worked example (curl or wrapper invocation + expected response
-  shape)
-- Gotchas (rate limits, vintage breaks, codelist quirks)
+- `## What it gives you` (dimensions, coverage, frequency, units —
+  enough to know whether it answers a question before fetching)
+- `## Access` (endpoint / package / query shape, the wrapper name and
+  signature, auth and env vars, rate limits, a minimal call)
+- `## Headline anchor` (a concrete re-fetchable value with its date)
+- `## Gotchas` (numbered, symptom first, then fix)
+- `## Coverage limits` (what the source does not have)
 
-Then set `Status: verified <today>`. The wrapper's docstring
+Then set `status: verified <today>` in the frontmatter and give
+`triggers:` four to eight concrete keywords — without them the doc is
+invisible to `retrieve-learnings.sh`. The wrapper's docstring
 `Full guide: research/sources/<slug>.md` back-link will resolve once
 the file is real.
 
@@ -523,8 +591,8 @@ against <target-context>` line replaces the donor's headline anchor.
    triple the documented procedure should produce).
 2. Run the documented query (the wrapper, the worked-example URL,
    whatever the doc describes).
-3. Paste the returned value into the anchor section.
-4. Set `Status: verified <today>`.
+3. Paste the returned value into the `## Headline anchor` section.
+4. Set `status: verified <today>` in the frontmatter.
 
 This is the smoke test that proves the doc still describes reality.
 
@@ -592,13 +660,14 @@ commit. The migration is complete.
 - **No orchestration.** One source per proposal cycle. Comma-list
   invocations iterate; they do not bundle.
 - **No auto-anchor verification.** The donor's headline-anchor value
-  is stripped; restoring the `Status: verified` line is the
-  receiving project's job (`MIGRATION_TODO.md` step 2).
+  is stripped; moving the doc's frontmatter from `status: stale` to
+  `status: verified <date>` is the receiving project's job
+  (`MIGRATION_TODO.md` step 2).
 - **No `.env` writes.** Only `.env.example`. Real secrets stay
   local.
 - **No silent overwrites.** Existing target files get merge markers.
 - **No auto-install of conventions.** Refuses if target lacks
-  `data-access`; the user runs `r2p init --upgrade`.
+  `sources`; the user runs `r2p init --upgrade`.
 - **No cross-project recipe library.** The conventions are the
   catalog; this skill walks a single donor at a time.
 - **No real-fetch smoke test.** v1 runs only an import check. Real

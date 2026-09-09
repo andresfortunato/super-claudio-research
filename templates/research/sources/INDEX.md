@@ -37,13 +37,20 @@ When adding a new data source, follow the recipe in
 `.claude/conventions/sources.md` (full protocol). The short
 form:
 
-1. **Create `research/sources/<source>_<thing>.md`** with the required
-   sections: `Status` / `Headline anchor(s)` / `Endpoints` /
-   `Query shape` / `Parsing` / `Pitfalls`. Naming is lowercase
-   snake_case; the first token names the source, the rest narrows
-   the scope (`imf_sdmx_api.md`, `world_bank_wbgapi.md`).
+1. **Create `research/sources/<source>_<thing>.md`** with frontmatter
+   (`source`, `status`, `triggers`, `wrapper`, `env`) and the five
+   required sections: `## What it gives you` / `## Access` /
+   `## Headline anchor` / `## Gotchas` / `## Coverage limits`. Naming
+   is lowercase snake_case; the first token names the source, the rest
+   narrows the scope (`imf_sdmx_api.md`, `world_bank_wbgapi.md`).
+   `triggers:` is what `retrieve-learnings.sh` globs — a doc without
+   one is invisible to retrieval.
+   *(`EXAMPLE_world_bank_api.md` still carries v1's Endpoints / Query
+   shape / Parsing / Pitfalls headings. Follow this list, not that
+   file, until it is reshaped.)*
 2. **Run the headline-anchor query at least once** and paste the
-   returned value into the doc; record `Status: verified <today>`.
+   returned value into the doc; set `status: verified <today>` in the
+   frontmatter.
    A date stamp without a re-fetchable anchor rots silently — see
    "Verifiable freshness anchors" in `docs/audience-and-philosophy.md`,
    in the framework repo (`r2p init` does not install `docs/`).
