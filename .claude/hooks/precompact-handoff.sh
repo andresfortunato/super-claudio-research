@@ -6,7 +6,7 @@
 # SILENT when no active plan exists (no plan/plan-*/ directories).
 # When a plan is active, emits two reminders:
 #   1. Refresh the active plan's handoff.md (status, decisions, next steps).
-#   2. Capture any session surprises as learnings/<slug>.md + index.yaml entry.
+#   2. Capture any session surprises into research/methods/, with triggers:.
 
 set -euo pipefail
 
@@ -33,13 +33,17 @@ Context is about to be compacted. Before losing detail:
 • Refresh the active plan's handoff.md with current status, decisions made, and
   next steps. Active plan(s):
 ${active_list}
-  Format and time-scales: .claude/conventions/handoff-format.md.
+  Format and time-scales: .claude/conventions/plan-lifecycle.md.
 
 • Were there any surprises, gotchas, or hard-won discoveries this session worth
-  preserving? If so, write a learning to learnings/<slug>.md and append an
-  index.yaml entry — see .claude/conventions/learning-capture.md. The
-  retrieval hook will surface it in future sessions when relevant trigger
-  keywords appear in a prompt.
+  preserving? If so, append it where it will be read — research/sources/<src>.md
+  under ## Gotchas, research/methods/<topic>.md under ## Traps, or
+  research/methods/_craft.md if it is cross-cutting — and check that file's
+  triggers: line carries a word someone would actually type. See
+  .claude/conventions/methods.md. There is no learnings/ directory and no
+  index.yaml in v2: retrieve-learnings.sh globs triggers: across
+  research/methods/*.md and research/sources/*.md, so a trap in a file with no
+  triggers: line is invisible to it.
 EOF
 
 if command -v jq >/dev/null 2>&1; then

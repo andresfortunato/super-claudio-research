@@ -9,4 +9,4 @@ Methodology calls that should outlive the brainstorm graduate to
 `research/methods/<topic>.md`.
 
 Format and handoff to the planning skill: `.claude/conventions/plan-lifecycle.md`.
-Rationale: `docs/brainstorm-mechanism.md`.
+Rationale: `docs/brainstorm-mechanism.md` in the framework repo, which `r2p init` does not install.

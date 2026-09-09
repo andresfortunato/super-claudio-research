@@ -20,11 +20,11 @@ collaborator picks up the same conventions.
 Three folders look adjacent and would be confusing if the
 boundaries were left implicit:
 
-- **`data_sources/<source>_<thing>.md`** documents *external
+- **`research/sources/<source>_<thing>.md`** documents *external
   systems* — APIs, codebooks, dataset mechanics. Carries
   `Status: verified <date>` plus a re-fetchable headline anchor.
-  The protocol is in `.claude/conventions/data-sources.md`.
-- **`methods/<method>/rule.md`** documents *operational
+  The protocol is in `.claude/conventions/sources.md`.
+- **`research/methods/<topic>.md`** documents *operational
   project-internal compute rules* — cohort definitions, sample
   restrictions, threshold filters — paired with diagnostic
   counts that prove the rule is in force. The protocol is in
@@ -38,8 +38,8 @@ boundaries were left implicit:
 
 The cleanest test: would another team running a similar diagnostic
 arrive at the same rule by reading domain literature or external
-docs? If yes, it's a `wiki/concepts/`, `data_sources/`, or
-`methods/` matter. If the rule is genuinely a *project decision*
+docs? If yes, it's a `research/wiki/concepts/`,
+`research/sources/`, or `research/methods/` matter. If the rule is genuinely a *project decision*
 about how this engagement does its work, it belongs here.
 
 ## Where project-convention docs live
@@ -60,10 +60,11 @@ about how this engagement does its work, it belongs here.
 
 ## The two enforced rules
 
-Unlike `data_sources/` (Status / Anchor / Endpoints / Query /
-Parsing / Pitfalls — six required sections) and `methods/`
-(Source / Rule / Why / Exclusions / Edge cases / Limitations /
-Counts — seven required sections), `.claude/conventions/project/` does
+Unlike `research/sources/` (What it gives you / Access / Headline
+anchor / Gotchas / Coverage limits — five required sections) and
+`research/methods/` (Rule / Why this and not the alternatives /
+Traps / Diagnostic counts / Scope and limits / Changelog — six),
+`.claude/conventions/project/` does
 **not** prescribe internal structure. Visualization rules need
 color tables and plotting helpers; writing rules need voice and
 citation guidance; slide rules need layout and density notes.
@@ -88,11 +89,12 @@ principles — but don't bolt on sections that don't fit.
 
 ## Why Principle 9 does NOT bind
 
-`docs/audience-and-philosophy.md` Principle 9 (verifiable
+`docs/audience-and-philosophy.md` in the framework repo (not
+installed here) — Principle 9, verifiable
 freshness anchors) requires reference docs about external
 systems to pair `Status: verified <date>` with a re-fetchable
-headline anchor. That principle binds `data_sources/` and
-`methods/` because their claims age out: an API endpoint
+headline anchor. That principle binds `research/sources/` and
+`research/methods/` because their claims age out: an API endpoint
 quietly retires; a cohort rule's diagnostic counts drift when
 the panel updates.
 
@@ -117,7 +119,7 @@ the history.
    gloss per file if the quick-nav doesn't already make the
    purpose obvious.
 3. **How to add a new convention** — three or four bullets.
-   Same shape as `data_sources/INDEX.md`'s recipe, adapted to
+   Same shape as `research/sources/INDEX.md`'s recipe, adapted to
    the looser internal structure here.
 
 ## Discipline rules
@@ -130,12 +132,12 @@ the history.
   past ~150 lines is a smell. Either the domain has split
   (visualization rules vs. interactive-dashboard rules) and
   should be two files, or the file has accumulated tangents
-  that belong in a `wiki/concepts/` page or a `decisions/`
-  record.
+  that belong in a `research/wiki/concepts/` page or a
+  `research/methods/` record.
 - **Edit, don't accumulate.** When the rule changes, edit the
   doc in place — don't append "UPDATE: now we use blue." Git
   history is the version log; the doc reads as current truth.
-  This mirrors the data-sources convention.
+  This mirrors the sources convention.
 - **Cross-link from CLAUDE.md only at the top level.** The
   CLAUDE.md pointer block names the folder and its purpose;
   individual files are not cross-linked from CLAUDE.md. The
@@ -170,17 +172,19 @@ the history.
 ## What this convention does NOT cover
 
 - **Framework-shared protocols** — those live in
-  `.claude/conventions/<name>.md` and ship with super-
-  claudio-research. `.claude/conventions/project/` is for the rules
+  `.claude/conventions/<name>.md` and ship with
+  research-to-policy. `.claude/conventions/project/` is for the rules
   *this engagement* makes locally.
 - **Peer-reviewable methodology calls** — deflator choice,
   identification strategy, sample restriction. Those go in
-  `decisions/YYYY-MM-DD_<slug>.md` (see
-  `.claude/conventions/decision-records.md`).
+  `research/methods/<topic>.md` (see
+  `.claude/conventions/methods.md`, which absorbed the v1
+  `decision-records` convention).
 - **External-system reference docs** — APIs and codebooks go
-  in `data_sources/` with anchors.
+  in `research/sources/` with anchors.
 - **Operational compute rules with diagnostic counts** —
-  cohort definitions and threshold filters go in `methods/`.
+  cohort definitions and threshold filters go in
+  `research/methods/`.
 - **Distilled domain claims with citations** — "the Balassa
   RCA index has a known small-economy bias" goes in
-  `wiki/concepts/`, not here.
+  `research/wiki/concepts/`, not here.

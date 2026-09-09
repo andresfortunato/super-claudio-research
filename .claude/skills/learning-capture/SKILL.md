@@ -109,13 +109,15 @@ date: YYYY-MM-DD
 [Situations where this knowledge is relevant — datasets, country-windows, deliverable types.]
 ```
 
-## index.yaml entry
+## The `triggers:` line
 
-Every learning MUST have a corresponding entry:
+There is no index. The destination file's own frontmatter carries the retrieval
+contract, and v1's separate `learnings/index.yaml` is gone — a forgotten index
+row made a learning invisible to retrieval, which is half of why 63 of the
+pilot's 70 learnings never reached a future session:
 
 ```yaml
-- file: <filename>.md
-  triggers: "keyword1 keyword2 keyword3 keyword4"
+triggers: "keyword1 keyword2 keyword3 keyword4"
 ```
 
 Triggers are words that would appear in a user's prompt when this learning is relevant. The retrieval hook (`.claude/hooks/retrieve-learnings.sh`) matches prompts against these keywords and surfaces a learning only when **at least 2 trigger words** appear in the prompt. Choose 4–8 specific, concrete keywords — variable names, dataset acronyms, country codes, year ranges — not generic words like "data" or "fix."
@@ -126,7 +128,7 @@ Bad: `"data error wave fix"` — generic; will misfire on unrelated work.
 
 ## Guidelines
 
-- **One learning per file.** Don't bundle unrelated things. A multi-symptom write-up belongs in `research/evidence/NN_*.md` or a methodology section, not in `research/methods/`.
+- **One trap per append.** Don't bundle unrelated things into a single `### ` section. A multi-symptom write-up belongs in `research/evidence/NN_*.md`, not in a `## Traps` section. (v1 said "one learning per *file*"; v2 appends into a shared topic file, so the unit is the section, not the file.)
 - **Be specific.** "PWT rgdpo inflates oil-exporter productivity by ~40% in 2010–2019 (vs rgdpe)" is useful. "Be careful with PWT" is not.
 - **Include the context that makes it actionable.** A future session reading this learning should know exactly what to do differently — which variable, which year, which sample.
 - **Don't duplicate what belongs in `research/methods/` or `research/evidence/`.** A peer-reviewable methodology call (chose `rgdpe` over `rgdpo`) goes in `research/methods/`; an evidence-based finding (Argentina's productivity slowdown decomposes 60/40 within/between sectors) goes in `research/evidence/`. A learning is the *gotcha* — the thing you'd want a future session to know *before* it tries the same step.
@@ -138,4 +140,4 @@ Bad: `"data error wave fix"` — generic; will misfire on unrelated work.
 - **`research/methods/`** is peer-reviewable methodology calls (`research/methods/<topic>.md`). A learning that surfaces a methodology choice (use `rgdpe`, not `rgdpo`) graduates to a decision record once the team agrees. The learning records the discovery; the decision record is the citable form.
 - **`plan/brainstorms/`** is decisions-pre-planning (the conversation that produces a `research/methods/` record). Learnings are not brainstorms — they're tacit knowledge from execution, not deliberation.
 
-Full rationale and the three-bucket model: `docs/learning-capture-mechanism.md`. Format and retrieval contract: `.claude/conventions/methods.md`.
+Full rationale and the three-bucket model: `docs/learning-capture-mechanism-v1.md`. Format and retrieval contract: `.claude/conventions/methods.md`.

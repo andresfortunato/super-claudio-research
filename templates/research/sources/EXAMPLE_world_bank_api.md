@@ -37,7 +37,8 @@ This triple — indicator code + ISO3 + year — is the smoke test future
 sessions re-run to confirm this doc still describes the live API
 correctly. A stale `Status:` date paired with a drifted value is the
 signal that the doc needs a refresh. See "Verifiable freshness
-anchors" in `docs/audience-and-philosophy.md`.
+anchors" in `docs/audience-and-philosophy.md`, in the framework repo
+(`r2p init` does not install `docs/`).
 
 The anchor is best chosen as a stable historical value (a 2010s GDP
 per capita figure won't be revised much) rather than a fresh

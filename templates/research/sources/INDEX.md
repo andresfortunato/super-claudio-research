@@ -45,7 +45,8 @@ form:
 2. **Run the headline-anchor query at least once** and paste the
    returned value into the doc; record `Status: verified <today>`.
    A date stamp without a re-fetchable anchor rots silently — see
-   "Verifiable freshness anchors" in `docs/audience-and-philosophy.md`.
+   "Verifiable freshness anchors" in `docs/audience-and-philosophy.md`,
+   in the framework repo (`r2p init` does not install `docs/`).
 3. **Add a row to the Quick navigation table** above so future-you
    finds it.
 4. **Cross-link from `CLAUDE.md`** only if the source is core

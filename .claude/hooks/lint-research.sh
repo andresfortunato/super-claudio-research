@@ -18,6 +18,7 @@
 #  12. `artifacts:` naming a path that does not exist    (a typo that satisfies inv 9)
 #  13. `[C<n>]` in a deliverable matching no claim heading (link deliverable->claim)
 #  14. bare `#nn` in a deliverable naming no live evidence id, banners honoured
+#  15. a `.claude/**` or `docs/**` markdown pointer naming a file that is gone
 #
 # Two verdict tiers, and the split is deliberate:
 #   FAIL — a broken link or a duplicate id. Exit 1. Always mechanical, never a
@@ -627,6 +628,107 @@ if [[ -d deliverables ]]; then
     show "$badn"
   elif (( nn )); then
     note "ok   every bare #nn in deliverables/ resolves ($nn distinct)"
+  fi
+fi
+
+# --- 15. every in-repo doc pointer resolves -------------------------------
+# The one defect class in this framework that is invisible *by construction*: a
+# file tells the session to read `.claude/conventions/<name>.md` or
+# `docs/<name>.md`, the file is not there, and nothing errors. The session simply
+# does not get the guidance. There is no symptom to notice, which is why it went
+# unnoticed for a full release.
+#
+# Scope is `.claude/**` and `docs/**` markdown, not conventions alone. The
+# generalisation is what makes a documentation *deletion* safe: the moment a
+# `docs/*.md` file is removed, every pointer at it becomes this defect, and that
+# is exactly the operation queued next. Placeholders are excluded for free —
+# `docs/<name>.md` contains `<`, which the reference pattern does not admit.
+#
+# Measured 2026-09-09, and the reason this had to be mechanical: a hand-built
+# inventory of the same defect, compiled one session earlier, listed seven dead
+# names. Resolving every pointer against `ls .claude/conventions/` found ten in
+# this repo and seven in the pilot, and the two lists were not the same seven.
+# An inventory of invisible defects is itself incomplete — so the check, not the
+# list, is the deliverable.
+#
+# **The tier is set by who cites it, not by which convention is missing.**
+#   FAIL — a shipped runtime surface: a hook, a skill, an agent, another
+#          convention, a template, the CLI, or CLAUDE.md. `precompact-handoff.sh`
+#          is the case that motivated this: it fires automatically when context
+#          fills and named two conventions that had not existed since v2, in
+#          every installed project.
+#   WARN — documentation. A stale pointer in `docs/` misleads a reader who can
+#          see the file is missing; one in a hook misleads a session that cannot.
+#
+# Two directories are exempt, and the reason is not convenience: `archive/` and
+# `brainstorms/` are the historical record. An archived plan that cites a v1
+# convention is *accurate about v1* — repathing it would falsify the record. This
+# is the same judgement invariant 14 makes when it honours a renumber banner:
+# context can make an unresolvable reference correct.
+#
+# **Only framework-owned files are read, and that scope was set by measurement.**
+# A first pass scanned everything and reported 22 findings on the pilot, of which
+# most were the researcher's own prose — an evidence doc citing a note, a
+# `reference/notes/` file citing framework paths. Those are broken links in
+# somebody's writing, a different check with a different population, and mixing
+# them in is how a WARN tier trains people to ignore it. In scope: `.claude/**`,
+# `templates/**`, `src/**`, `CLAUDE.md` (FAIL); `docs/**`, `README.md`,
+# `TODO.md`, `plan/**` (WARN). Out of scope: everything a researcher authors.
+#
+# The `plan/**` entries are self-clearing and need no exemption: a plan file that
+# quotes a dead convention name while *describing* the defect is correct, and
+# when the plan completes it moves to `archive/`, which is already exempt.
+# Two stated exclusions, in the spirit of `03_linkcheck.py`'s BASELINE_PAT —
+# filtered out loud, not silently:
+#
+#   1. `upgrade.js` documents its own path mapping with a placeholder name on
+#      both sides of the arrow. That is an illustration of the rule, not a
+#      pointer to a file.
+#   2. `.claude/conventions/project/` is the project-scoped namespace that
+#      `project-conventions.md` exists to define, and the project creates it on
+#      demand. A convention naming the contents of the directory it specifies is
+#      pointing forward, not dangling — the same distinction invariant 14 draws
+#      when it honours a renumber banner.
+LINT_PTR_ALLOW=${LINT_PTR_ALLOW:-'(^src/lib/upgrade\.js:.*/x\.md$)|(:\.claude/conventions/project/)'}
+if [[ -d .claude || -d docs ]]; then
+  ptr_run=""; ptr_doc=""; nptr=0
+  while IFS= read -r hit; do
+    [[ -n "$hit" ]] || continue
+    file=${hit%%:*}; rest=${hit#*:}; lineno=${rest%%:*}; ref=${rest#*:}
+    case "$file" in
+      .claude/*|templates/*|src/*|CLAUDE.md) tier=run ;;
+      docs/*|plan/*|README.md|TODO.md)       tier=doc ;;
+      *)                                     continue ;;   # researcher-authored
+    esac
+    nptr=$((nptr+1))
+    [[ -f "$ref" ]] && continue
+    [[ "$file:$ref" =~ $LINT_PTR_ALLOW ]] && continue
+    if [[ $tier == run ]]; then
+      ptr_run="${ptr_run}${file}:${lineno} -> ${ref} (gone)"$'\n'
+    else
+      ptr_doc="${ptr_doc}${file}:${lineno} -> ${ref} (gone)"$'\n'
+    fi
+  done < <(grep -rnoE '(\.claude|docs)/[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*\.md' \
+             --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=archive \
+             --exclude-dir=brainstorms --exclude-dir=.venv --exclude-dir=venv \
+             --exclude-dir=data --exclude-dir=output --exclude-dir=__pycache__ \
+             --include='*.md' --include='*.sh' --include='*.js' --include='*.json' \
+             --include='*.yaml' --include='*.yml' --include='*.example' \
+             --include='*.txt' --include='*.py' . 2>/dev/null | sed 's|^\./||')
+
+  # Runtime first. An unranked list of findings makes the reader do the triage
+  # the check was supposed to do (agent-teams G8), and here the two tiers differ
+  # in kind: one misleads a session, the other misleads a person.
+  if [[ -n "$ptr_run" ]]; then
+    note "FAIL $(grep -c . <<< "$ptr_run") doc pointer(s) in a shipped runtime surface resolve to nothing:"
+    show "$ptr_run"; fail=1
+  fi
+  if [[ -n "$ptr_doc" ]]; then
+    warn "$(grep -c . <<< "$ptr_doc") doc pointer(s) in documentation resolve to nothing (archive/ and brainstorms/ exempt):"
+    show "$ptr_doc"
+  fi
+  if [[ -z "$ptr_run" && -z "$ptr_doc" ]] && (( nptr )); then
+    note "ok   every .claude/** and docs/** pointer resolves ($nptr reference(s))"
   fi
 fi
 

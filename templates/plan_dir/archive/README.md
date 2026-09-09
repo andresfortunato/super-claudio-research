@@ -33,8 +33,9 @@ synthesis* — what a future reader needs to know about a multi-session
 piece of work in 100 lines instead of reconstructing from 30 commits
 and a deleted plan directory. Without the archive, completed plans
 would either pile up under `plan/` (signal-to-noise erodes as count
-grows) or vanish entirely (decisions become uninherited). See
-`docs/plan-archival-mechanism.md` for the full rationale.
+grows) or vanish entirely (decisions become uninherited). Full
+rationale: `docs/plan-archival-mechanism.md` in the framework
+repo, which `r2p init` does not install.
 
 ## What does NOT live here
 

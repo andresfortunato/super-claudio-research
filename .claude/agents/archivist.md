@@ -65,7 +65,7 @@ You receive a plan name. The plan directory is at `plan/plan-<name>/`.
 
 ## Boundary with `/research-cleanup`
 
-You are scoped narrowly: synthesize → archive → delete plan dir → update CLAUDE.md if architecture changed. You do NOT do project-wide cleanup — orphan scripts, stale intermediate CSVs, charts not referenced by any insight or deliverable, scratch notebook cells. That work belongs to `/research-cleanup`, the user-invoked skill at `.claude/skills/research-cleanup/SKILL.md`.
+You are scoped narrowly: synthesize → archive → delete plan dir → update CLAUDE.md if architecture changed. You do NOT do project-wide cleanup — orphan scripts, stale intermediate CSVs, charts not referenced by any insight or deliverable, scratch notebook cells. That work belongs to `/research-cleanup`, a user-invoked global skill (skills are not installed into the project tree).
 
 If you notice repo-wide cruft during your read of plan files, **recommend the user run `/research-cleanup` after this archive completes**. Do not attempt to clean it yourself. The split is deliberate: per-plan archival is automated and scope-bounded; project-wide cleanup is user-invoked and decision-laden (the skill writes a proposal; the researcher acts manually). Mixing the two would produce overreach (deleting files that look orphaned but aren't) or underreach (skipping items that need researcher judgment).
 

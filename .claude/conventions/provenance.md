@@ -140,8 +140,9 @@ sha256sum output/.../06c_wage_gradient.png
 
 ## Cross-references
 
-- `.claude/skills/verify/SKILL.md` — `/verify` walks `git log` → commit message
-  → script header to locate any artifact's provenance.
+- `/verify` (a global skill; `.claude/skills/` is not installed into a project)
+  — walks `git log` → commit message → script header to locate any artifact's
+  provenance.
 - `.claude/conventions/evidence.md` — the evidence doc's `## Provenance`
   section is this convention applied at the finding level. Its `artifacts:` key
   is the **complement, not a duplicate**: this convention answers *how* an
