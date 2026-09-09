@@ -64,6 +64,16 @@ Two things to get right:
 And print something when it finds nothing (principle 10): an invariant with an
 empty population prints that it had one, rather than vanishing from the report.
 
+**Run it against three corpora before shipping it**, in this order: a mature
+project (does it find the real defect?), this repo (does it find framework
+defects?), and a throwaway `r2p init` (does it no-op on an empty tree?). **The
+third is the one that gets skipped and the only one with an answer known in
+advance.** A linter that fails on the day it is installed teaches the project
+that red is normal, and every real finding after that arrives pre-discounted.
+Eleven v3 invariants shipped before anyone pointed the script at a fresh
+scaffold; three of them failed it. See
+`docs/field-notes/a-linter-must-be-run-against-a-fresh-install.md`.
+
 #### 2b. A user-invoked skill — for the half a grep cannot do
 
 Some checks are not decidable in bash: whether a paragraph asserts something

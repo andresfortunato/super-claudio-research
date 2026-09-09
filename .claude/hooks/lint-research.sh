@@ -388,6 +388,22 @@ have_id() { grep -qx -- "$1" <<< "$EV_IDS"; }
 # `claim` is cleared by any heading that is not a `C<n>` claim, so `## §N`
 # narrative sections bound each block and a number in section prose cannot be
 # attributed to the claim above it.
+# `claims.md` with `<!-- ... -->` regions blanked. A commented-out claim is one
+# the author has said is not live — a drafted claim, a retired one kept for
+# reference, or the shape shown in the shipped template. Reading inside the
+# comment made `r2p init` FAIL invariant 8 on its own seed file, which is the
+# one thing a linter must never do. Lines are blanked rather than dropped so
+# every `file:line` this script reports still points at the right line.
+claims_live() {
+  awk '
+    { out = $0 }
+    /<!--/ { sub(/<!--.*/, "", out); inc = 1 }
+    inc && /-->/ { inc = 0; sub(/.*-->/, "", $0); out = out $0 }
+    inc { out = "" }
+    { print out }
+  ' research/claims.md
+}
+
 if [[ -f research/claims.md ]]; then
   # Status by id, off the corpus scan. Only two values matter here.
   retired_ids=""; revised_ids=""
@@ -445,7 +461,7 @@ if [[ -f research/claims.md ]]; then
       [[ "$rest" == *·* ]] || break
       rest=${rest#*·}
     done
-  done < research/claims.md
+  done < <(claims_live)
   end_claim
 
   # --- 8. claim -> evidence
@@ -682,7 +698,7 @@ if [[ -d deliverables ]]; then
   # cites nothing* already forbids — write the claim first, which forces the
   # evidence doc. Blocking it is the point, not a side effect.
   if [[ -f research/claims.md ]]; then
-    claim_ids=$(grep -oE '^#{2,3} C[0-9]+' research/claims.md | grep -oE '[0-9]+' | sort -u)
+    claim_ids=$(claims_live | grep -oE '^#{2,3} C[0-9]+' | grep -oE '[0-9]+' | sort -u)
     badc=""; nc=0
     while IFS= read -r c; do
       [[ -n "$c" ]] || continue
@@ -821,12 +837,29 @@ fi
 #      demand. A convention naming the contents of the directory it specifies is
 #      pointing forward, not dangling — the same distinction invariant 14 draws
 #      when it honours a renumber banner.
+#   3. A `~/`- or `$HOME/`-prefixed path is a **global** install
+#      (`~/.claude/skills/`, `~/.claude/agents/` — symlinked there by
+#      `r2p init`), not a project-relative one. Resolving it against the project
+#      root is simply the wrong question, and doing so made a *fresh* `r2p init`
+#      fail this invariant on `check-archival.sh`'s correct reference to
+#      `~/.claude/agents/archivist.md`. Handled by the pattern, not this list.
+#   4. A line that also says **"framework repo"** is a deliberate qualified
+#      pointer at something `r2p init` does not install — `docs/` above all.
+#      The alternative was to keep failing every shipped file that correctly
+#      tells the reader where the framework's own docs live. This honours an
+#      explicit marker phrase rather than judging qualification in general,
+#      which is the same move invariant 14 makes with a renumber banner: the
+#      author states the context, and the check takes their word for it. It
+#      also turns "name the framework repo when you point into `docs/`" from
+#      advice into a rule with a consequence.
 LINT_PTR_ALLOW=${LINT_PTR_ALLOW:-'(^src/lib/upgrade\.js:.*/x\.md$)|(:\.claude/conventions/project/)'}
 if [[ -d .claude || -d docs ]]; then
   ptr_run=""; ptr_doc=""; ptr_plan=""; nptr=0
   while IFS= read -r hit; do
     [[ -n "$hit" ]] || continue
     file=${hit%%:*}; rest=${hit#*:}; lineno=${rest%%:*}; ref=${rest#*:}
+    # Exclusion 3: a global install path is not project-relative. See above.
+    [[ "$ref" == '~/'* || "$ref" == '$HOME/'* ]] && continue
     case "$file" in
       .claude/*|templates/*|src/*|CLAUDE.md) tier=run ;;
       docs/*|README.md|TODO.md)              tier=doc ;;
@@ -836,12 +869,14 @@ if [[ -d .claude || -d docs ]]; then
     nptr=$((nptr+1))
     [[ -f "$ref" ]] && continue
     [[ "$file:$ref" =~ $LINT_PTR_ALLOW ]] && continue
+    # Exclusion 4: the author marked this as pointing at the framework repo.
+    sed -n "${lineno}p" "$file" 2>/dev/null | grep -qF 'framework repo' && continue
     case $tier in
       run)  ptr_run="${ptr_run}${file}:${lineno} -> ${ref} (gone)"$'\n' ;;
       doc)  ptr_doc="${ptr_doc}${file}:${lineno} -> ${ref} (gone)"$'\n' ;;
       plan) ptr_plan="${ptr_plan}${file}:${lineno} -> ${ref} (gone)"$'\n' ;;
     esac
-  done < <(grep -rnoE '(\.claude|docs)/[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*\.md' \
+  done < <(grep -rnoE '(~/|\$HOME/)?(\.claude|docs)/[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*\.md' \
              --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=archive \
              --exclude-dir=brainstorms --exclude-dir=.venv --exclude-dir=venv \
              --exclude-dir=data --exclude-dir=output --exclude-dir=__pycache__ \
