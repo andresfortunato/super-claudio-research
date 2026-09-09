@@ -13,6 +13,7 @@
 #   8. claim `Rests on:` naming an evidence id with no file  (link claim->evidence)
 #   9. artifact used in deliverables/ that no evidence doc mentions at all
 #  9b. artifact an evidence doc discusses but does not bind via `artifacts:`
+#  10. evidence doc older than the artifacts it binds     (a re-render it never saw)
 #
 # Two verdict tiers, and the split is deliberate:
 #   FAIL — a broken link or a duplicate id. Exit 1. Always mechanical, never a
@@ -256,6 +257,65 @@ if [[ -d deliverables ]]; then
     show "$unbound"
   elif (( nref )); then
     note "ok   every artifact in deliverables/ is bound via artifacts:"
+  fi
+fi
+
+# --- 10. evidence staleness ------------------------------------------------
+# An evidence doc is stale when the newest commit touching any path in its own
+# `artifacts:` is newer than the doc's own `date:`. The documented case is a
+# chart re-rendered after a data re-read while the doc kept asserting the old
+# numbers (docs/field-notes/porting-a-chart-…), and the doc had been wrong for
+# weeks with nothing able to see it.
+#
+# WARN, not FAIL: a re-render is often cosmetic — a palette, a label, a figure
+# size — and failing the build on every one of those trains people to stop
+# reading the output.
+#
+# Deliberately NOT the deeper walk. `plan.md` describes this as "inputs carry a
+# newer commit than the doc", but evidence frontmatter has no `inputs` field and
+# adding one would duplicate the script header's `Inputs:` line — two sources of
+# truth for one fact. The artifact -> Run: -> script -> header traversal needs
+# real provenance walking and belongs to /pipeline-check.
+if git rev-parse --git-dir >/dev/null 2>&1; then
+  stale=""; checked=0
+  while IFS= read -r f; do
+    ddate=$(sed -n 's/^date:[[:space:]]*\([0-9-]\{10\}\).*/\1/p' "$f" | head -1)
+    [[ -n "$ddate" ]] || continue
+    # The doc's own last commit, as well as its `date:`. Both are needed and
+    # neither alone is right:
+    #   `date:` alone   — a hand-authored measurement date compared against a
+    #                     commit timestamp. Author a doc on Monday, commit it
+    #                     Wednesday with its chart, and the chart is "newer"
+    #                     than the doc it shipped in. Measured: a fresh fixture
+    #                     whose doc and chart are in one commit warned.
+    #   commit alone    — a typo fix on the doc after a re-render masks the
+    #                     staleness, because the doc "moved" more recently
+    #                     without anyone re-reading the numbers.
+    # Requiring both means: the artifact moved after the doc last moved AND
+    # after the date the doc claims to describe. The field-note case (chart
+    # re-rendered weeks later, doc untouched) satisfies both.
+    # `%ct` (unix seconds) for the commit-vs-commit half: `--date=short` is
+    # day-resolution, so a chart re-rendered the same afternoon as the doc's
+    # last edit compares equal and the check silently misses it.
+    read -r dct dcommit <<< "$(git log -1 --format='%ct %cd' --date=short -- "$f" 2>/dev/null)"
+    while IFS= read -r a; do
+      [[ -n "$a" ]] || continue
+      read -r act adate <<< "$(git log -1 --format='%ct %cd' --date=short -- "$a" 2>/dev/null)"
+      # No commit touching it yet: uncommitted or untracked. Invariant 12 owns
+      # "does not exist"; silence here, or every new chart warns before its
+      # first commit.
+      [[ -n "$act" ]] || continue
+      checked=$((checked+1))
+      [[ "$adate" > "$ddate" ]] || continue
+      [[ -n "$dct" ]] && (( act <= dct )) && continue
+      stale="${stale}#$(ev_id "$f") dated $ddate (last commit ${dcommit:-none}) — $a committed $adate"$'\n'
+    done < <(ev_artifacts "$f")
+  done < <(ev_docs)
+  if [[ -n "$stale" ]]; then
+    warn "$(grep -c . <<< "$stale") artifact(s) re-committed after the evidence doc that reads them:"
+    show "$stale"
+  elif (( checked )); then
+    note "ok   no evidence doc is older than the artifacts it binds ($checked checked)"
   fi
 fi
 
