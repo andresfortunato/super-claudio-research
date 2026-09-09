@@ -3,6 +3,7 @@
 import { Command } from 'commander';
 import { initCommand } from './commands/init.js';
 import { planInitCommand } from './commands/plan.js';
+import { evidenceNewCommand } from './commands/evidence.js';
 
 const program = new Command();
 
@@ -26,5 +27,14 @@ planCmd
   .command('init <slug>')
   .description('Scaffold plan/plan-<slug>/{plan.md, handoff.md, log.md, phases/, context/}')
   .action(planInitCommand);
+
+const evidenceCmd = program
+  .command('evidence')
+  .description('Work with the evidence corpus in research/evidence/');
+
+evidenceCmd
+  .command('new <slug>')
+  .description('Allocate the next id from .next-id (atomically) and scaffold research/evidence/NN_<slug>.md')
+  .action(evidenceNewCommand);
 
 program.parse();
