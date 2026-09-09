@@ -1,8 +1,8 @@
 # Handoff — plan-r2p-v3
 
 **Session:** 2026-09-09 (Phase 3 execution) · prior sessions 2026-08-05, 2026-08-17, 2026-09-09 (Phase 2b)
-**Last content commit:** `f1a8947` — **this handoff is committed on top of it**, so
-`HEAD` is the handoff commit, not `f1a8947`. (A handoff cannot name its own commit;
+**Last content commit:** `8c3f210` — **this handoff is committed on top of it**, so
+`HEAD` is the handoff commit, not `8c3f210`. (A handoff cannot name its own commit;
 the convention forbids fabricating it. Verify with `git log --oneline -2`.)
 **Branch:** `main` · **Working tree:** clean.
 
@@ -51,6 +51,7 @@ in weeks, so re-measure before diffing, always.
 | `50c246c` | **3.5** report shape — three legacy outputs capped; two invariants stop vanishing when inapplicable |
 | `aa6b61a` | **3.6** `r2p evidence new <slug>` — O_EXCL-locked atomic allocation |
 | `bf25bbe` | gitignore the allocator lock, both installers |
+| `8c3f210` | invariant 13 reports zero-adoption instead of vanishing — 3.5's rule, applied to the check that shipped after it |
 
 **Three out-of-phase fixes**, each forced by a verification criterion in
 `phase-3.md`, none discretionary:
