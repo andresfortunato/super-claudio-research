@@ -11,6 +11,8 @@
 #   6. claims.md staler than the newest evidence doc
 #   7. method or source doc with no `triggers:` line (invisible to retrieval)
 #   8. claim `Rests on:` naming an evidence id with no file  (link claim->evidence)
+#   9. artifact used in deliverables/ that no evidence doc mentions at all
+#  9b. artifact an evidence doc discusses but does not bind via `artifacts:`
 #
 # Two verdict tiers, and the split is deliberate:
 #   FAIL — a broken link or a duplicate id. Exit 1. Always mechanical, never a
@@ -49,6 +51,56 @@ warn() { warns=$((warns+1)); printf '  WARN %s\n' "$1"; }
 # negotiable, because it is the key claims.md and every deliverable resolve on.
 ev_docs() { find "$EV" -type f -name '[0-9]*_*.md' 2>/dev/null | LC_ALL=C sort; }
 ev_id()   { basename "$1" | grep -oE '^[0-9]+' | sed 's/^0*//'; }
+
+# `artifacts:` is a YAML *block* list, never inline (evidence.md). Emit one path
+# per line for one doc. The key is OPTIONAL and absent is the common legitimate
+# state — a doc that measures something without drawing it. Absence means "not
+# stated", never "no charts exist", so nothing here may treat it as a finding.
+ev_artifacts() {
+  awk 'NR==1 && $0!="---" {exit}
+       NR>1 && /^---$/     {exit}
+       /^artifacts:/       {inblock=1; next}
+       inblock && /^[[:space:]]+-[[:space:]]*/ {
+         sub(/^[[:space:]]+-[[:space:]]*/, "");
+         sub(/[[:space:]]*#.*$/, "");           # trailing YAML comment
+         gsub(/^["'"'"']|["'"'"']$/, "");
+         if (length($0)) print;
+         next }
+       inblock             {inblock=0}' "$1"
+}
+
+# A path as a deliverable writes it -> as the repo names it. `../../output/x.png`
+# from deliverables/memos/ and `output/x.png` from the root are the same artifact.
+norm_path() { sed -e 's|^/*||' -e 's|^\(\.\./\)*||' -e 's|^\./||'; }
+
+# Print a list, bounded, and ALWAYS say what was dropped. A silent cap reads as
+# "mostly fine" when it is not; `05_methods_merge.py:304` truncates to 12 with no
+# notice and that is the habit this exists to avoid importing. Override with
+# LINT_MAX=0 for the full list.
+LINT_MAX=${LINT_MAX:-20}
+show() {
+  local n=0 total
+  total=$(grep -c . <<< "$1")
+  while IFS= read -r l; do
+    [[ -n "$l" ]] || continue
+    if (( LINT_MAX > 0 && n >= LINT_MAX )); then
+      note "     … and $((total - n)) more not shown (LINT_MAX=$LINT_MAX; set LINT_MAX=0 for all)"
+      break
+    fi
+    note "     $l"; n=$((n+1))
+  done <<< "$1"
+}
+
+# Every artifact-shaped path a deliverable points at, repo-relative and unique.
+# Anchored on `output/` because that is where the layout puts artifacts and what
+# provenance.md's `Run:`/`Out:` records — it keeps `data/raw/*.csv` and a memo's
+# own companion PDF out of a check about charts.
+deliverable_artifacts() {
+  [[ -d deliverables ]] || return 0
+  find deliverables -type f -name '*.md' -print0 2>/dev/null \
+    | xargs -0 -r grep -ohE '(\.\./)*output/[A-Za-z0-9._/-]+\.(png|svg|jpg|jpeg|pdf|csv|tsv|xlsx)' 2>/dev/null \
+    | norm_path | LC_ALL=C sort -u
+}
 
 echo "== r2p v2 research lint =="
 
@@ -161,6 +213,49 @@ if [[ -f research/claims.md ]]; then
     note "FAIL claim rests on evidence that does not exist:"; printf '%s' "$unresolved"; fail=1
   else
     note "ok   every claim's Rests on: resolves"
+  fi
+fi
+
+# --- 9 / 9b. evidence -> artifact binding ----------------------------------
+# Two populations, and conflating them was the trap. Measured on the pilot:
+# 67 artifacts referenced from deliverables/, of which 53 are discussed inside
+# some evidence doc but not listed under `artifacts:`, and 14 appear nowhere in
+# research/evidence/ at all. Only the second group is the audit's finding — a
+# chart carrying a headline number with no evidence doc behind it, invisible for
+# six months. The first group is an adoption gap: `artifacts:` is a v3 key, so on
+# any project that predates it every reference is unbound by construction, and
+# failing the build on that is how check-evidence.sh died.
+if [[ -d deliverables ]]; then
+  refs=$(deliverable_artifacts)
+  bound=$(while IFS= read -r f; do ev_artifacts "$f"; done < <(ev_docs) | norm_path | LC_ALL=C sort -u)
+  # One -f pass over the corpus, not one grep per path: on the pilot (67 paths,
+  # 285 docs) per-path recursion cost 9s, which is long enough that people stop
+  # running the linter.
+  mentioned=$(grep -rhoFf <(printf '%s\n' "$refs") "$EV" 2>/dev/null | LC_ALL=C sort -u)
+  orphan=""; unbound=""; nref=0
+  while IFS= read -r a; do
+    [[ -n "$a" ]] || continue
+    nref=$((nref+1))
+    grep -qxF -- "$a" <<< "$bound" && continue
+    if grep -qxF -- "$a" <<< "$mentioned"; then
+      unbound="${unbound}${a}"$'\n'
+    else
+      orphan="${orphan}${a}"$'\n'
+    fi
+  done <<< "$refs"
+
+  if [[ -n "$orphan" ]]; then
+    note "FAIL artifact used in deliverables/ that no evidence doc mentions ($(grep -c . <<< "$orphan") of $nref):"
+    show "$orphan"; fail=1
+  elif (( nref )); then
+    note "ok   every artifact in deliverables/ is known to some evidence doc"
+  fi
+
+  if [[ -n "$unbound" ]]; then
+    warn "$(grep -c . <<< "$unbound") of $nref artifacts in deliverables/ are discussed by an evidence doc but not listed under the artifacts: key:"
+    show "$unbound"
+  elif (( nref )); then
+    note "ok   every artifact in deliverables/ is bound via artifacts:"
   fi
 fi
 
