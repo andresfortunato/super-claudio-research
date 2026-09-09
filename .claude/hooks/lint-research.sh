@@ -59,43 +59,55 @@ warn() { warns=$((warns+1)); printf '  WARN %s\n' "$1"; }
 # allocated twice, the counter was simply never consulted — so the recursive
 # walk *is* the defence. Subfolders are permitted; unique NN project-wide is not
 # negotiable, because it is the key claims.md and every deliverable resolve on.
-ev_docs() { find "$EV" -type f -name '[0-9]*_*.md' 2>/dev/null | LC_ALL=C sort; }
-ev_id()   { basename "$1" | grep -oE '^[0-9]+' | sed 's/^0*//'; }
+#
+# Read once into an array, not once per invariant. Measured on the pilot before
+# this change: 11.0s wall, of which the per-doc block below was 4.3s. `find`
+# re-ran on each of ten calls, and `ev_id` spawned three processes per document
+# inside four separate loops — roughly 3,400 processes to build a list of
+# numbers that cannot change during a run. A linter slow enough that people stop
+# running it is an adoption risk by the same reasoning that produced the WARN
+# tier, and the invariants Phase 6 adds would have multiplied that cost rather
+# than paying it once.
+EV_DOCS=()
+while IFS= read -r _f; do EV_DOCS+=( "$_f" ); done \
+  < <(find "$EV" -type f -name '[0-9]*_*.md' 2>/dev/null | LC_ALL=C sort)
+ev_docs() { (( ${#EV_DOCS[@]} )) && printf '%s\n' "${EV_DOCS[@]}"; return 0; }
 
-# Drop `<!-- … -->` spans, including multi-line ones. Authoring guidance is not
-# a measurement, and the shipped evidence template's own comment under
-# `## Measured` spells out the verdict words the check greps for — so a doc
-# created from the template failed invariant 5 on creation.
-strip_html_comments() {
-  awk '{
-    line = $0
-    if (inc) { p = index(line, "-->"); if (p == 0) next; line = substr(line, p + 3); inc = 0 }
-    while ((sopen = index(line, "<!--")) > 0) {
-      pre = substr(line, 1, sopen - 1); rest = substr(line, sopen + 4)
-      e = index(rest, "-->")
-      if (e == 0) { line = pre; inc = 1; break }
-      line = pre substr(rest, e + 3)
-    }
-    print line
-  }'
+# The id a filename claims, leading zeros stripped, in pure bash. `basename |
+# grep | sed` was three processes and this is called from report loops.
+ev_id() {
+  local b=${1##*/} d
+  d=${b%%[!0-9]*}
+  while [[ ${d:0:1} == 0 ]]; do d=${d:1}; done   # as `sed 's/^0*//'` did
+  [[ -n "$d" ]] && printf '%s\n' "$d"
+  return 0
 }
 
-# `artifacts:` is a YAML *block* list, never inline (evidence.md). Emit one path
-# per line for one doc. The key is OPTIONAL and absent is the common legitimate
-# state — a doc that measures something without drawing it. Absence means "not
-# stated", never "no charts exist", so nothing here may treat it as a finding.
-ev_artifacts() {
-  awk 'NR==1 && $0!="---" {exit}
-       NR>1 && /^---$/     {exit}
-       /^artifacts:/       {inblock=1; next}
-       inblock && /^[[:space:]]+-[[:space:]]*/ {
-         sub(/^[[:space:]]+-[[:space:]]*/, "");
-         sub(/[[:space:]]*#.*$/, "");           # trailing YAML comment
-         gsub(/^["'"'"']|["'"'"']$/, "");
-         if (length($0)) print;
-         next }
-       inblock             {inblock=0}' "$1"
-}
+# Parallel to EV_DOCS. Invariants 2, 8, 11 and 14 each need the same id list and
+# each used to rebuild it from scratch.
+EV_IDNUM=()
+for _f in "${EV_DOCS[@]+"${EV_DOCS[@]}"}"; do
+  _b=${_f##*/}; _d=${_b%%[!0-9]*}
+  while [[ ${_d:0:1} == 0 ]]; do _d=${_d:1}; done
+  EV_IDNUM+=( "$_d" )
+done
+ev_ids_all() { (( ${#EV_IDNUM[@]} )) && printf '%s\n' "${EV_IDNUM[@]}"; return 0; }
+
+# `<!-- … -->` stripping now lives inside the corpus scan below, as awk's
+# decomment(). It is not a general-purpose helper: its only caller was invariant
+# 5, and keeping a shell version alive next to the awk one would be two
+# implementations of the same rule.
+
+# `artifacts:` is a YAML *block* list, never inline (evidence.md). Reads one
+# doc's paths, one per line, by its index in EV_DOCS. The key is OPTIONAL and
+# absent is the common legitimate state — a doc that measures something without
+# drawing it. Absence means "not stated", never "no charts exist", so nothing
+# here may treat it as a finding.
+#
+# Parsing moved into the corpus scan below. Invariants 9, 10 and 12 each called
+# this once per document, so on the pilot it was 855 awk processes reading the
+# same 285 files three times over.
+ev_artifacts_at() { printf '%s' "${EV_ART_OF[$1]-}"; }
 
 # A path as a deliverable writes it -> as the repo names it. `../../output/x.png`
 # from deliverables/memos/ and `output/x.png` from the root are the same artifact.
@@ -147,6 +159,123 @@ deliverable_artifacts() {
     | norm_path | LC_ALL=C sort -u
 }
 
+# --- the corpus scan -------------------------------------------------------
+# One pass over every evidence doc, feeding invariants 3, 4, 5, 6 and 16. Each
+# of those used to re-read the corpus itself: a `head`, six `grep`s, two `sed`s,
+# an `awk` and a `grep` per document. awk takes the path list on stdin and opens
+# each file itself — not as argv, which would put a corpus-sized ceiling on
+# ARG_MAX, and not one awk per file, which is the cost being removed.
+#
+# Records emitted, tab-separated, tag first:
+#   FM_MISSING   <file>                      no `---` on line 1, or a required key absent
+#   ID_MISMATCH  <file> <fm-id> <name-id>    frontmatter id differs from the filename's
+#   DATE         <idx> <date>                first `date:` in the file  (invariants 6, 10)
+#   STATUS       <idx> <status>              frontmatter status         (invariant 16)
+#   ART          <idx> <path>                one `artifacts:` entry     (invariants 9, 10, 12)
+#   MEAS         <idx> <line>                a `## Measured` line, comments stripped
+#
+# `MEAS` and `STATUS` carry an index into EV_DOCS rather than a path, because the
+# verdict-word grep below runs over whole records and a path can contain the
+# words it looks for. Porting `\b` into awk was the alternative and it is not
+# safe here: mawk has no `\y` and is byte-oriented, so an accented letter stops
+# being a word character and `confirmó` would start matching `confirm`. The
+# check's meaning must not change inside a performance commit.
+#
+# An empty evidence doc reaches `n == 0` and is reported as missing frontmatter,
+# which is what `head -1 | grep -q '^---$'` did. That case is why awk reads the
+# path list rather than being handed the files as arguments: an empty file
+# produces no records at all, so FNR==1 never fires for it and every index after
+# it would have shifted by one.
+EV_SCAN=$(ev_docs | awk -v need="id headline status unit period confidence" '
+function decomment(line) {
+  # Verbatim port of the shell strip_html_comments this replaced. Authoring
+  # guidance is not a measurement, and the shipped evidence template spells out
+  # the verdict words under `## Measured` inside a comment — so a doc created
+  # from the template failed invariant 5 on creation.
+  if (inc) { p = index(line, "-->"); if (p == 0) return ""; line = substr(line, p + 3); inc = 0 }
+  while ((sopen = index(line, "<!--")) > 0) {
+    pre = substr(line, 1, sopen - 1); rest = substr(line, sopen + 4)
+    e = index(rest, "-->")
+    if (e == 0) { line = pre; inc = 1; break }
+    line = pre substr(rest, e + 3)
+  }
+  return line
+}
+BEGIN { nneed = split(need, needk, " "); idx = -1 }
+{
+  path = $0; idx++
+  b = path; sub(/^.*\//, "", b)
+  match(b, /^[0-9]+/); nid = substr(b, RSTART, RLENGTH); sub(/^0+/, "", nid)
+  split("", seen)
+  nofm = 0; infm = 0; fmid = ""; gotid = 0; st = ""; gotst = 0
+  dt = ""; gotdt = 0; meas = 0; inc = 0; inart = 0; n = 0
+
+  while ((getline line < path) > 0) {
+    n++
+    if (n == 1) { nofm = (line != "---"); infm = !nofm; continue }
+    if (infm) {
+      if (line == "---") { infm = 0 }
+      else {
+        if (match(line, /^[A-Za-z_][A-Za-z0-9_]*:/)) seen[substr(line, 1, RLENGTH - 1)] = 1
+        if (!gotid && substr(line, 1, 3) == "id:") {
+          v = substr(line, 4); sub(/^[ \t]*/, "", v)
+          match(v, /^[0-9]*/); fmid = substr(v, 1, RLENGTH); gotid = 1
+        }
+        if (!gotst && substr(line, 1, 7) == "status:") {
+          v = substr(line, 8); sub(/^[ \t]*/, "", v)
+          sub(/[ \t]*#.*$/, "", v); sub(/[ \t]+$/, "", v); st = v; gotst = 1
+        }
+        if (substr(line, 1, 10) == "artifacts:") inart = 1
+        else if (inart) {
+          if (match(line, /^[ \t]+-[ \t]*/)) {
+            v = substr(line, RLENGTH + 1)
+            sub(/[ \t]*#.*$/, "", v)                 # trailing YAML comment
+            gsub(/^["'"'"']|["'"'"']$/, "", v)
+            if (length(v)) print "ART\t" idx "\t" v
+          } else inart = 0
+        }
+      }
+    }
+    # `date:` is read from the whole file, not only the frontmatter, because
+    # that is where invariant 6 read it from and 45 pilot docs predate
+    # frontmatter entirely.
+    if (!gotdt && substr(line, 1, 5) == "date:") {
+      v = substr(line, 6); sub(/^[ \t]*/, "", v)
+      if (length(v) >= 10) { d = substr(v, 1, 10); if (d ~ /^[0-9-]+$/) { dt = d; gotdt = 1 } }
+    }
+    if (nofm) continue
+    if (line ~ /^## Measured/) { meas = 1; inc = 0; continue }
+    if (line ~ /^## /) { meas = 0 }
+    if (meas) { c = decomment(line); if (length(c)) print "MEAS\t" idx "\t" c }
+  }
+  close(path)
+  if (n == 0) nofm = 1
+
+  if (nofm) print "FM_MISSING\t" path
+  else {
+    miss = 0
+    for (k = 1; k <= nneed; k++) if (!(needk[k] in seen)) { miss = 1; break }
+    if (miss) print "FM_MISSING\t" path
+    if (fmid != nid) print "ID_MISMATCH\t" path "\t" (fmid == "" ? "none" : fmid) "\t" nid
+    if (st != "") print "STATUS\t" idx "\t" st
+  }
+  if (dt != "") print "DATE\t" idx "\t" dt
+}')
+scan_rows() { [[ -n "$EV_SCAN" ]] && grep "^$1"$'\t' <<< "$EV_SCAN"; return 0; }
+
+# Two per-document lookups, both indexed by position in EV_DOCS and both built
+# with no subprocess per document. Sparse on purpose: a doc with no `artifacts:`
+# and a doc with no `date:` are the common case, and `${arr[i]-}` reads empty.
+EV_ART_OF=(); EV_DATE_OF=()
+while IFS=$'\t' read -r _i _v; do
+  [[ -n "$_i" ]] || continue
+  EV_ART_OF[$_i]="${EV_ART_OF[$_i]-}$_v"$'\n'
+done < <(scan_rows ART | cut -f2-)
+while IFS=$'\t' read -r _i _v; do
+  [[ -n "$_i" ]] || continue
+  EV_DATE_OF[$_i]=$_v
+done < <(scan_rows DATE | cut -f2-)
+
 echo "== r2p v2 research lint =="
 
 # --- 1. headline cap -------------------------------------------------------
@@ -162,39 +291,38 @@ if [[ -f "$EV/INDEX.md" ]]; then
 fi
 
 # --- 2. duplicate ids ------------------------------------------------------
-dupes=$(while IFS= read -r f; do ev_id "$f"; done < <(ev_docs) | sort -n | uniq -d)
+dupes=$(ev_ids_all | sort -n | uniq -d)
 if [[ -n "$dupes" ]]; then
   note "FAIL duplicate evidence ids:"; fail=1
   while IFS= read -r d; do
     [[ -n "$d" ]] || continue
     note "     #$d claimed by:"
-    while IFS= read -r f; do
-      [[ "$(ev_id "$f")" == "$d" ]] && note "       $f"
-    done < <(ev_docs)
+    for i in "${!EV_DOCS[@]}"; do
+      [[ "${EV_IDNUM[$i]}" == "$d" ]] && note "       ${EV_DOCS[$i]}"
+    done
   done <<< "$dupes"
 else
   note "ok   evidence ids unique"
 fi
 
 # --- 3/4/5. per-doc checks -------------------------------------------------
+# Read off the corpus scan. The verdict test stays a real `grep -iE` so the
+# `\b` boundaries keep the semantics they had; `cut -f2-` drops the tag first so
+# the pattern sees `<idx>\t<line>` and cannot match inside a path.
 missing_fm=0; bad_id=0; verdicts=""; mismatch=""
-while IFS= read -r f; do
-  if ! head -1 "$f" | grep -q '^---$'; then
-    missing_fm=$((missing_fm+1)); continue
-  fi
-  fm=$(sed -n '2,/^---$/p' "$f")
-  for key in id headline status unit period confidence; do
-    grep -q "^${key}:" <<< "$fm" || { missing_fm=$((missing_fm+1)); break; }
-  done
-  fid=$(sed -n 's/^id:[[:space:]]*\([0-9]*\).*/\1/p' <<< "$fm" | head -1)
-  nid=$(ev_id "$f")
-  [[ "$fid" == "$nid" ]] || { bad_id=$((bad_id+1)); mismatch="${mismatch}$f (frontmatter=${fid:-none} filename=$nid)"$'\n'; }
-  # verdict words inside ## Measured only
-  meas=$(awk '/^## Measured/{f=1;next} /^## /{f=0} f' "$f" | strip_html_comments)
-  if [[ -n "$meas" ]] && grep -qiE '\b(confirms?|confirmed|refut|rejected|verdict|proves)\b' <<< "$meas"; then
-    verdicts="${verdicts}$f"$'\n'
-  fi
-done < <(ev_docs)
+while IFS=$'\t' read -r tag a b c; do
+  case "$tag" in
+    FM_MISSING)  missing_fm=$((missing_fm+1)) ;;
+    ID_MISMATCH) bad_id=$((bad_id+1))
+                 mismatch="${mismatch}$a (frontmatter=$b filename=$c)"$'\n' ;;
+  esac
+done <<< "$EV_SCAN"
+while IFS= read -r i; do
+  [[ -n "$i" ]] || continue
+  verdicts="${verdicts}${EV_DOCS[$i]}"$'\n'
+done < <(scan_rows MEAS | cut -f2- \
+         | grep -iE '\b(confirms?|confirmed|refut|rejected|verdict|proves)\b' \
+         | cut -f1 | sort -un)
 (( missing_fm == 0 )) && note "ok   frontmatter complete" \
   || { note "FAIL $missing_fm evidence docs missing frontmatter or a required key"; fail=1; }
 if (( bad_id == 0 )); then
@@ -212,9 +340,7 @@ fi
 if [[ -f research/claims.md ]]; then
   reviewed=$(grep -m1 -oE '\*\*Last reviewed:\*\* [0-9]{4}-[0-9]{2}-[0-9]{2}' research/claims.md \
              | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
-  newest=$(while IFS= read -r f; do
-             sed -n 's/^date:[[:space:]]*\([0-9-]\{10\}\).*/\1/p' "$f" | head -1
-           done < <(ev_docs) | sort -r | head -1)
+  newest=$(scan_rows DATE | cut -f3 | sort -r | head -1)
   if [[ -n "$reviewed" && -n "$newest" && "$newest" > "$reviewed" ]]; then
     warn "claims.md last reviewed $reviewed but newest evidence is $newest"
   else
@@ -239,7 +365,7 @@ done
 # Link 2 of the citation chain (citation-discipline.md). FAIL: a claim resting
 # on an evidence doc that was never written is the pilot's highest-value defect
 # class, and the only observable symptom is the dangling id.
-EV_IDS=$(while IFS= read -r f; do ev_id "$f"; done < <(ev_docs) | sort -u)
+EV_IDS=$(ev_ids_all | sort -u)
 have_id() { grep -qx -- "$1" <<< "$EV_IDS"; }
 
 if [[ -f research/claims.md ]]; then
@@ -276,7 +402,7 @@ fi
 # failing the build on that is how check-evidence.sh died.
 if [[ -d deliverables ]]; then
   refs=$(deliverable_artifacts)
-  bound=$(while IFS= read -r f; do ev_artifacts "$f"; done < <(ev_docs) | norm_path | LC_ALL=C sort -u)
+  bound=$(scan_rows ART | cut -f3 | norm_path | LC_ALL=C sort -u)
   # One -f pass over the corpus, not one grep per path: on the pilot (67 paths,
   # 285 docs) per-path recursion cost 9s, which is long enough that people stop
   # running the linter.
@@ -329,8 +455,13 @@ fi
 # real provenance walking and belongs to /pipeline-check.
 if git rev-parse --git-dir >/dev/null 2>&1; then
   stale=""; checked=0
-  while IFS= read -r f; do
-    ddate=$(sed -n 's/^date:[[:space:]]*\([0-9-]\{10\}\).*/\1/p' "$f" | head -1)
+  for i in "${!EV_DOCS[@]}"; do
+    # Nothing bound means nothing to compare, and asking git about the doc costs
+    # a process either way. On the pilot — 285 docs, zero `artifacts:` keys —
+    # this test alone was 285 `git log` calls for a check with no population.
+    arts=$(ev_artifacts_at "$i"); [[ -n "$arts" ]] || continue
+    f=${EV_DOCS[$i]}
+    ddate=${EV_DATE_OF[$i]-}
     [[ -n "$ddate" ]] || continue
     # The doc's own last commit, as well as its `date:`. Both are needed and
     # neither alone is right:
@@ -359,9 +490,9 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
       checked=$((checked+1))
       [[ "$adate" > "$ddate" ]] || continue
       [[ -n "$dct" ]] && (( act <= dct )) && continue
-      stale="${stale}#$(ev_id "$f") dated $ddate (last commit ${dcommit:-none}) — $a committed $adate"$'\n'
-    done < <(ev_artifacts "$f")
-  done < <(ev_docs)
+      stale="${stale}#${EV_IDNUM[$i]} dated $ddate (last commit ${dcommit:-none}) — $a committed $adate"$'\n'
+    done <<< "$arts"
+  done
   if [[ -n "$stale" ]]; then
     warn "$(grep -c . <<< "$stale") artifact(s) re-committed after the evidence doc that reads them:"
     show "$stale"
@@ -378,7 +509,7 @@ fi
 #
 # This will pass on a healthy project and stay quiet for months. Its value is
 # prospective: a green run here is not evidence the check is idle.
-highest=$(while IFS= read -r f; do ev_id "$f"; done < <(ev_docs) | sort -n | tail -1)
+highest=$(ev_ids_all | sort -n | tail -1)
 if [[ -f "$EV/.next-id" ]]; then
   nid=$(tr -dc '0-9' < "$EV/.next-id")
   if [[ -z "$nid" ]]; then
@@ -397,13 +528,11 @@ fi
 # resolves to a binding, and the binding resolves to nothing. FAIL — this only
 # fires on docs that opted into `artifacts:`, so there is no adoption cliff.
 gone=""; nbound=0
-while IFS= read -r f; do
-  while IFS= read -r a; do
-    [[ -n "$a" ]] || continue
-    nbound=$((nbound+1))
-    [[ -e "$a" ]] || gone="${gone}#$(ev_id "$f") binds $a — no such file"$'\n'
-  done < <(ev_artifacts "$f")
-done < <(ev_docs)
+while IFS=$'\t' read -r _i a; do
+  [[ -n "$a" ]] || continue
+  nbound=$((nbound+1))
+  [[ -e "$a" ]] || gone="${gone}#${EV_IDNUM[$_i]} binds $a — no such file"$'\n'
+done < <(scan_rows ART | cut -f2-)
 if [[ -n "$gone" ]]; then
   note "FAIL $(grep -c . <<< "$gone") artifacts: path(s) do not exist:"; show "$gone"; fail=1
 elif (( nbound )); then
@@ -479,7 +608,7 @@ if [[ -d deliverables ]]; then
   # `#nn` form, and it is the strongest argument for converting to `[C<n>]`:
   # claim ids are sparse and hand-curated, so `[C99]` is catchable where `#99`
   # is not (invariant 13).
-  live=$( { while IFS= read -r f; do ev_id "$f"; done < <(ev_docs); renumbered_ids; } | sort -u)
+  live=$( { ev_ids_all; renumbered_ids; } | sort -u)
   badn=""; nn=0
   while IFS= read -r tok; do
     [[ -n "$tok" ]] || continue
