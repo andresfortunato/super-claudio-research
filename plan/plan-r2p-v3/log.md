@@ -723,3 +723,129 @@ their red was free.
   The pilot's still lists `.claude/skills/` and a Stop hook that no longer
   exists. A warning is the same cheap fix as the orphaned-hook one.
 - **`.scc/status/project.md` staleness** still has nothing checking it.
+
+---
+
+## D10 — Phase 7 executed; v3 shipped; three things nobody had listed (2026-09-09)
+
+Eleven commits, `d351edf` … `e396392`. Every Phase 7 task landed and
+`package.json` is `0.3.0`. Outcomes table in `phases/phase-7.md`; this entry
+records only the direction changes and the things that generalize.
+
+### 1. A decision taken from a file list is a decision about the list
+
+**Decision B — "delete the 14 `docs/*-mechanism.md` files" — was executed as
+eight deletions and six repaths, on the researcher's call, escalated before any
+deletion.**
+
+Reading all fourteen: eight document conventions v2 merged away and are
+therefore accurate about v1 and misleading about the framework. Six document
+conventions that are still live. And `docs/extending.md` prescribes
+`docs/<name>-mechanism.md` as the design-rationale slot for *every* convention —
+the same slot task **7.2 creates `citation-chain-mechanism.md` in, in this same
+phase**. Executing B literally would have retired the naming pattern in the act
+of using it.
+
+Measured before asking, which is what made the question answerable in one round:
+the six keepers carry **0–3 stale path mentions each, eight in total**. So
+"keep" cost eight line-fixes rather than a rewrite, and the choice was not
+between deletion and debt.
+
+One deviation from the approved list, stated in the commit:
+`migrate-source-mechanism.md` was named in the delete column and was **kept**,
+because the rule the researcher approved alongside the list — *delete docs for
+conventions v2 merged away, keep docs for live ones* — puts it in the keep
+bucket. The skill is live and 6c repathed it; only its cross-references were
+stale.
+
+**The lesson is not "escalate more".** D8 recorded decision B as answered and
+unblocked, and it was — the *decision* was sound. What was wrong was its object:
+a count of files matching a glob, standing in for a category nobody had checked
+the glob against. *When a decision names a file set by pattern, enumerate the set
+and read it before the decision is executed, not before it is taken.*
+
+### 2. The verification criterion nobody had run found the largest defect
+
+Phase 7's verification list included *"`r2p init` into a throwaway repo:
+`lint-research.sh` green and silent on the empty tree — a linter that fails a
+fresh install is worse than no linter."*
+
+Run for the first time, after **eleven of the eighteen invariants had already
+shipped**, it exited 1 with three findings on a tree containing no research at
+all. Two of the three were the *check* being wrong:
+
+- `check-archival.sh` correctly names `~/.claude/agents/archivist.md`, which is
+  installed **globally**. Invariant 15 stripped the `~/` and resolved it against
+  the project root — the wrong question.
+- `project-conventions.md` correctly names `docs/audience-and-philosophy.md` and
+  qualifies it in prose as *"in the framework repo (not installed here)"*.
+  `TODO.md` had recorded this class as un-mechanisable, and that was true of
+  qualification in general and false of an **explicit marker**: honouring a line
+  that says *framework repo* is the same move invariant 14 makes with a renumber
+  banner, and it converts a piece of advice into a rule with a consequence.
+
+The third was the shipped `templates/research/claims.md` seed, whose worked `C1`
+is a placeholder claim — an assertion by invariant 17's definition, correctly
+flagged, on every fresh install. Fixed by commenting the block out **and** by
+teaching the claims parser that an HTML-commented region is not live, which a
+project needs anyway for a drafted or retired claim.
+
+**Surprise 5 of the last handoff said a framework cannot check itself against
+itself. This is the second half of that: it cannot check itself against its
+users either.** Both are *populated* states, both have answers nobody knows in
+advance. The empty state is a third corpus and the only one with a known-correct
+answer. Encoded in `extending.md` step 2a (three corpora, in order) and
+`docs/field-notes/a-linter-must-be-run-against-a-fresh-install.md`.
+
+### 3. "Promote the WARN tier to FAIL" needed a third tier instead
+
+The handoff's item 4 read as a one-line change. Executed literally it leaves the
+repo red for as long as any plan is open: the last seven findings all live in
+`plan/`, where quoting a dead convention **while describing the defect** is
+correct, and no edit makes such a line both accurate and resolvable.
+
+So `plan/**` became its own permanent WARN tier and the doc tier was promoted.
+The split is what made the promotion reachable at all, and it is the script's own
+rule doing the work — *FAIL only if a green run on a correct project is genuinely
+reachable today* — applied to a population the rule had not been applied to
+separately before.
+
+Shown red three ways before being trusted green: a dangling `docs/` pointer exits
+1, a dangling `.claude/` pointer exits 1, a dangling `plan/` pointer exits 0.
+
+### 4. Two things were larger than their task line said, in the same direction
+
+- **7.3's `r2p-adopt.md`** was listed as "live adoption guide" with five dangling
+  pointers. It was an entirely v1 document — every slot it proposed was a v1
+  slot — and it is the one file a project reads at the moment it has no other
+  model of the framework. Three of the repaths were conceptual, not textual: raw
+  data no longer goes to the wiki, archaeology proposes topics rather than dated
+  decision records, and it had been **teaching the id-collision vector**
+  (`ls evidence/ | sort | tail -1`) that produced five duplicate ids on the pilot.
+- **7.7's README** was listed as "conventions list and version". Its `docs/` tree
+  named nine files that no longer exist and none of the four that do; its
+  `templates/` tree was v1 throughout, and listed `research/methods/` twice with
+  different contents.
+
+Both are the same shape as D9's surprise 2 — *a hand-built inventory of invisible
+defects is itself incomplete* — one level up: **a task line written months before
+execution is an inventory too**, and it decays the same way.
+
+### 5. A generated report, once committed, becomes its own input
+
+`linkcheck.md` was picked up by an over-broad `git add -A` mid-phase. On the next
+run the duplicate-path detector read a *previous run's table rows* and reported a
+phantom 3× `data/raw/` collapse whose source was its own output. Untracked,
+gitignored, and `03_linkcheck.py` now excludes its `SELF_REPORT` from
+`tracked_md()` so it cannot recur for anyone who commits it again.
+
+Small, but it is the second time in two phases that a tool's own artifact
+distorted the tool's own measurement, and both times the symptom looked like a
+real finding.
+
+### 6. Version numbers were in two places
+
+`package.json` said `0.2.0` and so did a hardcoded `.version('0.2.0')` in
+`src/cli.js`, so `r2p --version` had been reporting independently of the
+manifest. Both bumped. Nothing checks that they agree; that is a candidate
+invariant if it recurs.

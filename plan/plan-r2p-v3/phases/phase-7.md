@@ -1,8 +1,10 @@
 # Phase 7 — Docs, constitution, release
 
 **Plan:** `plan/plan-r2p-v3/plan.md` · **Depends on:** all phases
-**⚠ Gated on decision B** — do the stale v1 `docs/*-mechanism.md` files move to
-`docs/v1/`, or get deleted? Recommendation on file: shelf them.
+**✅ DONE 2026-09-09** — `d351edf` … `e396392`, one session. Outcomes at the
+bottom of this file; the direction changes are `log.md` **D10**.
+**Decision B** was answered *delete*, and its scope was corrected during
+execution — see 7.6's outcome.
 **Session scope:** one session · **Estimated context:** ~45%
 
 ## Intent
@@ -138,3 +140,74 @@ rather than fixing them in a release commit.
 By pathspec, one command. Keep 7.3 (bug fixes) in commits separate from 7.7
 (release) — a reader tracing why a dead pointer was fixed should not land on a
 version bump.
+
+
+---
+
+## Outcomes — 2026-09-09
+
+Eleven commits, `d351edf` … `e396392`. Every task landed. Three things were
+found during execution that were in no task list, and they are the entries worth
+reading.
+
+| Task | Commit | Outcome |
+|---|---|---|
+| 7.3b | `1fad4b1` | Nine repaths, not six — the inventory was short by three, and `multi-day` forms of the same defect existed. Correction patched into this file, marked. |
+| 7.3 | `d351edf` | **`r2p-adopt.md` was not five dangling pointers; it was an entirely v1 document.** Full repath, three of them conceptual. |
+| 7.3 + C | `978de28` | `verification-architecture.md`: Layer 1 → Tier 1 (`lint-research.sh`), tiers 3 and 4 added, the side-effect axis, a new *Why nothing fires automatically*. |
+| 7.4 | `8d21a59` | Principles 5, 7 and 9 fixed; **principle 10 added**. |
+| 7.6 | `4a7e4fe` | **8 deleted, 6 kept — not 14.** See below. |
+| 7.1 | `2faea66` | `docs/v2-to-v3.md`. |
+| 7.2 | `28f6a19` | `docs/citation-chain-mechanism.md`. |
+| 7.5 | `a6af00b` | `extending.md` step 2 becomes 2a/2b/2c in preference order. |
+| item 5 | `6ac46cb` | `EXAMPLE_world_bank_api.md` reshaped to the required five sections. |
+| 7.7 | `a964e42`, `e396392` | README + TODO rewritten; `0.3.0` in **two** places. |
+| item 4 | `625b48e` | Invariant 15's doc tier → FAIL; `plan/**` split off as permanent WARN. |
+| — | `7aedef8` | **A fresh `r2p init` failed its own linter.** Not in any task list. |
+
+### 1. Decision B's scope was wrong, and the phase file said so before the deletion
+
+Decision B said "delete the 14 `docs/*-mechanism.md` files". Only **eight** are
+what that decision described — design docs for conventions v2 merged away. The
+other six document conventions that are still live, and this same phase's task
+7.2 *creates* a new `docs/<name>-mechanism.md`, which `extending.md` still
+prescribes as the rationale slot for every convention. Deleting all fourteen
+would have retired the pattern in the act of using it.
+
+Escalated before any deletion; researcher chose *delete 8, repath 6*. The six
+carried 0–3 stale path mentions each — eight line-fixes in total — so keeping
+them cost almost nothing. **`migrate-source-mechanism.md` was in the approved
+delete list and was kept**, because the rule the researcher approved with that
+list puts it in the keep bucket: the skill is live and 6c repathed it.
+
+*The generalizable part: a decision taken from a file list is a decision about
+the list, not about the files. Read them before executing it.*
+
+### 2. A fresh install failed the linter, and two of three findings were the check
+
+The phase's own verification criterion — *green and silent on the empty tree, a
+linter that fails a fresh install is worse than no linter* — was the thing that
+found it, on the first run against `r2p init` after eleven of eighteen
+invariants had shipped. Full write-up:
+`docs/field-notes/a-linter-must-be-run-against-a-fresh-install.md`. The rule is
+encoded in `extending.md` step 2a.
+
+### 3. The invariant-15 promotion needed a third tier, not a promotion
+
+Item 4 read "promote the WARN tier to FAIL". Done literally, it would leave the
+repo red for as long as any plan is open — the seven remaining findings all live
+in `plan/`, where quoting a dead convention *while describing the defect* is
+correct and no edit makes it both accurate and resolvable. `plan/**` is now its
+own permanent WARN tier, and that split is what made the promotion reachable.
+
+### 4. Corrections to this file, marked
+
+- **7.3b's inventory was short by three** and its verification grep cannot
+  return zero. Patched in place above, `⚠ CORRECTED 2026-09-09`.
+- **7.6's "if shelving: `docs/v1/` plus a README"** is moot; decision B chose
+  delete, and the scope split is item 1 above.
+- **7.7's two generated items** — the framework repo having no
+  `.claude/settings.json` and no `CLAUDE.md` until 2026-08-05 — were added to
+  `TODO.md` as open rather than fixed in a release commit, as the task
+  instructed. A third was added beside them: `lint-research.sh` has no CI job in
+  either repo.
