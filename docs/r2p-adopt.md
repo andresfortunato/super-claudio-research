@@ -56,9 +56,10 @@ Nothing happens automatically — that's by design.
 ## Preconditions
 
 - `r2p init` has been run. Look for `.claude/conventions/` and the
-  scaffolding directories (`evidence/`, `decisions/`, `archive/`, etc.). If
-  missing, write a one-line proposal that says "Run `r2p init` first" and
-  stop.
+  scaffolding directories (`research/evidence/`, `research/methods/`,
+  `research/sources/`, `deliverables/`, `plan/`, `data/`, `analysis/`,
+  `output/`). If missing, write a one-line proposal that says "Run `r2p init`
+  first" and stop.
 - Run from project root.
 - Note in the preflight section if the working tree is dirty — the researcher
   should commit or stash before executing the proposed moves so the migration
@@ -88,8 +89,12 @@ then content peek for ambiguous cases). See the pattern → slot table below.
 
 Findings split into four buckets:
 
-- **Likely raw data** — moves to `wiki/raw/<source>/`. Filename has `raw_*`,
-  `_orig`, or sits in a directory called `wiki/raw/` already.
+- **Likely raw data** — moves to `data/raw/<source>/`. Filename has `raw_*`,
+  `_orig`, or sits in a directory called `raw/` already. (v1 sent raw data to
+  `wiki/raw/`; v2 does not. `research/wiki/raw/` is the immutable archive of
+  *documents* that feed the wiki — papers, scrapes, dataset notes — and the
+  wiki itself is opt-in. Bulk data belongs under `data/`, inventoried in the
+  committed `data/README.md`.)
 - **Likely processed/intermediate** — moves to `data/processed/`. `_v2.csv`,
   `_clean`, `panel_*`, sits in `data/` but not `data/raw/`.
 - **Likely chart/output** — moves to `output/`. `.png`/`.pdf`/`.svg` outside
@@ -103,13 +108,15 @@ Findings split into four buckets:
 For markdown files outside framework dirs (`README.md`, `NOTES.md`, etc.):
 peek at content. If it reads as **methodology** → flag for audit 3
 (archaeology). If it reads as **findings** (specific numbers, charts
-referenced, "we find") → propose extracting into `evidence/NN_<slug>.md`.
-If neither → leave in place and note its presence.
+referenced, "we find") → propose extracting into
+`research/evidence/NN_<slug>.md`. If neither → leave in place and note its
+presence.
 
 For scripts in `scripts/`, `src/`, `code/`, or `analysis/`: don't propose
 renaming the directory — the framework doesn't mandate one. Just note its
-existence and recommend the script-header convention
-(`.claude/conventions/script-header.md`) gets adopted on next edit.
+existence and recommend the provenance convention
+(`.claude/conventions/provenance.md` — script headers and `Run:`/`Out:` commit
+lines) gets adopted on next edit.
 
 For notebooks (`.ipynb`): note their location only. Don't propose moves; do
 recommend a separate `/research-cleanup` pass to flag scratch cells.
@@ -134,20 +141,30 @@ This audit surfaces overlap and conflicts.
   - **Project-specific** (research scope, dataset names, glossary, audience
     notes) — keep. This is exactly what `CLAUDE.md` is for.
   - **Operational project rule** (e.g. "always run pytest before commit") —
-    propose moving to `project_conventions/<domain>.md`.
+    propose moving to `.claude/conventions/project/<domain>.md`, the
+    project-scoped namespace `project-conventions.md` defines.
 - **Pre-existing `.claude/` content.** List each file the framework didn't
   install. For each, ask the researcher: keep, delete, or merge with the
   matching framework artifact.
 - **Other tools' AI config.** `.cursorrules`, `.windsurfrules`, `AGENTS.md`:
-  propose extracting any project-bearing rules into `project_conventions/`
-  so they're tool-agnostic, then leaving the original files in place
+  propose extracting any project-bearing rules into
+  `.claude/conventions/project/` so they're tool-agnostic, then leaving the
+  original files in place
   (they're cheap and other tooling may still read them).
 
 ### 3. Methodology archaeology
 
-The point: methodology calls deserve `decisions/` records. In a pre-framework
+The point: methodology calls deserve a written record. In a pre-framework
 project they're scattered across READMEs, NOTES.md files, script docstrings,
 and inline comments. This audit surfaces candidates.
+
+v2 keeps **one** file per methodological object — `research/methods/<topic-slug>.md`
+— carrying the operational rule, the justification for it, and the traps in
+applying it together. (v1 split those three across `decisions/`, `methods/` and
+`learnings/` by genre; research arrives by topic, and on the pilot the boundary
+failed 90% of the time. See `.claude/conventions/methods.md`.) So archaeology
+proposes **topics**, not dated decision records: several scattered sentences
+about the same object collapse into one proposed file.
 
 For each candidate:
 
@@ -156,15 +173,22 @@ For each candidate:
   "rejected because", "deflator", "specification", "exclusion", etc.).
 - Record the file path and approximate line number.
 - Quote the candidate sentence/paragraph.
-- Propose a `decisions/YYYY-MM-DD_<slug>.md` filename. Date is best-guess
-  from `git log -1 --format=%ad <file>`; today's date if no git history.
-- Note: **researcher writes the full 5-section decision record** using the
-  candidate paragraph as raw material. This doc surfaces; the researcher
-  deliberates.
+- Propose a `research/methods/<topic-slug>.md` filename — kebab-case and
+  decision-bearing (`city-unit.md`, `price-normalization.md`), never dated and
+  never generic. Where two candidates concern the same object, propose one file
+  and list both sources under it.
+- Record the `decided:` date as a best guess from
+  `git log -1 --format=%ad --date=short <file>`; today's date if no git history.
+- Note: **the researcher writes the file** in the shape `methods.md` requires
+  (frontmatter with `slug`, `status`, `triggers`, `decided`; then the rule, the
+  justification, and the traps), using the candidate paragraph as raw material.
+  This doc surfaces; the researcher deliberates.
 
-Don't auto-generate decision records. Methodology calls deserve the
-researcher's deliberation — the value of `decisions/` comes from the
-researcher having actually thought through "what would invalidate this".
+Don't auto-generate methods files. Methodology calls deserve the researcher's
+deliberation — the value comes from the researcher having actually thought
+through "what would invalidate this". And `triggers:` in particular cannot be
+inferred: a filename-derived trigger line is the single most common way a
+methods file becomes unretrievable.
 
 ### 4. Orphan analysis
 
@@ -175,13 +199,16 @@ to `/research-cleanup`. Cross-link in the proposal so the researcher knows.
 - **Charts without evidence.** For every image under `output/`, `figures/`,
   `charts/`, or any directory with >5 image files: grep its basename across
   all `.md` files in the project. Zero hits → orphan candidate. Propose
-  either writing a retroactive `evidence/NN_<slug>.md` (if the chart is
-  load-bearing — filename suggests it answers a question) or noting it for
-  later cleanup.
+  either writing a retroactive `research/evidence/NN_<slug>.md` (if the chart
+  is load-bearing — filename suggests it answers a question) or noting it for
+  later cleanup. This is the highest-value finding the audit produces: the
+  Córdoba pilot carried three load-bearing memo numbers with no evidence doc at
+  all, invisible for six months (`docs/v2-case-study-cordoba.md` §4).
 - **Scripts without inbound references.** For every script outside framework
   dirs: grep its filename across the rest of the repo. Zero hits → potential
   orphan. Cross-check `git log --grep="Run: <script>"` for recent commits
-  using the analytical-commit-format convention. Note in the proposal.
+  using the `Run:`/`Out:` commit format in `provenance.md`. Note in the
+  proposal.
   Adoption isn't the time to delete, but the researcher should know.
 
 ## Proposal format
@@ -208,23 +235,23 @@ section so the migration is bisectable.
 1. Commit any pending work (preflight).
 2. **Section 2** (CLAUDE.md / .claude/ reconciliation) — small, low-risk
    diff first.
-3. **Section 3** (decisions/ archaeology) — high-value; doing this early
+3. **Section 3** (methodology archaeology) — high-value; doing this early
    surfaces what the project has already settled.
-4. **Section 1** (file moves) — biggest diff; do it in chunks (wiki/raw/
-   first, then output/, then intermediates).
+4. **Section 1** (file moves) — biggest diff; do it in chunks (`data/raw/`
+   first, then `output/`, then intermediates).
 5. **Section 4** (orphan analysis) — defer to a separate session, or to
    `/research-cleanup` once you're r2p-native.
 
 After each section, commit with a message like:
-- `adopt: extract methodology calls to decisions/`
-- `adopt: move raw inputs to wiki/raw/`
+- `adopt: extract methodology calls to research/methods/`
+- `adopt: move raw inputs to data/raw/`
 - `adopt: prune CLAUDE.md duplicates now covered by conventions/`
 
 ## 1. File classification
 
-### Likely raw data → `wiki/raw/<source>/`
+### Likely raw data → `data/raw/<source>/`
 - `data/wb_indicators_2024.csv` (847 KB) → propose
-  `wiki/raw/world-bank/wb_indicators_2024.csv`. **Rationale**: filename pattern;
+  `data/raw/world-bank/wb_indicators_2024.csv`. **Rationale**: filename pattern;
   treated as source of truth in scripts (no upstream generator).
 
 ### Likely processed/intermediate → `data/processed/`
@@ -238,11 +265,11 @@ After each section, commit with a message like:
 
 ### Unclear provenance — researcher decides
 - `combined_data.csv` (3.2 MB) at root. Could be raw download or derived.
-  **Action**: open and inspect, then move to `wiki/raw/` or `data/processed/`.
+  **Action**: open and inspect, then move to `data/raw/` or `data/processed/`.
 
 ### Scripts directory
 - `scripts/` exists (14 .py files). Framework doesn't rename. **Action**:
-  adopt `.claude/conventions/script-header.md` on next edit of each script.
+  adopt `.claude/conventions/provenance.md` on next edit of each script.
 
 (If a bucket is empty: `(none)` under that header.)
 
@@ -250,38 +277,38 @@ After each section, commit with a message like:
 
 ### Existing CLAUDE.md
 - Lines 12–30 ("Code style") duplicate
-  `.claude/conventions/script-header.md`. **Propose**: delete from
+  `.claude/conventions/provenance.md`. **Propose**: delete from
   CLAUDE.md.
 - Lines 31–60 ("Project context: Cambodia case study") project-specific.
   **Keep** — this is what CLAUDE.md is for.
 - Lines 61–65 ("Always run pytest before commit") operational project rule.
-  **Propose**: move to `project_conventions/testing.md`.
+  **Propose**: move to `.claude/conventions/project/testing.md`.
 
 ### Pre-existing .claude/
 - `.claude/hooks/format-on-save.sh` — pre-existing, no overlap with
   framework hooks. **Keep**.
 
 ### Other AI config
-- `.cursorrules` — extract project-bearing rules to `project_conventions/`,
-  leave file in place for Cursor users.
+- `.cursorrules` — extract project-bearing rules to
+  `.claude/conventions/project/`, leave file in place for Cursor users.
 
 (If none: `(none)` under each header.)
 
 ## 3. Methodology archaeology
 
-For each candidate, **write a `decisions/YYYY-MM-DD_<slug>.md` record**
+For each candidate, **write a `research/methods/<topic-slug>.md` file**
 using the source paragraph as raw material. Then either delete the
 originating sentence or leave a one-line pointer.
 
 - `README.md:42–46` — "We use the World Bank deflator series rather than
   IMF WEO because WEO has gaps for Cambodia 2018–2019." → propose
-  `decisions/2026-05-08_use-wb-deflator-not-weo.md`.
+  `research/methods/deflator-source.md`.
 - `scripts/build_panel.py:1–15` (docstring) — sample exclusion: "drop
   countries with <5 years coverage". → propose
-  `decisions/2026-05-08_min-five-years-coverage.md`.
+  `research/methods/coverage-floor.md`.
 - `notes.md:18` — "We exclude oil exporters from the headline sample;
   sensitivity in appendix." → propose
-  `decisions/2026-05-08_exclude-oil-exporters.md`.
+  `research/methods/headline-sample.md`.
 
 ## 4. Orphan analysis
 
@@ -311,7 +338,7 @@ under each section. The researcher needs to confirm the audit ran.
 - **Never moves a file.** Not even into a staging dir.
 - **Never edits CLAUDE.md or any pre-existing file.** Suggest edits, never
   apply them.
-- **Never writes a decision record.** Only surfaces candidates.
+- **Never writes a methods file.** Only surfaces candidates.
 - **Never commits.** The proposal is uncommitted markdown.
 - **Hedge on classification.** "Researcher decides" beats a wrong slot.
   False positives in classification cost 30 seconds; false negatives lose
@@ -320,7 +347,7 @@ under each section. The researcher needs to confirm the audit ran.
   `file:line` reference — the researcher must verify the quote by hand.
 - **Skip the directories listed under "Directories to skip".** Tooling state
   (`.git/`, `node_modules/`, `__pycache__/`, etc.) and framework working
-  dirs (`plan/`, `archive/` — these belong to active framework usage, not
+  dirs (`plan/`, `plan/archive/` — these belong to active framework usage, not
   pre-framework legacy).
 - **Don't recurse twice.** Glob once per filetype at the start of the
   workflow; cache and reuse across audits.
@@ -335,10 +362,31 @@ because adoption is a natural moment to confront accumulated cruft.
 `/research-cleanup` runs **periodically**, once the project is r2p-native.
 Its scope: *catching newly-accumulated cruft against framework reference
 points* (raw watermark, evidence cross-references, recent `Run:` commits in
-the analytical-commit-format).
+the shape `provenance.md` defines).
 
 After adoption, do not re-run this doc. Use `/research-cleanup` for
 ongoing audits.
+
+## After you execute the proposal
+
+Adoption produces a research record for the first time; the framework can
+check it from that point on. Two things to run once the moves are committed:
+
+- **`bash .claude/hooks/lint-research.sh`.** Eighteen invariants over the
+  record you just created — duplicate evidence ids, frontmatter gaps, a claim
+  resting on an id with no file, an artifact no evidence doc mentions, a doc
+  pointer that resolves to nothing. It is manual or CI, never a hook, and it
+  is the cheapest possible confirmation that adoption landed something
+  coherent. Expect findings on a freshly-adopted project; that is what it is
+  for.
+- **`research/claims.md`** once the corpus passes ~40 evidence docs. Adoption
+  rarely produces that many, so it is usually a later step — but if the
+  archaeology extracted a dozen findings that a memo already asserts, the
+  ledger is the layer that binds assertion to evidence. See
+  `.claude/conventions/claims.md` and `.claude/conventions/citation-discipline.md`.
+
+Neither is part of the proposal. The proposal moves files; these read what
+resulted.
 
 ---
 
@@ -389,11 +437,12 @@ Also skip the framework's own working directories — these belong to
 
 ```
 plan/                  # active multi-session work; archivist's domain
-archive/               # archived plan synthesis; archivist's domain
-brainstorms/           # gitignored working state
+plan/archive/          # archived plan synthesis; archivist's domain
+plan/brainstorms/      # gitignored working state
 .claude/conventions/   # framework-installed; check exists, don't audit content
+                       #   (except .claude/conventions/project/, which is the
+                       #    project's own — audit 2 proposes writes into it)
 .claude/hooks/         # framework-installed
-.claude/skills/        # framework-installed
 .claude/agents/        # framework-installed
 .claude/settings.json  # framework-installed
 ```
@@ -405,7 +454,7 @@ The audit is about pre-framework cruft, not framework state.
 Apply in priority order. First matching rule wins. If nothing matches,
 classify as "unclear — researcher decides".
 
-### Raw data → `wiki/raw/<source>/`
+### Raw data → `data/raw/<source>/`
 
 Filename / path patterns:
 
@@ -413,7 +462,7 @@ Filename / path patterns:
 raw_*                       # explicit raw prefix
 *_raw.*                     # explicit raw suffix
 *_orig.*                    # original/unmodified marker
-*/raw/**                    # already in a wiki/raw/ subtree
+*/raw/**                    # already in a raw/ subtree
 data/raw/**
 *_v1.*                      # often the first download
 download_*
@@ -451,7 +500,7 @@ Strengthening:
 - Generated by a script in the repo (grep its filename in scripts/).
 - Sits in a `data/` directory but **not** under `data/raw/`.
 
-If a `data/` directory exists with no `wiki/raw/` subdir, treat all data files
+If a `data/` directory exists with no `raw/` subdir, treat all data files
 as "unclear" rather than guessing — the researcher's organization isn't
 the framework's, and the wrong slot is worse than no slot.
 
@@ -486,20 +535,27 @@ and decide:
 
 - **Methodology document** (audit 3 trigger phrases below) → flag for
   archaeology. Propose extracting decision sentences into
-  `decisions/YYYY-MM-DD_<slug>.md`.
+  `research/methods/<topic-slug>.md`.
 - **Findings document** (specific numbers, charts referenced, "we find",
   "shows that", "result:") → propose extracting into
-  `evidence/NN_<slug>.md`. Suggest the next free `NN` from
-  `ls evidence/ | sort | tail -1`.
+  `research/evidence/NN_<slug>.md`. Do **not** hand-pick `NN` by listing the
+  directory: `r2p evidence new <slug>` allocates the next id atomically from
+  `research/evidence/.next-id`. Reading the highest id off disk is the exact
+  collision vector that produced five duplicate ids on the pilot.
 - **Project README** with mixed methodology + scope + setup → keep README
   in place; flag methodology sections for archaeology, suggest moving
-  setup instructions to `project_conventions/` if operational.
+  setup instructions to `.claude/conventions/project/` if operational.
 - **TODO / log / scratch** → leave in place; if there are gotchas worth
-  preserving, suggest `learnings/<slug>.md` per the learning-capture
-  convention.
+  preserving, suggest the topic's `research/methods/<topic-slug>.md`, or
+  `research/methods/_craft.md` for a cross-cutting numerical trap with no
+  topic home. (v1 had a `learnings/` directory; v2 folded it into methods —
+  7 of 71 learnings used the prescribed format, which made the format wrong.)
 - **Wiki-style structured page** (already a knowledge artifact, not a
-  decision or finding) → propose moving to `wiki/` per the wiki-ingest
-  schema.
+  decision or finding) → propose moving to `research/wiki/` per the
+  wiki-ingest schema, **if** the project installed the wiki
+  (`r2p init --with-wiki`). If it did not, say so and leave the file: the
+  wiki is opt-in, and proposing a move into a directory that does not exist
+  is how an adoption proposal loses the researcher's trust.
 
 ### Scripts
 
@@ -512,9 +568,9 @@ Don't propose renaming `scripts/`, `src/`, `code/`, `analysis/`, or any
 existing scripts directory. The framework doesn't mandate one. Just:
 
 - Note the directory's existence in the proposal.
-- Recommend `.claude/conventions/script-header.md` adoption on next edit.
-- Recommend `.claude/conventions/analytical-commit-format.md` for future
-  commits that produce charts/tables.
+- Recommend `.claude/conventions/provenance.md` adoption on next edit — it
+  carries both halves of the audit trail, the script header and the
+  `Run:`/`Out:` commit lines.
 
 For notebooks (`.ipynb`):
 - Don't propose moving them; researchers organize notebooks by workflow,
@@ -561,8 +617,8 @@ For each, the audit reports: file path, ~line count, and a recommendation:
   per the rules in the body above (conflicts, duplicates, project-specific,
   operational rule).
 - **Other tools' configs**: extract any project-bearing rules into
-  `project_conventions/`, leave the originals in place. They're cheap and
-  the project may have non-Claude collaborators.
+  `.claude/conventions/project/`, leave the originals in place. They're cheap
+  and the project may have non-Claude collaborators.
 - **Pre-existing `.claude/`** (not framework-installed): list each file,
   ask researcher to keep / delete / merge.
 
@@ -629,34 +685,41 @@ matches:
 ^#+ \s*(Sample|Coverage|Sources|Variables|Specification)$
 ```
 
-Headers don't auto-promote the whole section into a decision record — the
+Headers don't auto-promote the whole section into a methods file — the
 researcher decides what's load-bearing — but they're strong hints worth
 quoting in the proposal.
 
-## Decision-record slug heuristics
+## Methods slug heuristics
 
-When proposing a `decisions/YYYY-MM-DD_<slug>.md` filename:
+When proposing a `research/methods/<topic-slug>.md` filename:
 
-- **Date**: best-guess from `git log -1 --format=%ad --date=short <file>`
-  for the source file. If no git history, today's date.
-- **Slug**: short, decision-bearing kebab-case. Lift the verb-object from
-  the source sentence:
-  - "We use WB deflator rather than WEO" → `use-wb-deflator-not-weo`.
-  - "Drop countries with <5 years coverage" → `min-five-years-coverage`.
-  - "Exclude oil exporters from headline sample" →
-    `exclude-oil-exporters`.
+- **Slug**: short, decision-bearing kebab-case, naming the *object* the call
+  is about rather than the call itself — the file will outlive this decision
+  and absorb the next revision of it:
+  - "We use WB deflator rather than WEO" → `deflator-source`.
+  - "Drop countries with <5 years coverage" → `coverage-floor`.
+  - "Exclude oil exporters from headline sample" → `headline-sample`.
+- **No date in the filename.** The date goes in the `decided:` frontmatter
+  key, best-guessed from `git log -1 --format=%ad --date=short <file>`; a
+  revision later bumps `revised:` in the same file rather than opening a
+  second one.
 - Avoid generic slugs (`decision1`, `methodology-note`, `choice`) — the
   researcher should be able to read the slug and recall the call without
   opening the file.
+- **Propose `triggers:` as a question, not a guess.** The retrieval keywords
+  are the researcher's to write; a filename-derived trigger line reads as
+  filled-in and is never corrected.
 
 ## Preflight checks
 
 Before running the four audits, gather:
 
 1. **Framework installed?** `test -d .claude/conventions/` and at least
-   3 of the scaffolding dirs (`evidence/`, `decisions/`, `archive/`,
-   `wiki/`, etc.). If not → write a one-section proposal recommending
-   `r2p init` and stop.
+   3 of the scaffolding dirs (`research/evidence/`, `research/methods/`,
+   `research/sources/`, `deliverables/`, `plan/`, `data/`, `analysis/`,
+   `output/`). `research/wiki/` is **opt-in** (`r2p init --with-wiki`) — its
+   absence is not a missing install. If not → write a one-section proposal
+   recommending `r2p init` and stop.
 2. **Git status.** `git status --porcelain | head -20`. If non-empty,
    record the count for the preflight section. Don't refuse to run — the
    researcher may have the proposal staged.
