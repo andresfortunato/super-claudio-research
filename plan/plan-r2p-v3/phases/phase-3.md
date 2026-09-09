@@ -39,7 +39,7 @@ provenance traversal and belongs to `/pipeline-check` in Phase 5.
 
 ## ⚠ ADDED 2026-08-05 — measured against the pilot repo, read before 3.1
 
-A review of `~/cordoba-growth-narrative` (v2 layout, 173 evidence docs, 42 claims)
+A review of `~/research/cordoba` (v2 layout, 173 evidence docs, 42 claims)
 found three things that change how these invariants must be written. All are
 measurements, not guesses.
 

@@ -219,3 +219,63 @@ there.
 `context/cordoba-graduation.md` — a new **Phase 2b** for the rule-shaped items,
 because *2 blocks 3*), and **N6**, whether `chart_slide_export.md` ships as a
 second example project convention.
+
+> **Both closed since.** N6 was **rejected the same day** by the researcher
+> (`context/cordoba-graduation.md:253`, `:285`) — this paragraph was left stale.
+> Placement was adopted as written; Phase 2b shipped 2026-09-09 (**D5**).
+
+---
+
+## D5 — Phase 2b executed; one out-of-phase fix; a stale-pointer class surfaced (2026-09-09)
+
+All five graduated items landed as specced, all six criteria verified by command,
+all constraints held. Commits `9058c41` `7c63510` `70e1153` `ceff9bd` `d2bcde8`,
+one per item, by pathspec. **Not a direction change** — logged because three
+things below alter what a later session should believe.
+
+**1. The pilot repo moved: `~/cordoba-growth-narrative` → `~/research/cordoba`.**
+Every pilot-facing path in `handoff.md`, `phase-3.md` (lint baseline) and
+`context/cordoba-graduation.md` is dead as written. Phase 3's whole validation
+story runs against that repo, so this would have cost a session otherwise.
+
+**2. Criterion 6 earned its place, and should be copied.** Writing T2's banner
+spec *from the shipped artifact* and then checking the artifact against the spec
+caught three things a from-memory spec would have shipped wrong — `(was #NN)`
+lives on the frontmatter `headline:` key rather than the H1; the pilot set
+`status: revised` on docs that retracted nothing, so T2 rules `status` unchanged
+and flags the pilot's choice in a parenthetical rather than in the spec (which
+keeps criterion 6 resolvable); and T1's field is already in production on
+149/150/151, comment and all. **The pattern generalizes: when a phase graduates a
+pilot artifact, make the artifact the spec's test, not its inspiration.**
+
+Corollary, learned the hard way in the same task: a first draft of T2 enumerated
+the five collision appearances from memory and got the breakdown wrong — the
+study asserts "fifth appearance" and never enumerates. Shipped text states the
+count plus the **three documented vectors**. A "still correct a year later" claim
+about a five-week-old repair was cut in the same pass.
+
+**3. One out-of-phase commit, `2d21597`, and it was not optional.**
+`project-conventions.md` still put project conventions at `project_conventions/`
+**at the project root** — v1, 9 occurrences, in the one file that tells an author
+how to write one, while `templates/migration/01_layout.sh:80-86` moves that
+directory to `.claude/conventions/project/` and `rmdir`s it. T5 sends the
+archivist to the v2 path; an agent following T5 would read this file's recipe and
+**re-create a directory the migration deletes** — `02_repath.py`'s bug, the one
+G1 had just fixed, re-manufactured by our own new rule. Path only; the rest of
+that file's v1 residue was left alone deliberately.
+
+**New, needs a researcher call — a stale-pointer class wider than 7.3b.** Five
+`.claude/conventions/*.md` pointers repo-wide resolve to nothing:
+`data-access`, `data-sources`, `decision-records`, `handoff-format`,
+`learning-capture`. v2 consolidated 13 conventions into 7 + 2 and the inbound
+pointers were not all repathed — same class as **7.3b** (v1 methods path in eight
+files), which suggests 7.3b is one instance of a sweep rather than a one-off.
+`project-conventions.md:176` compounds it: it still says
+**"super-claudio-research"** and routes methodology calls to
+`decisions/YYYY-MM-DD_<slug>.md` via `decision-records.md` — a directory and a
+protocol that both no longer exist.
+
+Not fixed here because it is not a repath. Three of the five plausibly map onto
+renamed survivors, but **`decision-records` has no v2 successor**, and deciding
+where a decision record lives in v2 is a convention question. Reproduce with the
+one-liner in `phases/phase-2b.md` § *Found, not fixed*.

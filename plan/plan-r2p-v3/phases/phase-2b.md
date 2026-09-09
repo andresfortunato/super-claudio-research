@@ -1,5 +1,11 @@
 # Phase 2b — Graduate the Córdoba fixes
 
+**✅ DONE 2026-09-09.** All five items landed, all six verification criteria
+verified, all constraints held (no new file, no new directory, no hook or `src/`
+edit). Commits `9058c41` (T1) · `7c63510` (T2) · `70e1153` (T3) · `ceff9bd` (T4)
+· `d2bcde8` (T5), plus `2d21597` — one out-of-phase blocker fix, see the
+*Execution notes* at the end of this file.
+
 **Plan:** `plan/plan-r2p-v3/plan.md` · **Depends on:** Phase 2 · **Blocks:** Phase 3
 **Self-contained.** A worker on this phase needs no other file. The full study,
 with every measurement and reproduction command, is
@@ -164,3 +170,101 @@ to what the archivist synthesizes, not as a separate hook.
 across five files; T1–T3 and T5 are one file each, so five pathspec commits, one
 per item. Do not batch — `log.md` D4 is the shared rationale and each commit
 message should name its own item and its own pilot evidence.
+
+
+---
+
+## Execution notes (2026-09-09)
+
+**All six criteria verified**, each by a command, not by reading:
+
+| # | Result |
+|---|---|
+| 1 | `scope_authored` in the frontmatter block **and** its own `####` rationale; "Absent means 'nobody has checked', never 'checked and wrong.'" present |
+| 2 | `citation-discipline.md` greps **7** hits for `collision`; disambiguator carries "rejected, not an alternative" and "do not use" |
+| 3 | unit line inside Half 1 (`awk` between the two Half headings); **0** new absolute-count thresholds across the whole phase diff |
+| 4 | all three T4 elements inside `## Output Collection` (`:133-211`) — report-block section, rule, consolidation step |
+| 5 | Stage 4 names the destination and assigns the check; archivist step 4 exists and is **ordered before** the delete step (`:56` < `:60`) |
+| 6 | pilot `150_*.md` satisfies **6/6** banner elements; `149_*` and `151_*` also 6/6 |
+
+### The pilot repo has moved
+
+`~/cordoba-growth-narrative` → **`~/research/cordoba`**. The handoff's path is
+dead; every pilot-facing command in this plan needs the new one.
+
+### Three things the artifact settled that the spec could not
+
+Criterion 6's method — write the spec from the shipped banner, then check the
+banner against it — paid for itself three times:
+
+1. **`(was #NN)` lives on the frontmatter `headline:` key** on the pilot, not on
+   the H1. `evidence.md`'s shape carries the headline *as* the H1, so the spec is
+   written shape-agnostically ("the doc's headline"). The pilot's H1 still opens
+   `# 119 — …` with the pre-renumber id; under our shape there is no id in the H1
+   at all, so this does not propagate.
+2. **The pilot set `status: revised` on all three renumbered docs**, which by
+   `evidence.md`'s own definition means part of the doc is retired. Nothing was
+   retired — the id moved. T2 therefore says `status:` does **not** change, and
+   flags the pilot's choice in a parenthetical rather than folding it into the
+   banner spec, so criterion 6 still resolves against what actually shipped.
+3. **T1 is already live on the pilot**, comment and all
+   (`scope_authored: true   # unit/period hand-checked …` on 149/150/151). The
+   graduation is codifying a field that is in production, which is the strongest
+   form of §6.6.
+
+### The recurrence count was corrected before it shipped
+
+A first draft enumerated the five collision appearances from memory and got the
+breakdown wrong. The study says "fifth appearance" and does not enumerate. The
+shipped text states the count and names the **three distinct vectors** that are
+documented (parallel worktrees, parallel agent teams, a second numbering
+namespace), which is what a reader needs and is verifiable. Same correction
+applied to a "still correct a year later" claim about a repair made five weeks ago.
+
+### One out-of-phase commit — `2d21597`, and why it was not optional
+
+`project-conventions.md` still described project conventions as living in
+`project_conventions/` **at the project root** — the v1 path, in 9 places, in the
+single file that tells an author how to write one. v2 moved them to
+`.claude/conventions/project/`, and `templates/migration/01_layout.sh:80-86`
+actively moves the old directory there and `rmdir`s it.
+
+T5 sends the archivist to `.claude/conventions/project/`. An agent following T5
+would consult this file for the domain-file recipe, be told to create
+`project_conventions/<domain>.md`, and **re-create a directory the migration
+deletes** — the exact failure the graduation study found in `02_repath.py` (deck
+scripts `mkdir`-ing their v1 target). Shipping T5 on top of it would have
+manufactured the bug the study had just diagnosed.
+
+Path only, 9 occurrences plus one "at the project root" phrase. Everything else
+stale in that file was left alone and is reported below.
+
+### Found, not fixed — for the Phase 7 stale-pointer sweep
+
+**Five `.claude/conventions/*.md` pointers repo-wide resolve to nothing:**
+
+```
+.claude/conventions/data-access.md        .claude/conventions/handoff-format.md
+.claude/conventions/data-sources.md       .claude/conventions/learning-capture.md
+.claude/conventions/decision-records.md
+```
+
+Reproduce:
+
+```sh
+grep -rhoE '\.claude/conventions/[a-z-]+\.md' .claude/ templates/ \
+  | sort -u | while read f; do [ -e "$f" ] || echo "MISSING: $f"; done
+```
+
+Same class as **task 7.3b** (the v1 methods path live in eight files): v2
+consolidated 13 conventions into 7 + 2 and the inbound pointers were not all
+repathed. `project-conventions.md:176` also still says **"super-claudio-research"**
+and routes methodology calls to `decisions/YYYY-MM-DD_<slug>.md` via
+`decision-records.md`, which is one of the five missing files — so that paragraph
+sends a reader to a directory and a protocol that both no longer exist.
+
+**This needs a researcher call**, which is why it was not fixed here: three of the
+five names (`data-sources`, `handoff-format`, `learning-capture`) plausibly map onto
+files that exist under new names, but `decision-records` has no v2 successor in
+`.claude/conventions/`, and deciding where a decision record lives in v2 is a
+convention question, not a repath.

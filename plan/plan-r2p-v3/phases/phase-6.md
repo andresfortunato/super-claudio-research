@@ -115,7 +115,7 @@ red proves nothing. Pure bash, no new runtime dependency.
 
 ### ⚠ ADDED 2026-08-05 — a fourth upgrade defect, measured on the pilot
 
-`~/cordoba-growth-narrative` **still has `check-evidence.sh`, and its
+`~/research/cordoba` **still has `check-evidence.sh`, and its
 `settings.json` still fires it.** `check-archival.sh` — the v2 replacement — is
 absent. So the hook v2 deleted *for firing unconditionally after a path refactor*
 is still firing, months later, in the framework's own proving ground.

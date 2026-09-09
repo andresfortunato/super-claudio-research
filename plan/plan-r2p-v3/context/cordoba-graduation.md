@@ -23,7 +23,7 @@ EVID = REPO / "evidence"                # not matched — no slash
 So a script's docstring is repathed while the line that opens the directory is
 not. The report reads clean and complete.
 
-**Measured on the pilot** (`~/cordoba-growth-narrative`, ran `02_repath.py`
+**Measured on the pilot** (`~/research/cordoba`, ran `02_repath.py`
 2026-08-04, report at `plan/plan-r2p-v2-consolidation/mapping/repath_report.md`):
 `evidence/ -> research/evidence/` **571 rewrites, 559 files, double-prefix guard
 clean** — and **four dead v1 code paths survive**:
@@ -38,7 +38,7 @@ clean** — and **four dead v1 code paths survive**:
 Reproduce:
 
 ```sh
-cd ~/cordoba-growth-narrative
+cd ~/research/cordoba
 git grep -nE '(/|join\(|Path\()\s*"(evidence|methods|sources|wiki|slides|decisions|learnings|data_sources|brainstorms|internal_docs|project_conventions)"' -- '*.py' '*.sh' '*.R'
 for d in data_sources slides evidence; do [ -e "$d" ] || echo "$d GONE"; done
 ```
@@ -135,7 +135,7 @@ one-shot migration whose miss is silent is how this bug survived. Reproduce
 without touching the pilot (`--check` still overwrites its historical report):
 
 ```sh
-cd ~/cordoba-growth-narrative && python3 -c "
+cd ~/research/cordoba && python3 -c "
 import importlib.util
 s=importlib.util.spec_from_file_location('rp','$R2P/templates/migration/02_repath.py')
 rp=importlib.util.module_from_spec(s); s.loader.exec_module(rp)

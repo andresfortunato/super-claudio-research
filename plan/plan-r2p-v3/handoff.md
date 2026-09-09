@@ -1,11 +1,10 @@
 # Handoff — plan-r2p-v3
 
-**Session:** 2026-08-05 (first execution session)
-**Last content commit:** `785113f` — **this handoff is committed on top of it**, so
-`HEAD` is the handoff commit, not `785113f`. (A handoff cannot name its own commit;
+**Session:** 2026-09-09 (Phase 2b execution) · prior sessions 2026-08-05, 2026-08-17
+**Last content commit:** `2d21597` — **this handoff is committed on top of it**, so
+`HEAD` is the handoff commit, not `2d21597`. (A handoff cannot name its own commit;
 the convention forbids fabricating it. Verify with `git log --oneline -2`.)
-**Branch:** `main` · **Working tree:** clean except untracked `CLAUDE.md`
-(untracked *before* this session — see Surprises 5).
+**Branch:** `main` · **Working tree:** clean.
 
 ## Status
 
@@ -13,8 +12,8 @@ the convention forbids fabricating it. Verify with `git log --oneline -2`.)
 |---|---|---|
 | 1 | Drain the field notes | **done** — 4 routes + 7 stamps, all 5 criteria verified |
 | 2 | State the chain once | **done** — all 4 tasks + template pointer, all 4 criteria verified. **One shipped assumption corrected after the pilot review — see D2** |
-| 2b | **Graduate the Córdoba fixes** ✚ | **next** — unblocked. 5 tasks, `phases/phase-2b.md`. Added by **D4**; blocks 3 |
-| 3 | Lint the chain | blocked on 2b. **Task 3.0 (WARN tier) is new and comes first**; 3.4c is new. See *Carry into Phase 3* below |
+| 2b | Graduate the Córdoba fixes | **done 2026-09-09** — all 5 items, all 6 criteria verified by command, constraints held. See **D5** |
+| 3 | Lint the chain | **next — unblocked.** **Task 3.0 (WARN tier) is new and comes first**; 3.4c is new. See *Carry into Phase 3* below |
 | 4 | `/cite-check` | blocked on 3 · **needs decision A** |
 | 5 | `/pipeline-check` | blocked on 3 · **needs decision C** |
 | 6 | Harden the tooling | unblocked, independent of everything |
@@ -22,7 +21,15 @@ the convention forbids fabricating it. Verify with `git log --oneline -2`.)
 
 **Decisions made in-session:** principle 5's line budgets dropped (`log.md` **D1**);
 pilot-repo review corrected the claim-heading anchor and fed phases 3 and 6
-(`log.md` **D2**). Decisions **A**, **B**, **C**, **D**, **E** remain open.
+(`log.md` **D2**); Phase 2b executed and a stale-pointer class surfaced (**D5**).
+Decisions **A**, **B**, **C**, **D**, **E** remain open. **N6 is closed —
+rejected 2026-08-17.**
+
+**⚠ 2026-09-09 — the pilot repo moved.** `~/cordoba-growth-narrative` is gone; it
+is now **`~/research/cordoba`**. **Already repathed** in `phase-3.md`, `phase-6.md`
+and `context/cordoba-graduation.md` — including the runnable `cd` commands — because
+a phase file is what a parallel agent obeys (`agent-teams/SKILL.md:87`). `log.md`
+keeps the old path where it records a past review; that is a log doing its job.
 
 **✚ 2026-08-17 (`log.md` D4):** the Córdoba graduation study ran. It added
 **Phase 2b**, reordered Phase 3, landed one fix ahead of the phases, and closed
@@ -32,7 +39,7 @@ stays engagement-neutral). It also rejected the two-language finding outright:
 
 ## Pilot-repo review (2026-08-05) — what it changed
 
-Reviewed `~/cordoba-growth-narrative`: v2 layout, 173 evidence docs, 42 claims, 10
+Reviewed the pilot (then `~/cordoba-growth-narrative`, now `~/research/cordoba`): v2 layout, 173 evidence docs, 42 claims, 10
 worktrees. Full account in `log.md` **D2**. The three that bind future phases:
 
 1. **Claims sit at `### C<n>`, not `## C<n>`** — grouped under six `## §N`
@@ -98,6 +105,21 @@ depended on it.
 ✚; `[C12]` syntax in both `citation-discipline.md` and `claims.md`; `artifacts:`
 key in `evidence.md` + the example template; provenance ↔ artifacts cross-links;
 one pointer line in `templates/CLAUDE.md.template`.
+
+**Phase 2b** (`9058c41`, `7c63510`, `70e1153`, `ceff9bd`, `d2bcde8` — one pathspec
+commit per item) + `2d21597`, an out-of-phase blocker fix.
+
+| Item | Landed in |
+|---|---|
+| T1 `scope_authored:` | `evidence.md` frontmatter block + a `####` rationale; one pointer line in `templates/CLAUDE.md.template` |
+| T2 collision recovery | `citation-discipline.md` § *Repairing an ambiguous evidence id* — the negative rule, the banner's 4 required elements, `status:` unchanged |
+| T3 unit-of-count | `provenance.md` Half 1, one paragraph before `Supersedes:` |
+| T4 unranked = defect | `agent-teams/SKILL.md` § *Output Collection* — report-block section, the rule, consolidation step 2 |
+| T5 promotion trigger | `plan-lifecycle.md` Stage 4 + **`archivist.md` step 4**, ordered before the delete step |
+
+**T5 needed the archivist edit to be real.** Stage 4 assigns the check to the
+archivist; an archivist that has never heard of it is the same defect T5 exists to
+fix. Its steps were renumbered (a pre-existing duplicate `7.` fixed in passing).
 
 ## Carry into Phase 3 — read this before writing invariants
 
@@ -212,6 +234,29 @@ stale version stays visible.
 length is not a defect, so normalizing them would be work created by a rule that
 no longer exists. `evidence.md` is now 215 lines and `provenance.md` 143.
 
+**7. The pilot repo moved to `~/research/cordoba`** — see the warning at the top.
+Cost: two failed lookups before `find ~ -maxdepth 3 -type d -name '*cordoba*'`
+found it. Phase 3 depends on this repo more than any phase so far.
+
+**8. Five convention pointers repo-wide resolve to nothing** — `data-access`,
+`data-sources`, `decision-records`, `handoff-format`, `learning-capture`. v2 went
+from 13 conventions to 7 + 2 and the inbound pointers were not all repathed.
+**This makes task 7.3b look like one instance of a sweep, not a one-off.**
+`project-conventions.md:176` is the worst single line: old framework name
+(`super-claudio-research`) plus a route to `decisions/YYYY-MM-DD_<slug>.md` via
+`decision-records.md` — directory and protocol both gone. **Needs a researcher
+call**, because `decision-records` has no v2 successor and where a decision record
+lives in v2 is a convention question, not a repath. Reproduce: `phase-2b.md`
+§ *Found, not fixed*.
+
+**9. `project-conventions.md` was a v1 file and T5 could not ship over it.** It put
+project conventions at `project_conventions/` at the project root — the directory
+`templates/migration/01_layout.sh:80-86` moves and `rmdir`s. T5 sends the archivist
+to `.claude/conventions/project/`; a reader following T5 would take this file's
+recipe and re-create a deleted directory, which is `02_repath.py`'s bug re-made by
+our own new rule. Repathed in `2d21597`, path only. **The general lesson: a phase
+that adds a pointer into a file inherits that file's staleness.**
+
 ## What didn't work
 
 Nothing abandoned. Two checks were authored wrong and corrected:
@@ -224,6 +269,14 @@ Nothing abandoned. Two checks were authored wrong and corrected:
 - The first fixture memo had 3 references across only 2 distinct claims, which
   passes Phase 2's wording loosely. Rewritten to 3 distinct claims so the
   criterion is met unambiguously.
+- **Phase 2b, T2:** a first draft enumerated the five collision appearances from
+  memory. The study asserts "fifth appearance" and never enumerates, so the
+  breakdown was invented. Shipped text states the count plus the **three
+  documented vectors** (parallel worktrees · parallel agent teams · a second
+  numbering namespace). A "still correct a year later" claim about a five-week-old
+  repair went in the same pass. **Both were caught by re-reading against the
+  source, not by review** — when a phase file gives you a number without its
+  derivation, ship the number, not a reconstruction of it.
 
 ## Queued, ahead of the remaining phases
 
@@ -249,10 +302,13 @@ Three things it changes:
    rejected with reasons — including **G6** on a researcher call that r2p stays
    language-agnostic, and **N1**: rules graduate, gate code does not.
 
-**Still open, and both are `plan.md` edits needing approval:** placement of the
-approved items (recommendation tabled at the end of the result file — a new
-**Phase 2b** for the rule-shaped ones, because *2 blocks 3*), and **N6**, whether
-`chart_slide_export.md` ships as a second example project convention.
+**Both are now closed.** Placement: the tabled recommendation — a new **Phase 2b**
+for the rule-shaped items, because *2 blocks 3* — was adopted, and Phase 2b is done
+(2026-09-09, `log.md` **D5**). **N6 was rejected by the researcher on 2026-08-17**
+(`context/cordoba-graduation.md:253`, `:285`) — `chart_slide_export.md` does **not**
+ship as a second example project convention. ⚠ `log.md:220` and this section both
+carried N6 as open for three weeks after it was decided; the study result is
+authoritative.
 
 Method note for any future pilot review: read the diffs **and run the code**.
 Reading the tree is what made an earlier session call a deliberate, documented
@@ -261,22 +317,56 @@ best invention has been dead since 2026-08-04.
 
 ## Next
 
-**⚠ REVISED 2026-08-17.** **Phase 2b** is now the critical path and is unblocked —
-five rule-shaped items, one session, `phases/phase-2b.md` is self-contained. It
-blocks Phase 3 for the plan's own reason: *a check for a rule not yet written is
-a guess about what the rule would have said.*
+**⚠ REVISED 2026-09-09.** **Phase 2b is done**; **Phase 3 is now the critical path
+and is unblocked.**
 
-**Then Phase 3**, whose shape changed. **Task 3.0 (the WARN tier) is new and comes
-first** — 3.3, 3.5 and invariant 13 are all written as if that tier existed, and
-it does not; `lint-research.sh` is ok-or-FAIL throughout. **3.4c (invariant 14,
-`#nn` resolution)** is new and independent of 3.4b. The named split point is
-unchanged: **task 3.6**, the CLI.
+**Read three things before writing an invariant**, in this order:
 
-**Still open on 3.4b (invariant 13).** Add it per *Carry into Phase 3* §1, or
-explicitly decide not to and downgrade `citation-discipline.md`'s *Gaps* section
-from "proposed" to "advisory" so the file stops promising something that isn't
-coming. 3.4c does **not** settle this — it checks the `#nn` form, not `[C<n>]`.
+1. **The pilot repo is `~/research/cordoba`, not `~/cordoba-growth-narrative`.**
+   `phase-3.md`'s lint baseline and every validation step in this plan point at
+   the dead path. A "file not found" here means the path, not the finding.
+2. ***Carry into Phase 3*** above — unchanged and still correct: the `#{2,3} C<n>`
+   anchor, the verified `\[C[0-9]+\]` regex, `artifacts:` as a **block** list whose
+   absence is legitimate, and the fact that a new invariant needs no installer edit.
+3. **The order changed and the reason is mechanical.** **Task 3.0 (the WARN tier)
+   comes first** — 3.3, 3.5 and invariant 13 are all written as though that tier
+   exists and `lint-research.sh` is ok-or-FAIL throughout, so anything WARN-shaped
+   has nowhere to live until 3.0 lands. **3.4c (invariant 14, `#nn` resolution)** is
+   new and independent of 3.4b.
 
-Phase 6 remains available as an independent alternative if you'd rather keep the
-critical path for a fresh session. Note **6a shrank**: the bare-segment guard
-landed 2026-08-17; the duplicate-path detector and the `--upgrade` test remain.
+**Phase 2b changed what two Phase 3 invariants must check**, so do not spec them
+from `phase-3.md` alone:
+
+- **Invariant 14 (3.4c) now has a written rule to resolve against**, which was the
+  whole reason 2b blocked 3. A bare `#nn` in a deliverable may point at a **renumbered**
+  doc: T2 says the new doc carries `> ⚠ **Renumbered <old> → <new> on <date>.**`
+  directly under its frontmatter and `(was #<old>)` on its headline. So a `#nn` that
+  matches no file is not automatically broken — grep the renumber banners for
+  `<old>` before reporting it. Three live examples in the pilot: 119→149, 131→150,
+  139→151.
+- **Invariant 1 must become recursive regardless of how decision E lands** — the
+  `access_to_finance/` subdirectory (`:49`, `:80` glob non-recursively) is a
+  confident PASS over an unopened directory, and T2 now names that same second-
+  namespace vector in a shipped convention. The rule and the check disagree until
+  this is fixed.
+- **`scope_authored:` is a new optional frontmatter key.** Any invariant that
+  validates the frontmatter block must not treat it as unknown — and must never
+  populate it (T1: a heuristic that sets it is self-refuting).
+
+**Still open on 3.4b (invariant 13).** Unchanged: add it per *Carry into Phase 3*
+§1, or explicitly decide not to and downgrade `citation-discipline.md`'s *Gaps*
+section from "proposed" to "advisory" so the file stops promising something that
+isn't coming. **3.4c does not settle this** — it checks the `#nn` form, not `[C<n>]`.
+The named split point is unchanged: **task 3.6**, the CLI (read
+`context/installer-map.md` first).
+
+### Needs a researcher call — carried forward
+
+- **The stale-pointer sweep** (Surprises 8). Five dangling convention pointers, and
+  `decision-records` has no v2 successor. Sizes 7.3b up from a one-off to a class.
+- **Decision E** — the evidence subdirectory namespace. Phase 3 proceeds either
+  way, but invariant 1 goes recursive regardless.
+
+**Phase 6 remains available** as an independent alternative if you'd rather keep the
+critical path for a fresh session. **6a shrank**: the bare-segment guard landed
+2026-08-17; the duplicate-path detector and the `--upgrade` test remain.
