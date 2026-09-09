@@ -6,8 +6,10 @@
 #   1. INDEX.md headline > 120 chars   (the index reached 330 KB with a 10,410-char row)
 #   2. duplicate evidence id           (five collisions; three distinct vectors)
 #   3. evidence doc missing frontmatter or a required key
-#   4. id in a filename != id in its frontmatter
-#   5. verdict word inside ## Measured (measurements must not carry verdicts)
+#   4. id in a filename != id in its frontmatter  (only when an `id:` key exists;
+#      its absence is check 3's finding, not a mismatch)
+#   5. verdict word inside ## Measured (measurements must not carry verdicts) —
+#      checked on every doc, frontmatter or not
 #   6. claims.md staler than the newest evidence doc
 #   7. method or source doc with no `triggers:` line (invisible to retrieval)
 #   8. claim `Rests on:` naming an evidence id with no file  (link claim->evidence)
@@ -247,7 +249,6 @@ BEGIN { nneed = split(need, needk, " "); idx = -1 }
       v = substr(line, 6); sub(/^[ \t]*/, "", v)
       if (length(v) >= 10) { d = substr(v, 1, 10); if (d ~ /^[0-9-]+$/) { dt = d; gotdt = 1 } }
     }
-    if (nofm) continue
     if (line ~ /^## Measured/) { meas = 1; inc = 0; continue }
     if (line ~ /^## /) { meas = 0 }
     if (meas) { c = decomment(line); if (length(c)) print "MEAS\t" idx "\t" c }
@@ -260,7 +261,7 @@ BEGIN { nneed = split(need, needk, " "); idx = -1 }
     miss = 0
     for (k = 1; k <= nneed; k++) if (!(needk[k] in seen)) { miss = 1; break }
     if (miss) print "FM_MISSING\t" path
-    if (fmid != nid) print "ID_MISMATCH\t" path "\t" (fmid == "" ? "none" : fmid) "\t" nid
+    if (gotid && fmid != nid) print "ID_MISMATCH\t" path "\t" (fmid == "" ? "none" : fmid) "\t" nid
     if (st != "") print "STATUS\t" idx "\t" st
   }
   if (dt != "") print "DATE\t" idx "\t" dt
