@@ -279,3 +279,111 @@ Not fixed here because it is not a repath. Three of the five plausibly map onto
 renamed survivors, but **`decision-records` has no v2 successor**, and deciding
 where a decision record lives in v2 is a convention question. Reproduce with the
 one-liner in `phases/phase-2b.md` § *Found, not fixed*.
+
+---
+
+## D6 — Phase 3 executed; two specced invariants changed shape on measurement (2026-09-09)
+
+**Phase 3 is done.** Nine tasks plus the recursive fix to invariant 1, one commit
+per invariant, every one seen red against a built fixture first. `lint-research.sh`
+goes from 7 checks to 14, and `.next-id` acquires the first tool that reads it.
+
+Full record in `phases/phase-3.md` § *Execution notes*. This entry holds only the
+decisions, because they change what a later phase may assume.
+
+### 1. Invariant 9 ships as two checks. **Decided; reversible in one commit.**
+
+Specced as one FAIL — an artifact used in `deliverables/` that no evidence doc
+lists under `artifacts:`. Measured against the pilot, that is **67 of 67**, and
+the reason is structural rather than a data-quality problem: **zero** evidence
+docs carry an `artifacts:` key, because the key shipped in Phase 2 of *this plan*.
+On every project that predates v3, every reference is unbound by construction.
+
+A FAIL whose count equals "every chart the project ever drew" on upgrade day is
+the failure mode this plan already legislated against twice — Decision 2's
+grading, and D2's ruling that invariant 13 be WARN. `check-evidence.sh` died of it.
+
+Splitting on *does any evidence doc mention this path at all* separates the two
+populations cleanly, 14 / 53 on the pilot:
+
+- **9 (FAIL), 14 hits** — the chart appears **nowhere** in `research/evidence/`.
+  This is the audit's actual finding: a headline number with no evidence doc,
+  invisible for six months. True regardless of adoption.
+- **9b (WARN), 53 hits** — an evidence doc discusses the chart but has not listed
+  it. An adoption meter that converges to zero under convert-on-touch.
+
+The phase's intent survives: the three-missing-docs check is a `test -f` and it
+FAILs. What is avoided is the cliff where the first person to adopt the key
+inherits 66 failures.
+
+### 2. Invariant 10 compares a conjunction. **Decided; not reversible cheaply.**
+
+Specced as *newest commit touching an `artifacts:` path is newer than the doc's
+`date:`*. That compares a commit timestamp against a hand-authored measurement
+date, and the **green fixture — doc and chart in one commit — reported itself
+stale.** Every project would have warned on every doc the day it adopted the key.
+
+The obvious repair, comparing the doc's own last commit instead, has the mirror
+flaw: a typo fix after a re-render masks the staleness. So it requires both — the
+artifact moved after the doc last moved *and* after the date the doc claims. The
+field-note case satisfies both; authoring-to-commit lag satisfies neither.
+
+Commit-vs-commit compares `%ct` seconds, not `--date=short`. At day resolution a
+chart re-rendered the same afternoon compares equal, and the fixture that should
+have been red came back green. **Both halves were found by a fixture misbehaving,
+not by reasoning** — which is the argument for the phase's see-it-red rule.
+
+### 3. Invariant 13's recorded rationale has expired. **Left WARN. Needs a call.**
+
+D2 made invariant 13 WARN because it had **573 targets**. Those 573 were bare
+`#nn` — which is invariant **14's** population, and 14 did not exist on
+2026-08-05; it was added 2026-08-17 (D4/G2). Measured today, invariant 13's
+population on the pilot is **zero**.
+
+So the tier no longer rests on the argument that produced it. An unresolvable
+`[C<n>]` is as mechanical as invariant 8, which is FAIL, and unlike 14 it has no
+legacy population to drown in.
+
+**Left WARN**: it honours the recorded decision, and WARN → FAIL is a one-word
+change while the reverse costs a release. **Flagged for the researcher** —
+promoting it is the cheapest remaining hardening of link 1.
+
+### 4. Decision E's live instance closed itself. Invariant 1 went recursive anyway.
+
+`research/evidence/access_to_finance/` no longer holds evidence docs. Its README
+records that the `access-to-finance` branch merged on **2026-08-21** and ids
+20/21/22 were promoted to 208/209/210; what remains is a frozen provenance
+snapshot of charts and a memo. The three invisible collisions are gone, and not
+because anyone acted on E.
+
+The recursive fix ships regardless, and E lands as *permit subfolders, check them*.
+A check defends against a **vector**, not an instance, and T2 now names that vector
+— a second numbering namespace — in a shipped convention. Until this commit the
+rule and the check disagreed. Unique `NN` project-wide stays non-negotiable.
+
+### 5. What the phase found that no one was looking for
+
+**Three template/convention defects, each surfaced by a verification criterion
+rather than by review.** A doc copied from the shipped evidence template failed
+invariants 5 and 12 on creation — the `## Measured` guidance comment spells out
+the verdict words the check greps for, and the `artifacts:` example shipped as
+live YAML pointing at placeholder paths. A fresh `r2p init` warned on a source
+example that had no frontmatter at all. And `upgrade.js`'s
+`REQUIRED_GITIGNORE_LINES` still held the v1 paths `internal_docs/` and
+`literature/`, so an upgraded project never starts ignoring
+`reference/literature/` — it has been tracking third-party PDFs.
+
+That last one is the two-installer trap CLAUDE.md names, found for the fourth
+time, and again only in the `--upgrade` half.
+
+**The generalisable lesson: the verification criteria found more than the tasks
+did.** "Green *and silent* on a fresh scaffold" and "build the broken fixture,
+watch it go red" each surfaced a shipped defect that no amount of reading the
+diff would have. Keep both phrasings in future phases.
+
+### 6. Measured, not fixed
+
+`lint-research.sh` takes **~9s on the pilot, of which ~8.9s predates this phase** —
+the per-doc loop spawns ~6 subprocesses across 285 docs. Not a regression and not
+in the task list, so untouched. But a nine-second linter is an adoption risk by
+exactly the reasoning that produced the WARN tier. **Phase 6 candidate.**
