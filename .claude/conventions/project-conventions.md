@@ -31,7 +31,7 @@ boundaries were left implicit:
   `.claude/conventions/methods.md`.
 - **`.claude/conventions/<name>.md`** documents *framework-shared
   protocols* — the same set of files lives in every project that
-  installs research-to-policy. `project_conventions/` is
+  installs research-to-policy. `.claude/conventions/project/` is
   the *project-specific* counterpart: project-scoped style and
   process rules that the framework deliberately does not
   prescribe.
@@ -44,12 +44,13 @@ about how this engagement does its work, it belongs here.
 
 ## Where project-convention docs live
 
-- Single folder: `project_conventions/` at the project root.
+- Single folder: `.claude/conventions/project/`, alongside the
+  framework's own conventions.
 - One file per domain: `<domain>.md` (`visualization.md`,
   `writing_guidelines.md`, `slide_design.md`, `naming.md`).
 - The folder is **flat** — no subdirectories. Most engagements
   will have 1–5 files; a flat listing scans in seconds.
-- `project_conventions/INDEX.md` is required. It carries a
+- `.claude/conventions/project/INDEX.md` is required. It carries a
   quick-nav table ("if you're working on X, read Y") plus a
   short "how to add a convention" footer. Researchers update
   the INDEX when adding files.
@@ -62,7 +63,7 @@ about how this engagement does its work, it belongs here.
 Unlike `data_sources/` (Status / Anchor / Endpoints / Query /
 Parsing / Pitfalls — six required sections) and `methods/`
 (Source / Rule / Why / Exclusions / Edge cases / Limitations /
-Counts — seven required sections), `project_conventions/` does
+Counts — seven required sections), `.claude/conventions/project/` does
 **not** prescribe internal structure. Visualization rules need
 color tables and plotting helpers; writing rules need voice and
 citation guidance; slide rules need layout and density notes.
@@ -103,12 +104,12 @@ truth. Slapping a `Status:` line on a project-conventions doc
 would be theater; demanding a re-fetchable anchor would be
 non-sensical (there is nothing external to re-fetch). The
 discipline that *does* apply: edit the doc when the rule
-changes, and let `git log -- project_conventions/<file>` carry
+changes, and let `git log -- .claude/conventions/project/<file>` carry
 the history.
 
 ## INDEX.md schema
 
-`project_conventions/INDEX.md` carries:
+`.claude/conventions/project/INDEX.md` carries:
 
 1. **Quick navigation table** — `If you're working on X | Read
    Y`. One row per file. Sorted by likely access frequency.
@@ -152,13 +153,13 @@ the history.
 
 1. Identify the *domain*: visualization, writing, slide design,
    naming, citation style, etc. One file per domain.
-2. Create `project_conventions/<domain>.md`. Open with the
+2. Create `.claude/conventions/project/<domain>.md`. Open with the
    triggering line: "Use this document whenever \<situation\>."
 3. Write the rules in whatever shape the domain calls for.
    Include concrete examples (color hex codes, file naming
    patterns, sample sentences) so a reader can apply the rule
    without re-deriving it.
-4. Add a row to `project_conventions/INDEX.md`'s navigation
+4. Add a row to `.claude/conventions/project/INDEX.md`'s navigation
    table.
 5. If the convention is project-defining (a Claude session
    would silently violate it without knowing), add a one-line
@@ -170,7 +171,7 @@ the history.
 
 - **Framework-shared protocols** — those live in
   `.claude/conventions/<name>.md` and ship with super-
-  claudio-research. `project_conventions/` is for the rules
+  claudio-research. `.claude/conventions/project/` is for the rules
   *this engagement* makes locally.
 - **Peer-reviewable methodology calls** — deflator choice,
   identification strategy, sample restriction. Those go in
