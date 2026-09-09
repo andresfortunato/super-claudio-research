@@ -18,7 +18,7 @@ Each archive entry preserves:
 - **Key decisions** — the calls future readers should inherit, with
   cross-links to `research/methods/<topic>.md` for peer-review-grade
   methodology calls.
-- **Methods landed** — cross-links to any `research/methods/<slug>/rule.md`
+- **Methods landed** — cross-links to any `research/methods/<topic-slug>.md`
   files the plan created or materially changed.
 - **Files added or modified** — the actual file manifest, post-execution.
 - **Learnings** — surprises, gotchas, dead ends extracted from the

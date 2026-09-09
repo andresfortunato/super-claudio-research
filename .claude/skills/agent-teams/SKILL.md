@@ -128,7 +128,7 @@ Teammates can message each other and the lead. This matters when:
 
 ### Quality gates
 
-Each teammate verifies their own work before reporting results: scripts run end-to-end with the same seed, diagnostic counts match the relevant `research/methods/<slug>/rule.md` rule, source citations are present, charts re-render byte-identical (or sign-and-magnitude-identical for stochastic content). The lead reviews results before consolidating.
+Each teammate verifies their own work before reporting results: scripts run end-to-end with the same seed, diagnostic counts match the relevant `research/methods/<topic-slug>.md` rule, source citations are present, charts re-render byte-identical (or sign-and-magnitude-identical for stochastic content). The lead reviews results before consolidating.
 
 ## Output Collection
 

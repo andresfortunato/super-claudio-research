@@ -42,13 +42,13 @@ When a session ends, write/overwrite `plan/plan-<slug>/handoff.md`. The framewor
 ### Handoff (2026-05-08)
 
 **Status**: Phase 1 complete. Tasks 1.1–1.3 done.
-**State**: Committed as abc123. Diagnostic counts match `research/methods/eph-harmonization/rule.md`; no NA in age, region, or wage columns.
+**State**: Committed as abc123. Diagnostic counts match `research/methods/eph-harmonization.md`; no NA in age, region, or wage columns.
 **Next**: Phase 2, Task 2.1 — apply working-age + sample-construction filters.
 
 **Surprises:**
-- 2018 EPH wave dropped the household-id column for two trimesters; reconstructed via composite key (per `research/methods/2026-05-07_eph_panel_id.md`).
+- 2018 EPH wave dropped the household-id column for two trimesters; reconstructed via composite key (per `research/methods/eph-panel-id.md`).
 - Coefficient on regional FE flipped sign vs the brainstorm prediction — sample now restricted to >50k-pop cities, magnitude reconciles to literature. Logged in `log.md` and noted in the next regression's commit.
-- Deflator chain needed an extra splice point at 2017 (CPI methodology break) — added to `research/methods/deflator-chain/rule.md` v3.
+- Deflator chain needed an extra splice point at 2017 (CPI methodology break) — added to `research/methods/deflator-chain.md` v3.
 
 **What didn't work:**
 - Tried using `data.table::rbindlist(fill=TRUE)` to stack vintages — silently coerced factor levels. Switched to explicit per-wave `mutate()` + `bind_rows()` after.

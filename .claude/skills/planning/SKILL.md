@@ -58,7 +58,7 @@ Tasks should be independently verifiable milestones, not sequential instructions
 - Task 1.3: Save to `data/processed/`
 
 **Good** (checkpoints with intent):
-- Task 1.1: Apply working-age filter (15–64) to the EPH harmonized panel; save to `data/processed/eph_working_age.csv`. Verify: row count matches `research/methods/working-age-filter/rule.md` diagnostic counts; no NA in the age column; commit message has Run/Out lines.
+- Task 1.1: Apply working-age filter (15–64) to the EPH harmonized panel; save to `data/processed/eph_working_age.csv`. Verify: row count matches `research/methods/working-age-filter.md` diagnostic counts; no NA in the age column; commit message has Run/Out lines.
 
 If a task can't be independently verified, it's too granular — merge it up. Good tasks create natural commit points and enable progress tracking across sessions.
 
@@ -114,7 +114,7 @@ A well-structured plan covers these elements, adapted to the project's needs:
 - Tasks: [checkpoints with intent]
 ```
 
-Research plans naturally cross-link `research/methods/<date>_<slug>.md`, `research/methods/<slug>/rule.md`, and `research/sources/` — the structure above is a starting point, not a rigid template. Scale it to the task: a two-script change doesn't need phases; a complex methodology migration might need per-phase plan files.
+Research plans naturally cross-link `research/methods/<topic-slug>.md` — one flat file per methodological object, carrying the rule, its justification and its traps together — and `research/sources/<source>.md`. The structure above is a starting point, not a rigid template. Scale it to the task: a two-script change doesn't need phases; a complex methodology migration might need per-phase plan files.
 
 ## Plan Setup
 
@@ -144,7 +144,7 @@ The brainstorming summary contains the reasoning; the plan records the conclusio
 
 When a phase touches complex systems that the implementer would otherwise spend significant context exploring, write decision-enabling context summaries in `context/`. These save 15-30% of execution context by replacing exploration with a 20-line summary.
 
-A context file might describe how `research/sources/world_bank_api.md` interacts with the project's deflator chain, or how `research/methods/age-cohort-definition/rule.md` evolves vN-to-vN+1.
+A context file might describe how `research/sources/world_bank_api.md` interacts with the project's deflator chain, or how `research/methods/age-cohort-definition.md` evolves vN-to-vN+1.
 
 The test: would an implementer need to read 5+ files to understand this system well enough to make implementation decisions? If yes, write a context summary during planning.
 

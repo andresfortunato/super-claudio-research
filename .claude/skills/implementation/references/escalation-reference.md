@@ -27,7 +27,7 @@ Something you discover directly contradicts a decision in plan.md.
 
 A single task has consumed 3+ debugging cycles without resolution.
 
-**Example**: Row counts in the harmonized panel don't reconcile against `research/methods/working-age/rule.md`; you adjust the filter, a different country's count breaks; you re-adjust, the original fails again.
+**Example**: Row counts in the harmonized panel don't reconcile against `research/methods/working-age.md`; you adjust the filter, a different country's count breaks; you re-adjust, the original fails again.
 
 **Why**: Diminishing returns. You're burning context on a blocker that might need a fundamentally different approach (different deflator chain, different identification spec), or the user might know something that unblocks it immediately.
 

@@ -75,6 +75,25 @@ correct. *Verification:* after the fix,
 `grep -rn 'methods/<slug>/rule\.md\|methods/[a-z-]*/rule\.md' .claude/ templates/`
 returns nothing.
 
+**⚠ CORRECTED 2026-09-09 — the inventory above was short by three, and the
+verification grep cannot return zero.**
+
+Three more files carry the v1 form and are not in the list: `agent-teams/SKILL.md:131`
+(a teammate's self-verification step), `README.md:252` (the scaffold listing claims
+`EXAMPLE_method/rule.md`; `templates/` ships `EXAMPLE_topic.md`), and
+`audience-and-philosophy.md:120` (principle 9's anchor list — fixed under 7.4).
+`multi-session.md:49` carries the *other* v1 form, a date-prefixed
+`research/methods/2026-05-07_eph_panel_id.md`, which is v1 `decisions/` repathed
+rather than renamed; v2 is kebab-case topic slugs, so it is the same defect.
+
+The grep returns **one** line after the fix, and it is correct:
+`.claude/conventions/methods.md:13`, the *"what changed in v2"* history table, is
+the same class as the two `docs/` occurrences excluded above. Excluded out loud,
+in the spirit of `03_linkcheck.py`'s `BASELINE_PAT` — not silently.
+`README.md:252` is fixed in 7.7 with the rest of the stale scaffold listing, not
+here, because one corrected line inside a wholly-v1 block reads as a worse lie
+than the block did.
+
 **7.4 — Revise the constitution.** Three edits: generalize principle 9 to cover
 evidence `## Measured` blocks as anchors; add the compute-graded tier to the
 stakes-graded table in principle 7 (and to `verification-architecture.md`); fix
