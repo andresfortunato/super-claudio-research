@@ -20,7 +20,7 @@ rule nothing checks decays to whatever the last session felt like doing.
 
 | Link | Expressed as | Checked by |
 |---|---|---|
-| deliverable → claim | `[C12]` in the deliverable body | `/cite-check` · lint **invariant 13** — WARN |
+| deliverable → claim | `[C12]` in the deliverable body | `/cite-check` · lint **invariant 13** — FAIL |
 | deliverable → evidence *(legacy)* | bare `#nn` in the deliverable body | lint **invariant 14** — WARN |
 | claim → evidence | `Rests on: #71, #72` in `research/claims.md` | lint **invariant 8** — FAIL |
 | evidence → artifact | `artifacts:` frontmatter key on the evidence doc | lint **invariants 9, 12** — FAIL |
@@ -199,10 +199,24 @@ the strongest argument for converting: claim ids are sparse and hand-curated, so
 `[C99]` against a ledger holding C12–C48 is caught immediately where `#99` is not.
 **Convert-on-touch buys real checkability, not just tidiness.**
 
-Both 13 and 14 are WARN. 14 stays WARN permanently — convert-on-touch keeps `#nn`
-legal indefinitely, so the check reports at adoption volume by design. 13's tier is
-worth revisiting: an unresolvable `[C<n>]` is as mechanical as invariant 8, which
-is FAIL, and unlike 14 it has no legacy population to drown in.
+**13 is FAIL and 14 is WARN, and the split is the whole argument for converting.**
+14 stays WARN permanently — convert-on-touch keeps `#nn` legal indefinitely, so it
+reports at adoption volume by design, and a check that blocks every build during a
+year-long conversion is a check someone disables. 13 has no legacy population to
+drown in: an unresolvable `[C<n>]` is as mechanical as invariant 8, and it is
+either a typo or a claim nobody wrote down.
+
+*(13 shipped WARN on 2026-09-09 and was promoted the same day. The WARN call cited
+"573 references" — which is invariant 14's population, counted before 14 existed.
+Invariant 13's own population on the pilot is zero. **When a tier rests on a
+measured count, re-measure before trusting it**, including a count you took
+yourself.)*
+
+**The order this enforces.** `[C50]` written before C50 exists now fails the run.
+That is deliberate: § *A number that cites nothing* already says to write the claim
+first, because writing it is what forces the evidence doc, which forces the
+artifact. A citation to a claim you intend to write is the same defect as a number
+with no citation — it just looks tidier.
 
 **The last row of the table above stays expensive.** A headline number carrying no
 citation at all is invisible to every grep — there is nothing to resolve. Finding

@@ -34,6 +34,11 @@
 #
 # A check that cannot decide which tier it belongs in is FAIL only if a green
 # run on a correct project is genuinely reachable today. Nothing is auto-fixed.
+#
+# A tier chosen on a measured count is only as good as the count. Invariant 13
+# was written WARN on a volume argument that belonged to invariant 14, and its
+# own population turned out to be zero — so re-measure before citing a number
+# back at a tier decision, including one you made yourself last session.
 
 set -uo pipefail
 shopt -s nullglob   # an empty evidence dir must not glob-literal into sed
@@ -418,6 +423,20 @@ if [[ -d deliverables ]]; then
   # 13. `[C<n>]` resolving to a claim heading.
   # Anchored `^#{2,3} C<n>`, never `^## C<n>` alone — the pilot's ledger carries
   # all 48 claims at `###` under `## §N` sections, so the `##` form matches zero.
+  #
+  # FAIL, promoted from WARN 2026-09-09. It shipped WARN on a rationale that had
+  # expired before it was written: the "573 references would drown a real
+  # project" count is invariant 14's population — bare `#nn` — and 14 did not
+  # exist when that call was made. Measured on the pilot, invariant 13's own
+  # population is ZERO, so the volume argument that keeps 14 at WARN never
+  # applied here. What is left is a check as mechanical as invariant 8 (FAIL):
+  # claim ids are sparse and hand-curated, so an unresolvable `[C<n>]` is a typo
+  # or a claim nobody wrote, never a mid-adoption backlog.
+  #
+  # The one workflow this blocks is citing `[C50]` in a draft before adding C50
+  # to the ledger. That is the order citation-discipline.md § *A number that
+  # cites nothing* already forbids — write the claim first, which forces the
+  # evidence doc. Blocking it is the point, not a side effect.
   if [[ -f research/claims.md ]]; then
     claim_ids=$(grep -oE '^#{2,3} C[0-9]+' research/claims.md | grep -oE '[0-9]+' | sort -u)
     badc=""; nc=0
@@ -428,8 +447,8 @@ if [[ -d deliverables ]]; then
     done < <(deliverable_docs | xargs -0 -r grep -ohE '\[C[0-9]+\]' 2>/dev/null \
              | grep -oE '[0-9]+' | sort -un)
     if [[ -n "$badc" ]]; then
-      warn "$(grep -c . <<< "$badc") claim reference(s) in deliverables/ resolve to nothing:"
-      show "$badc"
+      note "FAIL $(grep -c . <<< "$badc") claim reference(s) in deliverables/ resolve to nothing:"
+      show "$badc"; fail=1
     elif (( nc )); then
       note "ok   every [C<n>] in deliverables/ resolves ($nc distinct)"
     elif [[ -s research/claims.md ]] && [[ -n "$(deliverable_docs | xargs -0 -r grep -l . 2>/dev/null)" ]]; then
