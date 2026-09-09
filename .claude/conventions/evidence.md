@@ -62,6 +62,8 @@ geography: Gran Córdoba (EPH aglomerado 13)
 period: 2014–2025
 kind: measurement            # measurement | comparison | decomposition | scenario | null-result
 confidence: high             # high | medium | low
+scope_authored: true                # OPTIONAL. Which keys above a human checked.
+  # unit/geography/period hand-checked against the doc; kind/confidence heuristic
 data: [eph_microdata, cep_sipa]     # research/sources/ stems
 methods: [real-wage-measurement]    # research/methods/ slugs this rests on
 artifacts:                          # OPTIONAL. Charts/tables this doc explains.
@@ -129,6 +131,36 @@ from this one missing field.
 
 `confidence` is `low` when the doc rests on a proxy, a modelled input, a single
 thin cell, or a period the source does not cleanly cover. Say which in `Scope`.
+
+#### `scope_authored:` — price the guess instead of deleting it
+
+The rule above has a binary answer to a mis-inferred scope key: hand-author it, or
+omit it. **At corpus scale the second half of that is wrong**, and the pilot found
+it out. `unit` and `period` are what the INDEX triages on; omit them across a few
+dozen back-filled docs and the triage table stops discriminating, so the reader
+opens everything — which is the cost the capped INDEX exists to avoid. Deleting a
+guessed value trades one wrong row for a whole column of blanks.
+
+The pilot's third option is what ships: **keep the machine-guessed value and price
+it.**
+
+```yaml
+scope_authored: true   # unit/period hand-checked against the doc; kind/confidence still heuristic
+```
+
+- **Optional, and hand-authored only.** A heuristic that populated
+  `scope_authored` would be asserting that a human checked something no human
+  looked at — self-refuting, and worse than the mis-inference it reports on.
+- **Absent means "nobody has checked", never "checked and wrong."** Same absence
+  semantics as `artifacts:` below. A doc with no `scope_authored` is the normal
+  state, not a defect.
+- **The free-text comment is the field, not decoration: it names *which* keys were
+  hand-checked.** A bare `true` re-creates the original problem one level up — the
+  reader now trusts five keys because someone verified two of them. Name the
+  verified keys and name the ones still inferred.
+- The value is about *provenance of the scope keys*, not about the finding.
+  `confidence` says how much to trust the measurement; `scope_authored` says how
+  much to trust the labels you would filter it by.
 
 ### `artifacts:` — which finding a chart carries
 

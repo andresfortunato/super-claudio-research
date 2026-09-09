@@ -128,3 +128,7 @@ Protocol: `.claude/conventions/plan-lifecycle.md`.
   evidence doc binds its charts with the `artifacts:` key. Protocol:
   `.claude/conventions/citation-discipline.md`. Promote to its own section only
   once `deliverables/` actually carries citations.
+- **A guessed scope key** — an evidence doc's `unit`/`period` that was inferred
+  rather than read is repaired with `scope_authored:` naming which keys a human
+  checked, **not** by blanking the key. Protocol:
+  `.claude/conventions/evidence.md`.
