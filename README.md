@@ -21,7 +21,7 @@ cd /path/to/your/research-project
 r2p init
 ```
 
-`r2p init` is idempotent — safe to re-run. It seeds the project with `.claude/{conventions,hooks}/`, `.claude/settings.json`, scaffolding directories (`research/evidence/`, `research/wiki/`, `research/methods/`, `research/methods/`, `research/methods/`, `plan/archive/`, `deliverables/`, etc.), `CLAUDE.md`, and a framework block in `.gitignore`. Skills and agents are global — symlinked into `~/.claude/{skills,agents}/` so an upgrade lands everywhere automatically. Existing files are never overwritten — in particular, if `CLAUDE.md` already exists, `r2p init` leaves it untouched and drops the framework template at `CLAUDE_TEMPLATE.md` alongside it so you can diff and merge.
+`r2p init` is idempotent — safe to re-run. It seeds the project with `.claude/{conventions,hooks}/`, `.claude/settings.json`, scaffolding directories (`research/{evidence,methods,sources}/`, `deliverables/`, `reference/`, `plan/archive/`, `data/`, `analysis/`, `output/` — `research/wiki/` only with `--with-wiki`), `CLAUDE.md`, and a framework block in `.gitignore`. Skills and agents are global — symlinked into `~/.claude/{skills,agents}/` so an upgrade lands everywhere automatically. Existing files are never overwritten — in particular, if `CLAUDE.md` already exists, `r2p init` leaves it untouched and drops the framework template at `CLAUDE_TEMPLATE.md` alongside it so you can diff and merge.
 
 ### Adopting r2p in an existing, disorganized project
 
