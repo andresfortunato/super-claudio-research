@@ -76,6 +76,87 @@ RULES: list[tuple[str, str]] = [
 LEFT = r"(?<![\w./-])"
 COMPILED = [(re.compile(LEFT + re.escape(src)), src, dst) for src, dst in RULES]
 
+# ---------------------------------------------------------------------------
+# Bare-segment guard. Every RULE above carries a trailing slash, so a path
+# BUILT SEGMENT-BY-SEGMENT is invisible to all of them:
+#
+#     EVID = REPO / "evidence"              # not matched — no slash
+#     """Inputs: research/evidence/*.md"""  # matched, rewritten
+#
+# The docstring gets repathed and the line that opens the directory does not,
+# and the report above reads clean. Measured on the pilot: 571 rewrites across
+# 559 files, double-prefix guard clean, and FOUR dead v1 paths left in code —
+# one gate that now crashes, one shared util module, and two chart scripts that
+# `mkdir(parents=True)` their v1 target and so RE-CREATE a directory this
+# migration deleted, silently, exit 0.
+#
+# This guard reports; it never rewrites. Turning `X / "evidence"` into
+# `X / "research" / "evidence"` needs to know what X is, and a wrong rewrite of
+# a path expression is worse than an unrewritten one.
+#
+# The watch list is DERIVED FROM `RULES`, not restated, so the guard and the
+# rewriter can never disagree about which directories moved.
+CODE_EXTS = {".py", ".R", ".r", ".sh", ".qmd", ".Rmd"}
+
+# Constructors that take a path segment as a bare quoted string.
+JOINERS = ("join(", "Path(", "file.path(", "here(", "glue(")
+
+
+def _bare_segments() -> dict[str, str | None]:
+    """v1 first segment -> the v2 parent that may legitimately precede it.
+
+    `methods/` -> `research/methods/` keeps the name, so a line already reading
+    `ROOT / "research" / "methods"` is correct and must not be flagged; the
+    parent to look for is `research`. `data_sources/` -> `research/sources/`
+    renames the segment, so `data_sources` can never be legitimate and the
+    parent is None.
+    """
+    out: dict[str, str | None] = {}
+    for src, dst in RULES:
+        seg = src.strip("/").split("/")[0]
+        if seg in out:
+            continue
+        parts = dst.strip("/").split("/")
+        i = parts.index(seg) if seg in parts else 0
+        out[seg] = parts[i - 1] if i > 0 else None
+    return out
+
+
+BARE = _bare_segments()
+
+
+def bare_segment_hits(files: list[Path]) -> list[str]:
+    """Path expressions naming a moved directory as a bare quoted segment."""
+    hits = []
+    for p in files:
+        if p.suffix not in CODE_EXTS:
+            continue
+        try:
+            lines = p.read_text(encoding="utf-8").splitlines()
+        except UnicodeDecodeError:
+            continue
+        for lineno, line in enumerate(lines, 1):
+            for seg, v2parent in BARE.items():
+                q = r"[\"']" + re.escape(seg) + r"[\"']"
+                m = re.search(r"/\s*" + q, line) or (
+                    re.search(q, line) if any(j in line for j in JOINERS) else None
+                )
+                if not m:
+                    continue
+                head = line[:m.start()]
+                # Relative to the script's own directory, not the repo root —
+                # `Path(__file__).parent / "slides"` inside a deliverable is
+                # that deliverable's own subfolder and did not move.
+                if "__file__" in head:
+                    continue
+                # Already under its v2 parent: `ROOT / "research" / "methods"`.
+                if v2parent and re.search(r"[\"']" + re.escape(v2parent) + r"[\"']", head):
+                    continue
+                hits.append(f"{p.relative_to(ROOT)}:{lineno}  "
+                            f"bare `{seg}` — {line.strip()[:88]}")
+                break
+    return hits
+
 
 def tracked_text_files() -> list[Path]:
     out = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z"],
@@ -126,6 +207,9 @@ def main() -> int:
             if pat in t:
                 bad.append(f"{p.relative_to(ROOT)}: {pat}")
 
+    # guard: paths built segment-by-segment, which no RULE can see
+    segs = bare_segment_hits(tracked_text_files())
+
     lines = ["# Repath report", "", f"mode: {'check' if check else 'write'}", "",
              "| rewrite | occurrences |", "|---|--:|"]
     for k, v in counts.most_common():
@@ -133,11 +217,17 @@ def main() -> int:
     lines += ["", f"files touched: **{len(touched)}**", "",
               "## Double-prefix guard", ""]
     lines.append("clean" if not bad else "\n".join(f"- ⚠ {b}" for b in bad))
+    lines += ["", "## Bare-segment guard", "",
+              "Path expressions that name a moved directory as a bare quoted",
+              "segment. Nothing above rewrote these — every rule needs a",
+              "trailing slash. **Fix each by hand before trusting this repath.**",
+              ""]
+    lines.append("clean" if not segs else "\n".join(f"- ⚠ {s}" for s in segs))
     report = "\n".join(lines) + "\n"
     (ROOT / "plan/plan-r2p-v2-consolidation/mapping/repath_report.md").write_text(
         report, encoding="utf-8")
     print(report)
-    return 1 if bad else 0
+    return 1 if (bad or segs) else 0
 
 
 if __name__ == "__main__":
