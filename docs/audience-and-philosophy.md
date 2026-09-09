@@ -14,13 +14,13 @@ The framework targets applied development-research teams: country-diagnostic, se
 It assumes:
 
 - **Multi-session, multi-week plans** — not one-shot scripts. A typical engagement runs 3–9 months and crosses dozens of Claude sessions.
-- **Mixed languages** — R and Python first-class; Stata and others tolerated. The framework is markdown-first and language-neutral in the core; language specifics live inside individual scripts (called out in the script-header `Env:` line).
+- **Mixed languages** — R and Python first-class; Stata and others tolerated. The framework is markdown-first and language-neutral in the core; language specifics live inside individual scripts (called out in the script header's `Env:` line, per `provenance.md`).
 - **Evidence accumulation matters more than feature velocity.** The deliverable is a defensible argument, not a shipped product. What was *learned* (and what's *unsettled*) needs to survive across sessions, researchers, and years.
 - **Open-source-from-day-one.** No engagement-specific content lives in committed framework files. Pilot teams (Córdoba, Cambodia) are the first users, but the framework is published for anyone doing similar work.
 
 It does *not* target: software engineering teams (Claude Code's defaults already serve them well), one-off data exercises (overkill), or fully-academic research with a LaTeX-Beamer pipeline (deferred to v1.1+).
 
-## The nine design principles
+## The ten design principles
 
 ### 1. Silent-by-default hooks
 
@@ -42,7 +42,7 @@ Trigger discipline: tripwires read `git status`, the filesystem, file mtimes, or
 
 Every convention is one file in `.claude/conventions/` (the protocol) plus optionally one file in `.claude/hooks/` (the nudge) plus one file in `docs/` (the rationale). Skills are one directory under `.claude/skills/<name>/` with a single `SKILL.md`. Profiles are one directory under `templates/deliverables/<name>/` with `PROFILE.md` + `template.md`.
 
-A project adopts pieces selectively. If the team doesn't write decision records, they don't install `decision-records.md` and the rest works fine. There is no orchestrator coordinating between conventions, and there is deliberately no cross-skill router (the Imbad mode-registry pattern is deferred until skill count exceeds ~8).
+A project adopts pieces selectively. If the team never scrapes, they don't install `source-registry.md` and the rest works fine. There is no orchestrator coordinating between conventions, and there is deliberately no cross-skill router (the Imbad mode-registry pattern is deferred until skill count exceeds ~8).
 
 When proposing a new convention, ask: can this be one file in `.claude/conventions/`? If it requires touching three other conventions to integrate, the design is wrong.
 
@@ -50,7 +50,7 @@ When proposing a new convention, ask: can this be one file in `.claude/conventio
 
 Everything in `.claude/conventions/`, `.claude/hooks/`, `.claude/skills/`, `.claude/agents/`, and `.claude/settings.json` is committed to the research repo so every collaborator (human or AI, on any machine) gets the same scaffolding. User-personal customization stays in `.claude/settings.local.json` (gitignored).
 
-This is the inverse of the Claude Code default, where most config lives in `~/.claude/`. The research repo is the unit of collaboration, so the harness moves with the repo. Same argument as for the script-header convention: future-you, your handoff partner, and the auditor years later all need to see the same thing.
+This is the inverse of the Claude Code default, where most config lives in `~/.claude/`. The research repo is the unit of collaboration, so the harness moves with the repo. Same argument as for the provenance convention: future-you, your handoff partner, and the auditor years later all need to see the same thing.
 
 ### 5. Short CLAUDE.md, with pointers
 
@@ -60,7 +60,21 @@ CLAUDE.md is loaded into every session. Long-form rules in CLAUDE.md cost tokens
 
 The pointer block names the convention, says when it applies, and points at `.claude/conventions/<name>.md` for the protocol. Claude reads the full protocol on demand when the situation matches the trigger. This pattern is the single biggest token-cost lever in the framework.
 
-The ten pointer blocks shipped in v1: Evidence Logging, Wiki, Script Headers, Analytical Commit Format, Handoff Format, Plan Structure, Decision Records, Methods, Source Registry, Data Sources.
+v1 shipped ten pointer blocks: Evidence Logging, Wiki, Script Headers, Analytical Commit Format, Handoff Format, Plan Structure, Decision Records, Methods, Source Registry, Data Sources. **v2 consolidated them to seven mandatory plus two optional**, and the merges are the argument for the principle rather than against it — four of the ten were always read together and each restated the others' halves:
+
+| v2 convention | Absorbs |
+|---|---|
+| `evidence.md` | Evidence Logging |
+| `claims.md` | ✚ new in v2 — the curated layer above append-only evidence |
+| `citation-discipline.md` | ✚ new in v3 — the chain the other three resolve against |
+| `methods.md` | Methods, Decision Records, Learnings |
+| `provenance.md` | Script Headers, Analytical Commit Format |
+| `plan-lifecycle.md` | Plan Structure, Handoff Format, Brainstorm Format, Plan Archival |
+| `project-conventions.md` | ✚ the project's own local namespace |
+| `sources.md` *(optional)* | Data Sources, Data Access |
+| `source-registry.md` *(optional)* | Source Registry — installed with `r2p init --with-wiki` |
+
+The two optional ones ship only where the wiki does. A project that never scrapes never reads them.
 
 ### 6. Markdown-first, language-neutral core
 
@@ -74,8 +88,10 @@ LaTeX/Beamer add-ons are deferred to v1.1+ (Pedro / Hugo Sant'Anna patterns), an
 
 Verification is tiered by cost and by who triggers it:
 
-- **Provenance substrate (zero install cost, researcher discipline).** `script-header` and `analytical-commit-format` conventions turn `git log` into the audit trail. No hook, no separate log; `git log -- output/<file>` resolves to a commit, the message names the script, the script's header documents the run.
+- **Provenance substrate (zero install cost, researcher discipline).** The `provenance.md` convention turns `git log` into the audit trail. No hook, no separate log; `git log -- output/<file>` resolves to a commit, the message names the script, the script's header documents the run.
+- **`lint-research.sh` (zero tokens, manual or CI).** Eighteen mechanical invariants over the research record — duplicate ids, missing frontmatter, a claim resting on an id with no file, a doc pointer resolving to nothing. Pure bash, no model in the loop, 2.3s over a 285-document corpus. Every check in it is a defect that actually happened on the pilot.
 - **`/verify` (≤2k tokens, user-invoked).** Per-artifact: one regression, one chart, one paragraph. Sign-of-coefficients, magnitudes, missingness, source citation, provenance. Run when you're about to publish or hand off.
+- **`/cite-check` (≤2k tokens, user-invoked).** ✚ **Added 2026-09-09.** Walks one finished deliverable's citation chain end to end: every number traced to a claim, every claim to live evidence. Mechanical and exhaustive where `/verify` is selective and judgement-shaped.
 - **`/deliverable-review` (≤12k tokens, user-invoked, forked parallel).** Seven lenses (data validity, identification/reasoning, robustness, framing, audience-fit, political-economy realism, peer-Lab plausibility), each in a separate sub-context. Run only on advanced deliverable drafts — last-mile, not exploratory.
 
 - **`/pipeline-check` (side-effecting, user-invoked).** ✚ **Added 2026-09-09.** Detects which analytical outputs are stale against their inputs and **re-runs the producing script directly**. The first tier in the framework that writes anything.
@@ -114,12 +130,51 @@ Reference documentation about external systems — APIs, codebooks, project-inte
 
 The discipline is to pair every freshness timestamp with at least one **headline anchor** — a concrete value or count produced by the documented procedure. "As of 2026-05-04, the IMF DIP query for KHM 2009 inward FDI from China returns $1.113B." "Under v2 of the electronics-entrant rule, the narrow cohort has 49 entrants, with class breakdown sustainer 39 / faller 6 / plateauer 2 / pending 2." Anchors turn a date stamp into a re-runnable smoke test: future-Claude (or future-you) can re-fetch the value, and any drift surfaces immediately.
 
-Where this binds in v1:
+Where this binds:
 
-- **`data_sources/<source>_<thing>.md`** — every doc carries a `Status: verified <YYYY-MM-DD>` line plus at least one anchor (a country-year-indicator triple is ideal). See `.claude/conventions/data-sources.md`.
-- **`methods/<method>/rule.md`** — the diagnostic-counts block IS the anchor; bumping a rule from vN to vN+1 requires re-running the implementing script and updating the counts. See `.claude/conventions/methods.md`.
+- **`research/sources/<source>.md`** — every doc carries a `Status: verified <YYYY-MM-DD>` line plus at least one **Headline anchor** (a country-year-indicator triple is ideal). See `.claude/conventions/sources.md`.
+- **`research/methods/<topic-slug>.md`** — the diagnostic-counts block IS the anchor; bumping a rule from vN to vN+1 requires re-running the implementing script and updating the counts. See `.claude/conventions/methods.md`.
+- **`research/evidence/NN_<slug>.md`** — ✚ **generalized 2026-09-09.** The `## Measured` block is an anchor too, and had been one since v2 without anyone saying so: concrete numbers produced by a documented procedure, held verdict-free by lint invariant 5. *That* is what makes it mechanically comparable to a re-run rather than merely re-readable — the verdict-free rule was written for legibility and turned out to be the property an automated check needs. `/pipeline-check` re-runs the producing script and diffs against it; the block did not have to be redesigned to support that, only recognised.
 
-Future ref-doc conventions whose claims age out should adopt the same pattern. The cost is a few minutes per verification; the payoff is an audit trail future readers can cheaply re-confirm. If a source genuinely has no point-in-time anchor (intraday market feeds, frequently-revised series), the escape hatch is a *structural* anchor — "the response object has these top-level keys"; "the codelist contains 20 codes" — weaker but better than a bare timestamp.
+**The generalization is the point.** Principle 9 was written for *reference documentation about external systems* — an API whose response shape shifts under a stable endpoint. An evidence doc is not that: it documents this project's own measurement. But it rots the same way and for the same reason, which is that a date is not re-runnable and a number is. Any doc whose claims age out is in scope, and the test for whether the anchor is good enough is unchanged: **can a future reader re-produce the value and see the drift?** Future ref-doc conventions whose claims age out should adopt the same pattern. The cost is a few minutes per verification; the payoff is an audit trail future readers can cheaply re-confirm. If a source genuinely has no point-in-time anchor (intraday market feeds, frequently-revised series), the escape hatch is a *structural* anchor — "the response object has these top-level keys"; "the codelist contains 20 codes" — weaker but better than a bare timestamp.
+
+### 10. Silence reads as a pass
+
+**✚ Added 2026-09-09.** A check that finds nothing must say so, and name what
+it looked at. An invariant that does not apply prints that it does not apply.
+A row that came back clean prints *Not flagged*. A re-run that reproduced its
+numbers prints *Reproduced unchanged*. Empty output is never the report.
+
+The reason is that silence is ambiguous in a way a reader cannot resolve. "This
+check found nothing", "this check was skipped because the population was empty",
+"this check errored and swallowed it" and "this check was never written" all look
+identical from the outside, and the reader's only options are to over-trust the
+silence or to re-derive the check by hand — which is the cost the check existed
+to remove. An accounted-for pass is cheap to print and is the whole difference
+between a report and an absence.
+
+Four v3 mechanisms reached this independently before it was written down:
+inapplicable lint invariants print a `--` line rather than vanishing;
+`/cite-check` prints *Not flagged* per unflagged number; `/pipeline-check`
+prints *Reproduced unchanged*; the migration linkchecker prints `noted` for a
+break it deliberately tolerates. Four arrivals is a principle, not a
+coincidence, and the fourth one is the one that argues hardest: a *tolerated*
+finding that prints nothing is indistinguishable from a finding the tool cannot
+see.
+
+**This does not contradict principle 1, and the boundary is who asked.** A hook
+fires without being invited, into a session doing something else, so its silence
+is the default state and speaking is the exception it must earn. A check the
+researcher typed — or a script they ran, or a report they are reading right now
+— is already being read; its silence is not restraint, it is a gap in the
+account. Ambient mechanisms are silent by default. Invoked ones account for
+everything they examined.
+
+**The failure mode this prevents is specific.** v2's lint globbed
+`research/evidence/[0-9]*_*.md` non-recursively and returned a confident `ok`
+over three documents in a subdirectory it never opened — a PASS that was
+literally true about the files it read and false about the corpus. Printing the
+count it checked would have shown 174 where the project had 177.
 
 ## How the principles bind future additions
 
@@ -135,7 +190,8 @@ Before proposing a new convention, hook, skill, or template, run it past the con
 | Markdown-first | Does it work without a specific language toolchain? |
 | Stakes-graded | Does it fit the cost tier (zero / ≤2k / ≤12k tokens)? Or invent a new one with reason? **And what does it change if it is wrong** — read-only, derived files, or source? Anything past read-only needs the bounds in principle 7. |
 | Open-source | Is anything here engagement-specific? |
-| Verifiable freshness | If this convention adds a ref doc whose claims age out, does it carry a `Status` date paired with a re-runnable headline anchor? |
+| Verifiable freshness | If this convention adds a doc whose claims age out — a ref doc, a methods rule, an evidence `## Measured` block — does it carry a `Status` date paired with a re-runnable headline anchor? |
+| Silence reads as a pass | When this finds nothing, does it *say* it found nothing and name what it examined? If it is a hook, principle 1 wins instead — ambient mechanisms stay quiet. |
 
 If a proposal fails one of these and the failure is intentional, the constitution gets revised first — explicitly, in this document — before the addition lands. That's the only way the framework stays small over time.
 
@@ -152,6 +208,8 @@ A few things deliberately omitted in v1, with the reasoning:
 ## Cross-references
 
 - The protocol files: `.claude/conventions/*.md`
-- The mechanism docs (per-convention rationale): `docs/*-mechanism.md`, `docs/wiki-architecture.md`, `docs/verification-architecture.md`
+- The design-rationale docs: `docs/citation-chain-mechanism.md`, `docs/verification-architecture.md`, `docs/wiki-architecture.md`
 - The extension guide (concrete steps to add a convention): `docs/extending.md`
-- The build plan that produced v1: `plan/plan-v1-framework/plan.md` (in the framework repo; gitignored in target projects)
+- The release change tables: `docs/v1-to-v2-migration.md`, `docs/v2-to-v3.md`
+- The audit these principles were pressure-tested against: `docs/v2-case-study-cordoba.md`
+- The build plans that produced each release: `archive/` in the framework repo (not installed into target projects)
