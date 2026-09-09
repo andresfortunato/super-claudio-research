@@ -195,8 +195,8 @@ plan/plan-r2p-v3/
 └── project-conventions.md                      ✎ fix dangling refs to deleted v1 conventions
 
 .claude/hooks/
-└── lint-research.sh                            ✎ invariants 8–12 (see Phase 3)
-                                                ✎ 3: WARN tier (G3) — before 3.4b; #nn resolution (G2)
+└── lint-research.sh                            ✅ invariants 8–14 + 9b — LANDED 2026-09-09
+                                                ✅ WARN tier (G3); #nn resolution (G2); invariant 1 recursive
 
 .claude/skills/
 ├── cite-check/SKILL.md                         ✚ deliverable → claim → evidence walk (≤2k)
@@ -207,13 +207,29 @@ plan/plan-r2p-v3/
 └── migrate-source/SKILL.md                     ✎ repath v1 → v2 (TODO v2.1)
 
 src/
-├── cli.js                                      ✎ register `evidence` subcommand
-├── commands/evidence.js                        ✚ `r2p evidence new <slug>` — atomic id from .next-id
-└── lib/upgrade.js                              ✎ ship the new convention + skills on --upgrade
+├── cli.js                                      ✅ register `evidence` subcommand — LANDED 2026-09-09
+├── commands/evidence.js                        ✅ thin wrapper — LANDED 2026-09-09
+├── lib/evidence-new.js                         ✅ `r2p evidence new <slug>` — atomic id from .next-id
+│                                                  (not in the original manifest; follows the existing
+│                                                  commands/*.js → lib/*.js split)
+├── lib/install-project.js                      ✅ gitignore the allocator lock — LANDED 2026-09-09
+└── lib/upgrade.js                              ⛔ NOT needed for conventions/skills — CONFIRMED 2026-09-09.
+                                                   Both installers build their candidate list by walking
+                                                   `.claude/conventions/` and `.claude/hooks/`
+                                                   (install-project.js:171, upgrade.js:258), so a new
+                                                   convention or a new lint invariant reaches a project
+                                                   with no installer edit. context/installer-map.md said
+                                                   so; it is now verified rather than predicted.
+                                                ✎ …but it WAS edited, for an unrelated defect the work
+                                                   surfaced: REQUIRED_GITIGNORE_LINES still held the v1
+                                                   paths `internal_docs/` and `literature/`.
 
 templates/
 ├── CLAUDE.md.template                          ✎ one line under Where Things Go — no new section
-├── research/evidence/EXAMPLE_01_slug.md        ✎ show artifacts:
+├── research/evidence/EXAMPLE_01_slug.md        ✅ artifacts: shown, COMMENTED — live placeholder paths
+│                                                  FAIL invariant 12 on every copy (LANDED 2026-09-09)
+├── research/sources/EXAMPLE_world_bank_api.md  ✅ frontmatter added — the scaffold shipped a doc with no
+│                                                  `triggers:`, so a fresh init warned (LANDED 2026-09-09)
 ├── migration/02_repath.py                      ✅ bare-segment guard (G1) — LANDED 2026-08-17, ahead of Phase 6
 ├── migration/03_linkcheck.py                   ✎ --baseline mode; duplicate-path-per-line detector
 └── migration/05_methods_merge.py               ✎ print the heading tree after merging
