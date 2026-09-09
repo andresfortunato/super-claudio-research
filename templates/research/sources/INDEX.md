@@ -45,9 +45,6 @@ form:
    narrows the scope (`imf_sdmx_api.md`, `world_bank_wbgapi.md`).
    `triggers:` is what `retrieve-learnings.sh` globs — a doc without
    one is invisible to retrieval.
-   *(`EXAMPLE_world_bank_api.md` still carries v1's Endpoints / Query
-   shape / Parsing / Pitfalls headings. Follow this list, not that
-   file, until it is reshaped.)*
 2. **Run the headline-anchor query at least once** and paste the
    returned value into the doc; set `status: verified <today>` in the
    frontmatter.

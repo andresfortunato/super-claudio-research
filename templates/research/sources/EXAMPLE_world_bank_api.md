@@ -6,176 +6,158 @@ wrapper: none                      # function in <project>_utils.py, or "none"
 env: [none]                        # env-var names, or [none]
 ---
 
-# World Bank API — usage guide
+# World Bank Open Data API — indicator time series by country and year
 
-> **This is a template / worked example.** Replace with your project's
-> actual `<source>_<thing>.md` files, or delete once real sources are
-> documented. The indicator value below is illustrative — re-fetch
-> before relying on it.
+> **This is a template / worked example** of the shape
+> `.claude/conventions/sources.md` requires: five sections, in this order,
+> with a re-fetchable anchor. Replace it with your project's real
+> `<source>_<thing>.md` files, or delete it once real sources are documented,
+> and drop its rows from `INDEX.md`. The indicator value below is
+> illustrative — re-fetch before relying on it.
 
-**Status**: verified 2026-05-06 against the World Bank Open Data API
-v2. No registration or API key required for the public indicators.
-Replaces nothing (initial doc).
+## What it gives you
 
-**Authoritative spec**: <https://datahelpdesk.worldbank.org/knowledgebase/topics/125589>
+Annual time series for ~1,400 development indicators across ~217 countries and
+~48 aggregates, from 1960 to the most recent published year. This is the
+delivery API for the World Development Indicators (WDI) and about sixty other
+World Bank databases.
 
-**Companion docs in `research/sources/`**:
+- **Unit of observation**: country × indicator × year. A handful of indicators
+  are monthly or quarterly (`2024M03`, `2024Q1` date forms).
+- **Codelists**: indicators are dotted codes (`NY.GDP.PCAP.CD`); countries are
+  ISO3 (`VNM`, `KHM`), with World-Bank-internal codes for aggregates (`EAS` =
+  East Asia & Pacific, `LMC` = Lower Middle Income).
+- **Units are per-indicator and are in the metadata, not the data.** The same
+  indicator family ships current US$, constant 2015 US$, PPP and local-currency
+  variants under different codes. `/indicator/{code}` returns the unit string;
+  read it before comparing two series.
+- **Vintage**: the API always serves the latest revision. There is no
+  as-of-date parameter (see *Coverage limits*).
 
-- `INDEX.md` — top-level index
-- (add WB-specific deep-dives here as they accumulate — e.g.
-  `world_bank_wdi_indicators.md` for indicator-code cheatsheets)
+**Authoritative spec**:
+<https://datahelpdesk.worldbank.org/knowledgebase/topics/125589>
 
----
+## Access
 
-## Headline anchor (illustrative)
+Base URL `https://api.worldbank.org/v2`. **No auth, no API key, no env vars**
+for public indicators. Rate limits are unpublished but generous; back off on
+`429`.
 
-| Indicator | Country | Year | Value |
-|---|---|---|---|
-| `NY.GDP.PCAP.CD` (GDP per capita, current US$) | `VNM` (Vietnam) | 2022 | ≈ 4,164 |
-
-This triple — indicator code + ISO3 + year — is the smoke test future
-sessions re-run to confirm this doc still describes the live API
-correctly. A stale `Status:` date paired with a drifted value is the
-signal that the doc needs a refresh. See "Verifiable freshness
-anchors" in `docs/audience-and-philosophy.md`, in the framework repo
-(`r2p init` does not install `docs/`).
-
-The anchor is best chosen as a stable historical value (a 2010s GDP
-per capita figure won't be revised much) rather than a fresh
-estimate (2024 figures might be).
-
----
-
-## 1. Endpoints
-
-Base URL: `https://api.worldbank.org/v2`
-
-The two endpoint families you'll actually use:
-
-| Family | Path | Purpose |
-|---|---|---|
-| **Indicator data** | `/country/{ISO}/indicator/{indicator}` | Time series for one (or many) ISO country code(s) on one indicator. |
-| **Indicator metadata** | `/indicator/{indicator}` | Name, description, source, unit. |
-
-Plus: `/country`, `/source`, `/topic`, `/region`, `/incomeLevel`
-endpoints for browsing the catalog. Add `?format=json` to almost
-every request — the default is XML.
-
-**No auth header required** for public indicators. Rate limits are
-unpublished but generous; back off on `429` if it happens.
-
----
-
-## 2. Query shape
-
-The path takes one or many semicolon-joined ISO3 codes and one or
-many semicolon-joined indicators:
-
-```
-GET /v2/country/{ISO}/indicator/{indicator}?format=json&date=2010:2023&per_page=200
-```
-
-| Param | Purpose | Default |
-|---|---|---|
-| `format` | `json` (almost always) or `xml` | `xml` |
-| `date` | Year (`2022`) or range (`2010:2023`) or month (`2024M03`) | all years |
-| `per_page` | Page size; max ~32,500 | 50 (paginated!) |
-| `page` | 1-indexed page number | 1 |
-| `mrv` | "Most recent value" — request the last N obs | — |
-| `gapfill` | `Y` to forward-fill missing years from prior obs | `N` |
-
-**Worked example:**
+Minimal call, copy-pasteable:
 
 ```
 GET https://api.worldbank.org/v2/country/VNM/indicator/NY.GDP.PCAP.CD?format=json&date=2000:2023&per_page=200
 ```
 
-Returns ~24 annual observations for Vietnam in a two-element JSON
-array: `[meta, data]`. The first element is metadata
-(`page`, `pages`, `per_page`, `total`); the second is the array of
-observations.
+Two endpoint families do almost all the work:
 
-### Multi-country, multi-indicator shortcut
+| Family | Path | Purpose |
+|---|---|---|
+| **Indicator data** | `/country/{ISO}/indicator/{indicator}` | Time series for one or many ISO3 codes on one or many indicators. |
+| **Indicator metadata** | `/indicator/{indicator}` | Name, description, source database, **unit**. |
 
-Join with semicolons. Use `all` for "every country":
+Plus `/country`, `/source`, `/topic`, `/region`, `/incomeLevel` for browsing the
+catalog. **Add `?format=json` to every request** — the default is XML.
+
+| Param | Purpose | Default |
+|---|---|---|
+| `format` | `json` (almost always) or `xml` | `xml` |
+| `date` | Year (`2022`), range (`2010:2023`), or month (`2024M03`) | all years |
+| `per_page` | Page size; max ~32,500 | **50 (paginated!)** |
+| `page` | 1-indexed page number | 1 |
+| `mrv` | "Most recent value" — the last N observations | — |
+| `gapfill` | `Y` to forward-fill missing years from prior obs | `N` |
+| `source` | Pin to one source database (`2` = WDI) | unpinned |
+
+Semicolon-join for multi-country or multi-indicator pulls; `all` means every
+country:
 
 ```
 /v2/country/VNM;THA;PHL/indicator/NY.GDP.PCAP.CD?format=json
 /v2/country/all/indicator/NY.GDP.PCAP.CD;SP.POP.TOTL?format=json&source=2
 ```
 
-The `source=` filter pins indicators to a specific source database
-(e.g. `2` = WDI) — useful when an indicator code exists in multiple
-sources with different vintages.
-
----
-
-## 3. Parsing / decoding
-
-The response is a length-2 array: `[meta_dict, list_of_obs]`. The
-smallest decoder pattern (Python; mirror in R as needed):
+**Decoding.** The response is a length-2 array, `[meta_dict, list_of_obs]`:
 
 ```python
 import requests, pandas as pd
 
 URL = ('https://api.worldbank.org/v2/country/VNM/indicator/'
        'NY.GDP.PCAP.CD?format=json&date=2000:2023&per_page=200')
-resp = requests.get(URL, timeout=60)
-meta, obs = resp.json()
+meta, obs = requests.get(URL, timeout=60).json()
+assert len(obs) == meta['total'], f"paginated: got {len(obs)} of {meta['total']}"
 
-rows = [
-    {
-        'iso3':       o['countryiso3code'],
-        'indicator':  o['indicator']['id'],
-        'year':       int(o['date']),
-        'value':      o['value'],   # may be None for missing obs
-    }
+df = pd.DataFrame([
+    {'iso3': o['countryiso3code'],
+     'indicator': o['indicator']['id'],
+     'year': int(o['date']),
+     'value': o['value']}          # None for missing obs — not omitted
     for o in obs
-]
-df = pd.DataFrame(rows).dropna(subset=['value'])
+]).dropna(subset=['value'])
 df['value'] = pd.to_numeric(df['value'])
 ```
 
-**`wbgapi` wrapper.** The `wbgapi` Python package (and similar R
-packages — `wbstats`, `WDI`) wraps the same API and is usually less
-boilerplate than raw `requests`. Use the raw API only when `wbgapi`
-doesn't expose the parameter you need (e.g. `gapfill`, `source`
-pinning).
+**Prefer a package unless you need a raw parameter.** `wbgapi` (Python) and
+`wbstats` / `WDI` (R) wrap the same API with far less boilerplate. Drop to raw
+`requests` only for parameters they don't expose — `gapfill`, `source` pinning.
+If this project wraps it, the wrapper goes in `<project>_utils.py`, its
+docstring back-links here, and the `wrapper:` key above names it.
 
----
+## Headline anchor
 
-## 4. Pitfalls
+| Indicator | Country | Year | Value |
+|---|---|---|---|
+| `NY.GDP.PCAP.CD` (GDP per capita, current US$) | `VNM` (Vietnam) | 2022 | ≈ 4,164 |
 
-- **Pagination defaults to 50 rows** — easy to silently truncate a
-  long series. Always pass `per_page=200` (or higher) for
-  full-history pulls, and check `meta['total']` against the row
-  count you got back.
-- **Missing observations come back as `value: null`**, not omitted
-  rows. Filter / impute deliberately; don't assume the response
-  array is dense.
-- **The same indicator code can appear in multiple sources** with
-  different vintages or country coverage. WDI (`source=2`) is the
-  default for most macro indicators; if a value disagrees with
-  another reference, check whether you accidentally pulled from an
-  REO database (`source=11`, `source=15`) instead.
-- **ISO3 vs the WB's internal codes.** Most WB endpoints accept
-  ISO3 (`VNM`, `KHM`) but a handful of legacy aggregates use WB
-  codes (`EAS` = East Asia & Pacific, `LMC` = Lower Middle Income).
-  The `/v2/country` endpoint enumerates them.
-- **Aggregates are mixed in with country lists.** `/country/all`
-  returns ~265 entries; ~217 are individual countries and the rest
-  are aggregates (income groups, regions). Filter on
-  `region.id != 'NA'` or use the explicit ISO3 list.
-- **Year-only dates ignore mid-year revisions.** A figure tagged
-  `2022` may have been published in late 2023 and revised in 2024;
-  the API serves the latest. Pin to a specific WB Statistical
-  Performance Indicators (SPI) vintage if reproducibility against a
-  publication date matters.
+Re-run the minimal call above and check this triple. A stale `status:` date
+paired with a drifted value is the signal the doc needs a refresh; a date with
+no anchor beside it cannot be checked at all. See "Verifiable freshness anchors"
+in `docs/audience-and-philosophy.md`, in the framework repo (`r2p init` does not
+install `docs/`).
 
----
+**Pick a stable historical value, not a fresh one.** A 2010s GDP-per-capita
+figure barely moves; a 2024 estimate is revised routinely, so it would report
+drift that says nothing about whether the API still behaves as documented.
 
-## 5. Reference files in the repo
+## Gotchas
 
-- `research/sources/INDEX.md` — top-level index
-- `research/sources/EXAMPLE_world_bank_api.md` — this file (template;
-  delete or replace with the project's real WB doc)
+1. **Pagination defaults to 50 rows and truncates silently.** *Symptom*: a
+   full-history pull returns exactly 50 observations. *Fix*: pass
+   `per_page=200` or higher, and assert `len(obs) == meta['total']` — the
+   `assert` in the snippet above is there for this.
+2. **Missing observations arrive as `value: null`, not as absent rows.**
+   *Symptom*: a "dense" series that silently contains `None`, and a mean that
+   comes back as `NaN` or is computed over the wrong denominator. *Fix*: filter
+   or impute deliberately; never assume the array is dense.
+3. **The same indicator code exists in several source databases.** *Symptom*: a
+   value disagrees with another reference by a few percent for no obvious
+   reason. *Fix*: pin `source=2` (WDI) for macro indicators; you may have
+   pulled an REO vintage (`source=11`, `source=15`).
+4. **Aggregates are mixed into country lists.** *Symptom*: `/country/all`
+   returns ~265 entries and a per-country mean is wrong because income groups
+   and regions are in the sample. *Fix*: filter `region.id != 'NA'`, or pass an
+   explicit ISO3 list.
+5. **ISO3 mostly works, but not always.** *Symptom*: a legacy aggregate returns
+   empty for its ISO3-looking code. *Fix*: `/v2/country` enumerates the real
+   codes; aggregates use World Bank internal ones.
+6. **A year label is not a publication date.** *Symptom*: a figure tagged `2022`
+   changes between two pulls months apart. *Fix*: the API serves the latest
+   revision and cannot be pinned — see *Coverage limits*. Cache the response
+   under `data/raw/` and cite the fetch date if reproducibility matters.
+
+## Coverage limits
+
+- **No as-of / vintage parameter.** You cannot ask for "WDI as published in
+  April 2023". Reproducing a number against a publication date requires a cached
+  copy of the response, or the archived WDI bulk downloads.
+- **Annual only, for practical purposes.** A handful of indicators carry monthly
+  or quarterly dates; anything higher-frequency needs the source statistical
+  agency directly.
+- **Aggregation is the World Bank's, not yours.** Regional and income-group
+  values are computed on their own weighting and coverage rules. If your unit is
+  a custom country group, pull country-level and aggregate yourself.
+- **Sub-national is out of scope.** Provinces, cities and functional urban areas
+  are not here; that needs a national statistics office or a geospatial source.
+- **Coverage is uneven before ~1990** and for small states throughout. Check
+  `meta['total']` against the year range you asked for before treating a gap as
+  a zero.
