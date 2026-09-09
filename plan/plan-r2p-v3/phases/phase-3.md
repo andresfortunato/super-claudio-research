@@ -1,8 +1,11 @@
 # Phase 3 — Lint the chain, and make `.next-id` real
 
-**Plan:** `plan/plan-r2p-v3/plan.md` · **Depends on:** Phase 2 · **Blocks:** Phases 4, 5
-**Session scope:** likely two · **Estimated context:** ~55% for 3.1–3.5, ~25% for 3.6
+**Plan:** `plan/plan-r2p-v3/plan.md` · **Depends on:** Phase 2, **Phase 2b** · **Blocks:** Phases 4, 5
+**Session scope:** likely two · **Estimated context:** ~55% for 3.0–3.5, ~25% for 3.6
 **Context file:** read `context/installer-map.md` before touching anything under `src/`.
+**⚠ ADDED 2026-08-17** (`log.md` **D4**): task **3.0** — the WARN tier — is new and
+comes first; **3.4c** — invariant 14 — is new. 2b now blocks this phase because
+3.4c resolves against a banner format 2b specifies.
 
 ## Intent
 
@@ -94,6 +97,22 @@ predate v3.
 
 ## Tasks
 
+**3.0 — ✚ ADDED 2026-08-17 — the WARN tier, which does not exist.** `lint-research.sh`
+is ok-or-FAIL throughout: `note "FAIL …"; fail=1` at every check, `exit $fail` at
+`:106`. There is no `warn` function, no warn counter, and PASS/FAIL is the only
+verdict. **3.3 and 3.5 below are both written as if the tier already existed, and
+so is invariant 13** (WARN, decided in `log.md` **D2**). Build it first: a `warn`
+helper, a separate counter, a summary line that reports both, and **exit 0 when
+only warnings fired**. Everything else in this phase depends on it.
+
+The pilot built this tier independently and wrote down why
+(`gate_retracciones.py:132-146`): its language check misreports — `base
+exportadora`, `gradiente plano` and `industrias urbanas` carry no accent and no
+function word, so a stopword test called all three wrong — so it **prints the
+rows and asks for an eye** rather than *"ship a test that misreports"*. Measured
+12 of 40 rows. That sentence is the tier's design rationale; put it in the
+script, not only here.
+
 **3.1 — Invariant 8: `Rests on:` resolves.** Every id in every claim's `Rests on:`
 names a file in `research/evidence/`. FAIL. Catches: a claim resting on evidence
 that was never written.
@@ -114,8 +133,27 @@ died of.
 if it doesn't, the next allocation collides). No `artifacts:` path that does not
 exist (FAIL — a typo'd binding silently satisfies invariant 9 for nothing).
 
+**3.4c — ✚ ADDED 2026-08-17 — invariant 14: every `#nn` in a deliverable resolves
+to a live evidence id.** **WARN** (needs 3.0). Independent of 3.4b — it does not
+assume invariant 13 ships, and if 13 is dropped this is the only thing checking
+`deliverables/` at all.
+
+Why it is needed on top of 13: 13 checks `[C<n>]` **claim** references, and
+`citation-discipline.md`'s convert-on-touch rule means the old `#nn` form stays
+legal indefinitely. The pilot measured **573 bare `#nn` and zero claim
+references** across three drafts of one memo, so at adoption time this is the
+invariant that actually fires.
+
+**The failure it catches is real and already happened.** The pilot resolved three
+id collisions by renumbering (`131→150`, `119→149`, `139→151`), did it carefully —
+banner, `(was #131)` in the headline — and **never updated the citations**.
+Nothing could see it. Three memo fragments still write `#119`(sec); a gate's
+lookup table still names three files that no longer exist. Resolve against the
+renumber banner Phase 2b **T2** specifies, so `(was #131)` counts as a live
+target rather than a dangling one.
+
 **3.5 — Report shape.** Keep the existing `note`/`fail` idiom and the FAIL/WARN
-split. **No silent caps** — if output is bounded, print the dropped count.
+split built in **3.0**. **No silent caps** — if output is bounded, print the dropped count.
 `05_methods_merge.py:304` truncates to 12 with no notice and Phase 6b is fixing
 it; do not import the habit here.
 

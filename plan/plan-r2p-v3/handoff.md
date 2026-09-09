@@ -13,7 +13,8 @@ the convention forbids fabricating it. Verify with `git log --oneline -2`.)
 |---|---|---|
 | 1 | Drain the field notes | **done** — 4 routes + 7 stamps, all 5 criteria verified |
 | 2 | State the chain once | **done** — all 4 tasks + template pointer, all 4 criteria verified. **One shipped assumption corrected after the pilot review — see D2** |
-| 3 | Lint the chain | **next** — unblocked. See *Carry into Phase 3* below |
+| 2b | **Graduate the Córdoba fixes** ✚ | **next** — unblocked. 5 tasks, `phases/phase-2b.md`. Added by **D4**; blocks 3 |
+| 3 | Lint the chain | blocked on 2b. **Task 3.0 (WARN tier) is new and comes first**; 3.4c is new. See *Carry into Phase 3* below |
 | 4 | `/cite-check` | blocked on 3 · **needs decision A** |
 | 5 | `/pipeline-check` | blocked on 3 · **needs decision C** |
 | 6 | Harden the tooling | unblocked, independent of everything |
@@ -22,6 +23,12 @@ the convention forbids fabricating it. Verify with `git log --oneline -2`.)
 **Decisions made in-session:** principle 5's line budgets dropped (`log.md` **D1**);
 pilot-repo review corrected the claim-heading anchor and fed phases 3 and 6
 (`log.md` **D2**). Decisions **A**, **B**, **C**, **D**, **E** remain open.
+
+**✚ 2026-08-17 (`log.md` D4):** the Córdoba graduation study ran. It added
+**Phase 2b**, reordered Phase 3, landed one fix ahead of the phases, and closed
+three researcher calls — placement, the repath timing, and **N6** (rejected: r2p
+stays engagement-neutral). It also rejected the two-language finding outright:
+**r2p stays language-agnostic**, researcher call, do not re-propose.
 
 ## Pilot-repo review (2026-08-05) — what it changed
 
@@ -196,9 +203,10 @@ skills — worth one grep in Phase 7.**
 Splitting `evidence.md`'s two routes across two pathspec commits needs partial
 staging — which the pathspec rule committed one step earlier says not to do.
 
-**5. `CLAUDE.md` is untracked on `main`.** Pre-existing. The repo's own
-project-instruction file is uncommitted, so a fresh clone gets none of its rules.
-Outside any phase's ownership; needs a deliberate call.
+**5. `CLAUDE.md` is untracked on `main`.** ⚠ **RESOLVED — verified tracked
+2026-08-17** (`git ls-files --error-unmatch CLAUDE.md`); committed by `3182db8`.
+A fresh clone now gets the repo's rules. No call needed; kept in place so the
+stale version stays visible.
 
 **6. The 5 over-length conventions were deliberately left alone.** Under D1 their
 length is not a defect, so normalizing them would be work created by a rule that
@@ -219,25 +227,56 @@ Nothing abandoned. Two checks were authored wrong and corrected:
 
 ## Queued, ahead of the remaining phases
 
-**Deep-dive the Córdoba r2p fixes and graduate what works** —
-`context/cordoba-graduation.md`. The pilot repeatedly fixed r2p under deadline and
-the fixes stuck; most never came back to the framework. That note carries what
-this session already confirmed, the commits and directories to read, and one
-explicit negative decision (`mapa_evidencia.md` was examined and rejected — do not
-re-propose it). **Study only. Produce candidate graduations, ask before editing
-the plan.**
+**Deep-dive the Córdoba r2p fixes — ✅ DONE 2026-08-17.**
+`context/cordoba-graduation.md` is now the **study result**, not a scoping note.
+Decision record in `log.md` **D4**. Read the result file before touching Phases 3,
+5 or 6; it reorders one of them.
 
-Read the diffs, not the current tree — reading the tree is what made this session
-call a deliberate, documented evidence subfolder a defect.
+Three things it changes:
+
+1. **A shipped framework bug.** `templates/migration/02_repath.py` matches path
+   tokens only with a trailing slash, so `Path` joins on bare segments
+   (`REPO / "evidence"`) are never rewritten — docstrings get repathed, the code
+   that opens the directory does not, and the report reads clean. Four dead v1
+   paths survive on the pilot; two deck scripts `mkdir` their v1 target and so
+   **re-create a directory the migration deleted**. Fourth defect of the
+   migration-path-only class. → **G1 into Phase 6a**, plus a field note.
+2. **G3 reorders Phase 3.** `lint-research.sh` is ok-or-FAIL throughout, so
+   invariant 13 — already decided to be WARN in **D2** — has nowhere to live.
+   **Add the WARN tier before 3.4b, not after.**
+3. **Seven approved graduations**, ranked: G4 `scope_authored:`, G5 collision
+   recovery, G1, G3, G2, G7, G8. **G9** is Phase 5 *input*, not a task. Six
+   rejected with reasons — including **G6** on a researcher call that r2p stays
+   language-agnostic, and **N1**: rules graduate, gate code does not.
+
+**Still open, and both are `plan.md` edits needing approval:** placement of the
+approved items (recommendation tabled at the end of the result file — a new
+**Phase 2b** for the rule-shaped ones, because *2 blocks 3*), and **N6**, whether
+`chart_slide_export.md` ships as a second example project convention.
+
+Method note for any future pilot review: read the diffs **and run the code**.
+Reading the tree is what made an earlier session call a deliberate, documented
+evidence subfolder a defect; only *running* the pilot's gates showed that its
+best invention has been dead since 2026-08-04.
 
 ## Next
 
-**Phase 3** (lint the chain) is the critical path and is unblocked. Its named split
-point is **task 3.6** (the CLI), after the five invariants — plan the session
-boundary there. Add **3.4b (invariant 13)** per *Carry into Phase 3* §1, or
+**⚠ REVISED 2026-08-17.** **Phase 2b** is now the critical path and is unblocked —
+five rule-shaped items, one session, `phases/phase-2b.md` is self-contained. It
+blocks Phase 3 for the plan's own reason: *a check for a rule not yet written is
+a guess about what the rule would have said.*
+
+**Then Phase 3**, whose shape changed. **Task 3.0 (the WARN tier) is new and comes
+first** — 3.3, 3.5 and invariant 13 are all written as if that tier existed, and
+it does not; `lint-research.sh` is ok-or-FAIL throughout. **3.4c (invariant 14,
+`#nn` resolution)** is new and independent of 3.4b. The named split point is
+unchanged: **task 3.6**, the CLI.
+
+**Still open on 3.4b (invariant 13).** Add it per *Carry into Phase 3* §1, or
 explicitly decide not to and downgrade `citation-discipline.md`'s *Gaps* section
 from "proposed" to "advisory" so the file stops promising something that isn't
-coming.
+coming. 3.4c does **not** settle this — it checks the `#nn` form, not `[C<n>]`.
 
 Phase 6 remains available as an independent alternative if you'd rather keep the
-critical path for a fresh session.
+critical path for a fresh session. Note **6a shrank**: the bare-segment guard
+landed 2026-08-17; the duplicate-path detector and the `--upgrade` test remain.

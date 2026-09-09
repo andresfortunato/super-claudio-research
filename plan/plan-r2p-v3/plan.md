@@ -184,19 +184,25 @@ plan/plan-r2p-v3/
 
 .claude/conventions/
 ├── evidence.md                                 ✎ artifacts: key; digest-safe header style; staleness rule
+│                                               ✎ 2b: scope_authored: (G4)
 ├── claims.md                                   ✎ Rests on: must resolve; deliverable-cites-claims made checkable
 ├── provenance.md                               ✎ commit by pathspec (field note); artifact→evidence binding
+│                                               ✎ 2b: a counting script's header states its unit (G7)
 ├── plan-lifecycle.md                           ✎ point fan-out rules at agent-teams; gap-check breadth
+│                                               ✎ 2b: Stage 4 promotion trigger, archivist-checked (meta-finding)
 ├── citation-discipline.md                      ✚ the chain, stated once (no line cap — log.md D1)
+│                                               ✎ 2b: id-collision recovery (G5) — zero coverage today
 └── project-conventions.md                      ✎ fix dangling refs to deleted v1 conventions
 
 .claude/hooks/
 └── lint-research.sh                            ✎ invariants 8–12 (see Phase 3)
+                                                ✎ 3: WARN tier (G3) — before 3.4b; #nn resolution (G2)
 
 .claude/skills/
 ├── cite-check/SKILL.md                         ✚ deliverable → claim → evidence walk (≤2k)
 ├── pipeline-check/SKILL.md                     ✚ anchor-diff regression (compute-graded)
 ├── agent-teams/SKILL.md                        ✎ fan-out hygiene from the field notes
+│                                               ✎ 2b: an unranked output is the defect (G8)
 ├── verify/SKILL.md                             ✎ cross-ref to /cite-check
 └── migrate-source/SKILL.md                     ✎ repath v1 → v2 (TODO v2.1)
 
@@ -208,6 +214,7 @@ src/
 templates/
 ├── CLAUDE.md.template                          ✎ one line under Where Things Go — no new section
 ├── research/evidence/EXAMPLE_01_slug.md        ✎ show artifacts:
+├── migration/02_repath.py                      ✅ bare-segment guard (G1) — LANDED 2026-08-17, ahead of Phase 6
 ├── migration/03_linkcheck.py                   ✎ --baseline mode; duplicate-path-per-line detector
 └── migration/05_methods_merge.py               ✎ print the heading tree after merging
 
@@ -220,6 +227,7 @@ docs/
 ├── verification-architecture.md                ✎ the compute-graded tier; remove refs to deleted conventions
 ├── audience-and-philosophy.md                  ✎ principle 9 generalized; fix the v1 pointer-block list
 ├── field-notes/*.md                            ✎ Encoded in: line on each of the seven
+├── field-notes/migration-repaths-the-docstring-not-the-code.md   ✅ LANDED 2026-08-17 (the eighth)
 ├── v1/                                         ✚ shelf for the superseded mechanism docs (pending B)
 └── extending.md                                ✎ the lint-invariant-plus-skill pattern
 
@@ -238,7 +246,8 @@ above apply to every phase and are deliberately not restated in them.
 |---|---|---|:--:|:--:|:--:|
 | 1 | Drain the field notes | 7 notes → 4 conventions/skills, `Encoded in:` stamps | 1 | ~40% | — |
 | 2 | State the chain once | `citation-discipline.md` ✚, `artifacts:` key, claim-reference syntax | 1 | ~35% | — |
-| 3 | Lint the chain | invariants 8–12, `r2p evidence new <slug>` | 2 | ~55% + ~25% | — |
+| 2b | **Graduate the Córdoba fixes** ✚ | `scope_authored:`, collision recovery, script-header unit, ranked fan-out, the promotion trigger | 1 | ~40% | — |
+| 3 | Lint the chain | invariants 8–12 **+ the WARN tier**, `r2p evidence new <slug>` | 2 | ~55% + ~25% | — |
 | 4 | `/cite-check` | skill ✚ (deliverable → claim → evidence walk) | 1 | ~30% | **A** |
 | 5 | `/pipeline-check` | skill ✚ (`## Measured` as a re-runnable anchor) | 1 | ~35% | **C** |
 | 6 | Harden the tooling | linkcheck `--baseline` + dup-path, merge heading tree, migrate-source repath, `--upgrade` test | 2 | ~50% + ~30% | — |
@@ -254,14 +263,20 @@ installer edit).
 
 ```
 Phase 1 (field notes) ─┐
-                       ├─→ Phase 2 (conventions) ─→ Phase 3 (lint) ─┬─→ Phase 4 (/cite-check)
-Phase 6 (tooling) ─────┘                                            └─→ Phase 5 (/pipeline-check)
-                                                                          │
-                                          all ─────────────────────────────→ Phase 7 (docs, release)
+                       ├─→ Phase 2 ─→ Phase 2b ─→ Phase 3 (lint) ─┬─→ Phase 4 (/cite-check)
+Phase 6 (tooling) ─────┘   (rules)    (rules)                     └─→ Phase 5 (/pipeline-check)
+                                                                        │
+                                        all ───────────────────────────→ Phase 7 (docs, release)
 ```
 
 - **1, 2 and 6 are unblocked.** 1 and 6 are independent of each other and of
   everything else — safe first session, or a two-agent fan-out.
+- **2b blocks 3, for the same reason 2 does.** Its four items are *rules*;
+  Phase 3's invariants are the *checks* on them, and invariant G2 checks the
+  rule 2b writes. It is a separate phase rather than a reopened Phase 2 because
+  Phase 2 is verified `done` and reopening it would cost the status table its
+  meaning. It also carries one item belonging to closed Phase 1
+  (`agent-teams/SKILL.md`), for the same reason.
 - **If 1 and 6 are fanned out:** their phase files are self-contained by design,
   so any correction arriving after launch must be patched *into the phase files*
   before the launch, marked `⚠ CORRECTED <date>`. A fix stored only in

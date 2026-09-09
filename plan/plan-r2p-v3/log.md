@@ -153,3 +153,69 @@ disagree with. → **new task 7.3b**.
 (§5 of the ⚠ ADDED block), per case-study §5.2. Today it FAILs on headline caps
 (6 rows), one root-level duplicate id (162), and 15 docs missing frontmatter keys.
 Any v3 lint run must be diffed against that, not read cold.
+
+---
+
+## D4 — 2026-08-17 · The Córdoba graduation study: 7 approved, 6 rejected, 1 framework bug
+
+**Raised by:** executing the queued deep-dive in `context/cordoba-graduation.md`.
+Full account there — that file is now the study **result** and supersedes its own
+scoping note. This entry records only what changes direction.
+
+**Method mattered.** The scoping note said read the diffs, not the tree. The
+sharper rule is **run the code**: the two hardest findings are invisible in a
+diff and only appear when the pilot's gates are executed.
+
+**A shipped framework bug with a live victim.**
+`templates/migration/02_repath.py` matches path tokens only with a trailing
+slash, so `Path` joins on bare segments (`REPO / "evidence"`) are never
+rewritten. Docstrings get repathed, the code that opens the directory does not,
+and the report reads clean — 571 rewrites, 559 files, guard clean. **Four dead
+v1 paths survive on the pilot**, two of them worse than a crash: the deck render
+scripts `mkdir(parents=True)` their v1 `slides/` target, so running one chart
+script **re-creates a directory the "26 dirs → 8" migration deleted** and exits
+0. This is the **fourth** defect of the class `CLAUDE.md` names — visible only on
+the migration/upgrade path, never to an `init` test. → **G1, Phase 6a**, plus a
+field note.
+
+**The pilot's best invention is dead and nobody noticed.** `gate_coverage.py` —
+the coverage gate that found a load-bearing memo exhibit with no evidence doc —
+crashes today, killed by that repath miss two days after the migration. The
+generalizable half is the *second* bug: reading a `defaultdict(list)` key
+auto-vivifies it, so the later `if n not in by_num` test answers "resolved" for
+ids that only ever existed because they were looked at. **A membership test
+against a `defaultdict` is not a membership test**, and it converted a loud
+failure into a cryptic one. **Direction consequence: rules graduate, gate code
+does not** (N1) — a plan-local gate has no owner once the plan closes.
+
+**Seven approved, in rank order:** G4 `scope_authored:` (a truthfulness flag on
+the frontmatter block — resolves the hand-author-or-omit binary at
+`evidence.md:144` into a third option), G5 collision **recovery** into
+`citation-discipline.md` (which today greps clean for the whole topic; the
+renumber-plus-banner held, the inline disambiguator **rots**), G1, G3 the lint's
+missing **WARN tier**, G2 `#nn` resolution, G7 a counting script's header states
+its unit, G8 an unranked fan-out output is the defect.
+
+**G3 reorders Phase 3.** `lint-research.sh` is ok-or-FAIL throughout; invariant
+13 was already decided to be WARN (D2) and **has nowhere to live**. G3 must
+precede 3.4b. The pilot reached the same conclusion independently and wrote the
+reason in the file — *rather than ship a test that misreports*.
+
+**G6 rejected on a constitutional call (researcher, 2026-08-17): r2p stays
+language-agnostic.** The two-language finding was real and measured, but encoding
+it would put a language assumption in the core. It costs nothing: G6's only
+language-independent part — a short-token heuristic classifier misreports, so
+print and ask rather than fail — is exactly what **G3** ships.
+
+**The meta-finding is the cheapest item here.** `project-conventions.md` says how
+to write a project convention and where it lives, but **never when a plan's
+by-product becomes one**. Measured: 3 of the pilot's 9 reusable rules reached
+`.claude/conventions/project/`; 6 are still in a closed plan's directory. That is
+case-study §6.8 recurring one layer below where Phase 1 just fixed it. → one rule
+in `plan-lifecycle.md` Stage 4, checked by the **archivist**, which already runs
+there.
+
+**Not decided here:** placement in `plan.md` (recommendation tabled at the end of
+`context/cordoba-graduation.md` — a new **Phase 2b** for the rule-shaped items,
+because *2 blocks 3*), and **N6**, whether `chart_slide_export.md` ships as a
+second example project convention.
