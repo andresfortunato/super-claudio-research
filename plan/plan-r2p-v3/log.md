@@ -387,3 +387,82 @@ diff would have. Keep both phrasings in future phases.
 the per-doc loop spawns ~6 subprocesses across 285 docs. Not a regression and not
 in the task list, so untouched. But a nine-second linter is an adoption risk by
 exactly the reasoning that produced the WARN tier. **Phase 6 candidate.**
+
+## D7 — Two researcher calls answered; Phase 4 done (2026-09-09)
+
+Both calls the previous handoff carried forward were put to the researcher and
+answered in one exchange. Both were taken as recommended, so nothing downstream
+moves. **Decisions B and C remain open**, blocking Phases 7 and 5.
+
+### 1. Invariant 13 is promoted to FAIL. **Answered: promote.**
+
+Recorded in **D2** as WARN, on the grounds that a FAIL would drown a real
+project in **573 references**. Those 573 are bare `#nn` — invariant **14**'s
+population — and 14 did not exist when D2 was written. Invariant 13's own
+population on the pilot is **zero**.
+
+So the volume argument that keeps 14 at WARN permanently never applied to 13 at
+all, and what is left is a check as mechanical as invariant 8, which is already
+FAIL. Claim ids are sparse and hand-curated: an unresolvable `[C<n>]` is a typo
+or a claim nobody wrote, never a conversion backlog.
+
+**What it blocks, deliberately:** writing `[C50]` in a draft before C50 exists in
+the ledger now fails the run. That is the order `citation-discipline.md` § *A
+number that cites nothing* already requires — the citation is what forces the
+claim, which forces the evidence doc. Naming it in the script comment matters,
+because the next person to hit it will read it as the check being wrong.
+
+Verified in both directions on an isolated fixture. **The first fixture was red
+for two unrelated reasons** — missing `headline:`/`confidence:` and a missing
+`.next-id` — which would have read as confirmation while proving nothing. A
+fixture is only a test once it is green-except-one. Commit `34b77af`.
+
+*Generalisable, and now written into the script's tier-selection header: a tier
+chosen on a measured count is only as good as the count. Re-measure before
+citing one back, including a count you took yourself last session.*
+
+### 2. Decision **A** — `/cite-check` is its own skill. **Answered: own skill.**
+
+As recommended in `plan.md`. `/verify`'s contract is 3–5 judgement checks on one
+artifact; the chain walk is mechanical and sweeps a whole document. Same ≤2k
+tier, different shape. The boundary is now written into `/verify` itself (4.3) —
+unstated, the two drift into overlapping and the one remembered second stops
+being run.
+
+### 3. Phase 4 shipped smaller than specced, and that was the plan working
+
+`phase-4.md` was written when link 1 had no lint at all. Phase 3 shipped
+invariants 13 and 14 in between, so `/cite-check` does **not** reimplement
+resolution — it runs `lint-research.sh` first, reads its output, and spends its
+budget on the three classes no grep can see. The handoff's *Carry into Phases 4
+and 5* §1 is what made this cheap; it is worth writing that section again.
+
+### 4. The fixture changed two things the diff could not show
+
+Same pattern as D6 §5, third phase running. Commit `703821f`.
+
+- **The refuse-early rule refused the fixture.** It had inherited
+  `/deliverable-review`'s ≥800-word floor, and the fixture is a *finished*
+  127-word memo. That floor exists because a seven-lens fan-out is too expensive
+  to spend on a stub; a ≤2k check has no such excuse, and short is exactly the
+  shape of a ministerial briefing note. **Refuse on draft markers, never on
+  length.** Copying a neighbour skill's precondition without its reason is the
+  general form of this bug.
+- **Added a *Not flagged* section to the report.** Without it a reader cannot
+  tell an exemption from a miss. This is 3.5's rule for inapplicable invariants —
+  silence reads as a pass — arriving independently from the other side, which is
+  some evidence it is a real rule and not a local fix.
+
+**The fixture is also the argument for the skill.** `lint-research.sh` prints a
+clean PASS on it — every `[C<n>]` resolves, every `#nn` resolves — while the memo
+carries an uncited 11.4%, an 18% citing `#1` directly, and a `[C20]` resting on a
+retired doc whose live replacement revises 6% to 2%. A green lint and three real
+defects in the same document is the clearest statement of what link 1's expensive
+half is for.
+
+### 5. Noted, not built
+
+**A claim resting on `status: retired` evidence is fully mechanical** and could be
+invariant 15. It sits in `/cite-check` because `phase-4.md` put it there, and
+Phase 4 does not get to grow into `lint-research.sh`. **Phase 6 candidate**,
+alongside the two one-liners the previous handoff already lists.

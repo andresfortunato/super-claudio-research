@@ -1,9 +1,10 @@
 # Handoff — plan-r2p-v3
 
-**Session:** 2026-09-09 (Phase 3 execution) · prior sessions 2026-08-05, 2026-08-17, 2026-09-09 (Phase 2b)
-**Last content commit:** `8c3f210` — **this handoff is committed on top of it**, so
-`HEAD` is the handoff commit, not `8c3f210`. (A handoff cannot name its own commit;
-the convention forbids fabricating it. Verify with `git log --oneline -2`.)
+**Session:** 2026-09-09 (Phase 4 + the invariant 13 call) · prior sessions
+2026-08-05, 2026-08-17, 2026-09-09 (Phase 2b), 2026-09-09 (Phase 3)
+**Last content commit:** `703821f` — **this handoff is committed on top of it**,
+so `HEAD` is the handoff commit. (A handoff cannot name its own commit; the
+convention forbids fabricating it. Verify with `git log --oneline -3`.)
 **Branch:** `main` · **Working tree:** clean.
 
 ## Status
@@ -12,78 +13,54 @@ the convention forbids fabricating it. Verify with `git log --oneline -2`.)
 |---|---|---|
 | 1 | Drain the field notes | **done** — 4 routes + 7 stamps, all 5 criteria verified |
 | 2 | State the chain once | **done** — one shipped assumption corrected after the pilot review (**D2**) |
-| 2b | Graduate the Córdoba fixes | **done 2026-09-09** — all 5 items, all 6 criteria (**D5**) |
-| 3 | Lint the chain | **done 2026-09-09** — 9 tasks + invariant 1 recursive. 7 checks → 14. Two specced invariants changed shape on measurement (**D6**) |
-| 4 | `/cite-check` | **next — unblocked.** **needs decision A** |
-| 5 | `/pipeline-check` | **unblocked.** **needs decision C** |
-| 6 | Harden the tooling | unblocked, independent of everything. **6a shrank again** — see below |
-| 7 | Docs, constitution, release | blocked on 4·5·6 · **needs decision B** |
+| 2b | Graduate the Córdoba fixes | **done** — all 5 items, all 6 criteria (**D5**) |
+| 3 | Lint the chain | **done** — 9 tasks + invariant 1 recursive. 7 checks → 14 (**D6**) |
+| 4 | `/cite-check` | **done 2026-09-09** — 3 tasks, 4 criteria. Decision **A** answered (**D7**) |
+| 5 | `/pipeline-check` | **next — unblocked.** **needs decision C** |
+| 6 | Harden the tooling | unblocked, independent of everything. **Grew by one** — see below |
+| 7 | Docs, constitution, release | blocked on 5·6 · **needs decision B** |
 
-**Decisions made in-session:** invariant 9 split into FAIL/WARN halves; invariant
-10 made a conjunction; invariant 13 left WARN on an expired rationale; decision
-**E** landed as *permit subfolders, check them* (`log.md` **D6**). Decisions
-**A**, **B**, **C** remain open, plus **one new call** — invariant 13's tier.
-**D** was recommended-and-unchallenged (no `#nn → [C<n>]` script in v3).
+**Answered this session:** **decision A** — `/cite-check` is its own skill; and
+**invariant 13's tier** — promoted WARN → FAIL. Both as recommended, so nothing
+downstream moved. **B** (Phase 7) and **C** (Phase 5) remain open, each with a
+recommendation in `plan.md` and each reversible within its phase.
 
 **⚠ The pilot repo is `~/research/cordoba`**, not `~/cordoba-growth-narrative`.
-Still true, still the thing that costs a session two failed lookups.
+Fourth handoff carrying this. Still the thing that costs a session two failed
+lookups.
 
-**⚠ `phase-3.md`'s §5 lint baseline was five weeks stale and is now corrected in
-place.** Every number moved: 173 → 285 evidence docs, 42 → 48 claims, 6 → 64
-headline-cap failures, 15 → 106 missing-frontmatter docs. **A future baseline diff
-must use the `⚠ CORRECTED 2026-09-09` block, not the one above it.** The lesson
-generalises past this file: a baseline measured against a live engagement decays
-in weeks, so re-measure before diffing, always.
+**⚠ `phase-3.md`'s §5 lint baseline is the `⚠ CORRECTED 2026-09-09` block, not
+the one above it.** A baseline measured against a live engagement decays in
+weeks — re-measure before diffing, always.
 
 ## What landed
 
-**Phase 3** — one commit per invariant, each carrying its own fixture story.
-
 | Commit | What |
 |---|---|
-| `def96b6` | **3.0** the WARN tier — `warn()`, a counter, `PASS — 2 warning(s)`, exit 0 on warnings only |
-| `6535549` | **invariant 1 recursive** — one `ev_docs()` walker replaces four non-recursive globs |
-| `665d6b6` | **3.1 / invariant 8** — `Rests on:` resolves (FAIL) |
-| `68ce58f` | **3.2 / invariants 9 + 9b** — artifact binding, split (FAIL + WARN); also `show()`, the no-silent-caps printer |
-| `2f1344a` | **3.3 / invariant 10** — evidence staleness (WARN) |
-| `566e57b` | **3.4 / invariants 11, 12** — `.next-id` ahead of the corpus; bound paths exist (both FAIL) |
-| `1419586` | **3.4b / 3.4c / invariants 13, 14** — `[C<n>]` and bare `#nn` resolution (both WARN) |
-| `50c246c` | **3.5** report shape — three legacy outputs capped; two invariants stop vanishing when inapplicable |
-| `aa6b61a` | **3.6** `r2p evidence new <slug>` — O_EXCL-locked atomic allocation |
-| `bf25bbe` | gitignore the allocator lock, both installers |
-| `8c3f210` | invariant 13 reports zero-adoption instead of vanishing — 3.5's rule, applied to the check that shipped after it |
+| `34b77af` | **invariant 13 → FAIL.** Its WARN rationale cited invariant 14's population; its own is zero |
+| `703821f` | **Phase 4** — `.claude/skills/cite-check/SKILL.md`, refuse-early, and the `/verify` boundary |
 
-**Three out-of-phase fixes**, each forced by a verification criterion in
-`phase-3.md`, none discretionary:
+Plus this handoff, the `log.md` **D7** entry, `phase-4.md`'s execution notes, and
+a correction to `.scc/status/project.md` — which claimed **`plan/` is empty**
+while this plan was five weeks into execution. It is the first thing a session
+reads. **Update it when a phase lands, not when the plan does.**
 
-| Commit | Found by | What |
-|---|---|---|
-| `a93d49d` | "green **and silent** on a fresh scaffold" | `templates/research/sources/EXAMPLE_world_bank_api.md` had no frontmatter at all → a fresh `r2p init` warned on a file it had just written |
-| `91ac89d` | building 3.6, which creates docs *from the template* | a doc copied from `EXAMPLE_01_slug.md` failed invariants 5 and 12 on creation |
-| `d0829ba` | 3.4b's stated condition | `citation-discipline.md` still called invariant 13 "proposed"; `evidence.md` still described invariant 9 as one check |
+## Carry into Phase 5 — read before writing `/pipeline-check`
 
-Plus `95e5ee8` (phase record + manifest) and `f1a8947` (`log.md` **D6**).
+**1. The scope-shrink that hit Phase 4 will hit Phase 5 too.** `phase-5.md` was
+written when link 1 had no lint. It now has invariants 8, 9, 9b, 10, 11, 12, 13,
+14. **Before implementing any check inside a skill, ask whether the lint already
+answers it** — and if it does, run the lint and read its output instead. That
+single question is what turned Phase 4 from a day into an afternoon.
 
-## Carry into Phases 4 and 5 — read before writing either skill
+**2. `context/cordoba-graduation.md`'s **G9** is Phase 5 input, not a task.**
+Unchanged.
 
-**1. The cheap halves all exist now, so both skills' scope shrank.** `/cite-check`
-(Phase 4) and `/pipeline-check` (Phase 5) were specced when link 1 had no lint at
-all. It now has two. **Do not re-implement resolution in a skill** — invariants 13
-and 14 already answer *does this reference resolve*. What is left for
-`/cite-check` is the row the lint explicitly cannot do:
+**3. Decision C** is *should `/pipeline-check` ever run a script, or only report
+what is stale and hand over the command?* Recommendation on file:
+report-and-hand-over, execute only on an explicit second confirmation.
 
-> **a headline number with no `[C<n>]` at all.** There is nothing to resolve, so
-> no grep can see it. Finding every number in a document and asking whether it is
-> *yours* is the judgement walk. `citation-discipline.md` § *A number that cites
-> nothing* is the rule it enforces, including the "illustrative context is exempt"
-> boundary.
-
-**2. Run the lint first and read its output.** Both skills should start by running
-`lint-research.sh` rather than re-deriving what it knows. Invariant 9's FAIL list
-is 14 named artifacts on the pilot; that is `/cite-check`'s worklist, already
-enumerated.
-
-**3. The regexes are settled and verified — reuse them, do not re-derive.**
+**4. The regexes are settled and verified — reuse them, do not re-derive.**
 
 | Thing | Form | Gotcha that cost a session |
 |---|---|---|
@@ -94,112 +71,88 @@ enumerated.
 | `artifacts:` | YAML **block** list; optional; absent is normal | absent means "not stated", never "no charts exist" |
 | renumber banner | `Renumbered <old> → <new>` and `(was #<old>)` | a `#nn` matching no file may still be live — check banners first |
 
-**4. Invariant 14's ceiling is the strongest argument `/cite-check` has.**
-Evidence ids are contiguous — **285 docs over 1..285, zero gaps** on the pilot —
-so a transposed `#71` → `#17` resolves to the wrong doc and no version of the
-check will ever catch it. Claim ids are sparse and hand-curated, so `[C99]` is
-caught immediately. That is now written into `citation-discipline.md` § *Gaps* and
-into the script. **Convert-on-touch buys checkability, not tidiness** — say that
-in `/cite-check`, because it is the reason a researcher would bother.
-
-**5. Phase 5 input, unchanged.** `context/cordoba-graduation.md`'s **G9** is
-`/pipeline-check` input, not a task.
-
 ## Surprises
 
-**1. The verification criteria found more defects than the tasks did.** Three
-shipped defects surfaced, none by reading a diff:
+**1. A tier decision rested on another check's count.** Invariant 13 shipped WARN
+because "573 references would drown a real project". Those 573 are bare `#nn` —
+invariant **14**'s population — and 14 did not exist when the call was made.
+Invariant 13's own population on the pilot is **zero**. Now FAIL, and the
+tier-selection header in the script carries the lesson: *a tier chosen on a
+measured count is only as good as the count; re-measure before citing one back,
+including one you took yourself last session.*
 
-- *"green **and silent** on a fresh scaffold"* → a scaffolded source doc with no
-  frontmatter, which is also the worked example a researcher copies first.
-- *"build the broken fixture, watch it go red"* → invariant 10's comparison was
-  wrong in **two opposite directions**, and both were caught by a fixture
-  misbehaving. The naive `date:` version reported the green fixture stale; the
-  obvious repair (compare the doc's own last commit) silently missed a
-  same-afternoon re-render because `--date=short` is day-resolution.
-- building 3.6 *from* the evidence template → a doc copied from it fails
-  invariants 5 and 12 on creation.
+**2. The first fixture was red for two unrelated reasons.** Missing
+`headline:`/`confidence:` and a missing `.next-id` — nothing to do with invariant
+13. "The lint went red" would have read as confirmation while proving nothing.
+**A fixture is only a test once it is green-except-one.** Add this next to
+"build the broken fixture, watch it go red" wherever that phrasing appears; on
+its own it is not sufficient.
 
-**Keep both phrasings in future phase files.** "Green" is not "silent", and an
-invariant that has only ever been green is untested.
+**3. The Phase 4 fixture refused itself.** `/cite-check`'s refuse-early rule had
+inherited `/deliverable-review`'s ≥800-word floor, so a *finished* 127-word memo
+was turned away. That floor exists because a seven-lens fan-out is too expensive
+for a stub; a ≤2k check has no such excuse, and short is exactly the shape of a
+ministerial briefing note. **The general form is worth naming: copying a
+neighbour skill's precondition without copying its reason.** Refuse on draft
+markers, never on length.
 
-**2. The pilot fixed one of our open decisions while we were deciding it.**
-`research/evidence/access_to_finance/` no longer holds evidence docs — the branch
-merged 2026-08-21 and 20/21/22 became 208/209/210. Decision **E**'s live instance
-is gone. The recursive fix shipped anyway: a check defends against a **vector**,
-and T2 names that vector in a shipped convention. *Generalisable:* an open
-decision about a live engagement can be resolved by the engagement. Re-check the
-world before deciding about it.
+**4. Two independent paths reached the same rule.** Phase 3's 3.5 made
+inapplicable invariants print rather than vanish, because silence reads as a
+pass. Phase 4 independently needed a *Not flagged* section, because without one a
+reader cannot tell an exemption from a miss. Same rule from opposite directions —
+some evidence it is real and not a local fix. It should probably be written down
+somewhere shared before a third phase rediscovers it.
 
-**3. Invariant 13's tier was resting on another invariant's evidence.** D2 made it
-WARN because "573 targets". Those are bare `#nn` — invariant 14's population — and
-14 did not exist when D2 was written. Invariant 13's real population on the pilot
-is **zero**. Left WARN; **needs a call**. *Generalisable:* when a decision cites a
-number, re-check that the number still describes the thing being decided.
-
-**4. `upgrade.js`'s `REQUIRED_GITIGNORE_LINES` still held v1 paths.**
-`internal_docs/` and `literature/`, renamed by v2 to `reference/internal/` and
-`reference/literature/`. `init` has been right all along. So an upgraded project
-appends two directories that do not exist and never starts ignoring the two that
-do — and the block's own comment says those are ignored because they are large and
-often copyrighted. **A researcher who upgraded rather than re-initialised has been
-committing third-party PDFs.** Fixed in `bf25bbe`, `reference/external/` added too.
-Fourth sighting of the two-installer trap, fourth time only in the `--upgrade` half.
-
-**5. Nothing had ever read `.next-id`.** Worth restating because the fix is
-measured: 10 concurrent `r2p evidence new` calls produce 10 distinct ids; with the
-lock disabled as a negative control, the same 10 produce **8 docs** — two ids
-handed out twice, the losers saved only by the doc write also being `wx`.
-
-**6. The lint takes ~9s on the pilot and ~8.9s of that predates Phase 3.** The
-per-doc loop spawns ~6 subprocesses across 285 docs. Not a regression, not in the
-task list, untouched. But a nine-second linter is an adoption risk by exactly the
-reasoning that produced the WARN tier. **Phase 6 candidate**, and cheap: one awk
-pass per doc instead of six.
+**5. The status file drifted for five weeks and nothing caught it.** `.scc/status/project.md`
+said "No active plans. `plan/` is empty." CLAUDE.md designates that file as the
+owner of volatile state precisely so this does not happen. **Nothing checks it** —
+worth a thought in Phase 6, though it is not currently in any task list.
 
 ## What didn't work
 
-Nothing abandoned. Two authoring errors, both caught by running rather than reading:
-
-- A `sed` "fix" to a message string introduced a **backtick inside a double-quoted
-  bash string**, so `artifacts:` ran as a command. Visible only in a live run; the
-  diff looked like a wording change.
-- Invariant 9's first implementation ran one `grep -r` per referenced path — 67
-  recursive greps over 285 docs, 9s on its own. Replaced with a single
-  `grep -rhoFf` pass. **A check nobody waits for is a check nobody runs.**
+Nothing abandoned. Both errors this session were caught by running rather than
+reading, and both are in *Surprises* above.
 
 ## Next
 
-**Phase 4 (`/cite-check`) is the critical path and is unblocked**, but it
-**needs decision A** and its scope has changed — read *Carry into Phases 4 and 5*
-§1 before opening `phase-4.md`, which was written when link 1 had no lint at all.
+**Phase 5 (`/pipeline-check`) is the critical path and is unblocked**, needs
+**decision C**, and its scope has almost certainly shrunk the way Phase 4's did —
+read *Carry into Phase 5* §1 before opening `phase-5.md`.
 
 **Phase 6 remains the independent alternative** if you would rather keep the
-critical path for a fresh session. **6a shrank again**: the bare-segment guard
-landed 2026-08-17, and this session's `bf25bbe` fixed the stale-EXCLUDE-adjacent
-gitignore defect. What remains there is the duplicate-path-per-line detector, the
-`--upgrade` integration test, and now the lint's runtime.
+critical path for a fresh session.
 
-### Needs a researcher call — carried forward, one new
+### Needs a researcher call — two carried forward
 
-- **✚ NEW — invariant 13's tier.** WARN on an expired rationale (see Surprises 3).
-  Promoting it to FAIL is a one-word change and the cheapest remaining hardening
-  of link 1. Population on the pilot is zero, so it cannot cry wolf.
-- **The stale-pointer sweep** (`log.md` **D5**). Five dangling convention pointers
-  — `data-access`, `data-sources`, `decision-records`, `handoff-format`,
+- **Decision B** (Phase 7) — do the stale v1 `docs/*-mechanism.md` files move to
+  `docs/v1/` or get deleted? *Recommend `docs/v1/` + a README.* **Note the part
+  that is a bug either way:** `.claude/conventions/project-conventions.md`, a live
+  v2 convention, references conventions that no longer exist — as do
+  `docs/audience-and-philosophy.md` and `docs/verification-architecture.md`.
+- **Decision C** (Phase 5) — see *Carry into Phase 5* §3.
+- **The stale-pointer sweep** (`log.md` **D5**). Five dangling convention
+  pointers — `data-access`, `data-sources`, `decision-records`, `handoff-format`,
   `learning-capture`. **`decision-records` has no v2 successor**, so where a
   decision record lives in v2 is a convention question, not a repath. Sizes 7.3b
   up from a one-off to a class. Reproduce: `phase-2b.md` § *Found, not fixed*.
-- **Decision A** (Phase 4), **B** (Phase 7), **C** (Phase 5) — unchanged, each
-  reversible within its phase, each with a recommendation in `plan.md`.
 
-### Adjacent one-liners, deliberately not shipped
+### Phase 6 candidates — the list has grown again
 
-Both are inside link 2 and cost one `grep` each. Left out because they are not in
-any phase's task list, and a phase that grows its own scope stops predicting
-anything. **Either would be a legitimate Phase 6 addition.**
+Now four, none in any task list, each a legitimate Phase 6 addition:
 
+- **`status: retired` under a cited claim is mechanical** and would make a clean
+  **invariant 15**. It lives in `/cite-check` only because `phase-4.md` put it
+  there, and a phase does not get to grow into `lint-research.sh`. **This is the
+  strongest of the four** — it closes the one class in `/cite-check` that does not
+  need judgement.
+- **The lint's runtime** — ~9s on the pilot, ~8.9s of it predating Phase 3. The
+  per-doc loop spawns ~6 subprocesses across 285 docs; one awk pass would fix it.
+  A nine-second linter is an adoption risk by exactly the reasoning that produced
+  the WARN tier.
 - `claims.md` says *"a claim with no ids is an assertion — delete it."* Nothing
-  checks it.
+  checks it. One `grep`.
 - A dangling `**Supersedes the reading of:** #62` is a broken link. Invariant 8
-  reads only the ids before the first `·`, so it does not see it.
+  reads only the ids before the first `·`, so it does not see it. One `grep`.
+
+Plus the pre-existing 6a remainder: the duplicate-path-per-line detector and the
+`--upgrade` integration test.

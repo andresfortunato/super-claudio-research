@@ -126,10 +126,11 @@ path. The bump lands in Phase 7 with the release notes, not opportunistically.
 Flagged for the researcher before the phase that depends on each. Execution may
 proceed on the recommendation if unanswered; each is reversible within its phase.
 
-- **A. `/cite-check` as its own skill, or a fourth check menu inside `/verify`?**
-  *Recommend: its own skill.* `/verify`'s contract is 3–5 judgement-shaped checks
-  on one artifact; the chain walk is mechanical and enumerates every number in a
-  document. Different shape, same ≤2k tier. Blocks Phase 4.
+- **A. ✅ ANSWERED 2026-09-09 — `/cite-check` is its own skill.** Taken as
+  recommended: `/verify`'s contract is 3–5 judgement-shaped checks on one
+  artifact; the chain walk is mechanical and enumerates every number in a
+  document. Different shape, same ≤2k tier. The boundary between the two is now
+  written into `/verify` itself (task 4.3). Phase 4 shipped — `log.md` **D7**.
 - **B. Do the stale v1 `docs/*-mechanism.md` files move to `docs/v1/`, or get
   deleted?** *Recommend: `docs/v1/` with a one-paragraph README.* They are the
   only record of why v1 was shaped that way, and the case study cites them. But
