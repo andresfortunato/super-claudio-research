@@ -61,6 +61,18 @@ The fourth landed in v3 Phase 7:
   framework not running the framework. Worth deciding deliberately rather than
   fixing in a release commit: wiring `check-archival.sh` here would mean r2p's
   own plans get the archival tripwire, which is the behaviour it ships.
+- **scc's Stop hook and r2p's archival convention disagree, in this repo.**
+  Observed 2026-09-09: `plan-r2p-v3/.completed` fired
+  `super-claudio-code/hooks/stop.js` — not r2p's `check-archival.sh`, which is
+  unwired here — and it asked for **archivist *and* cleanup, in parallel**.
+  `plan-lifecycle.md` Stage 4 says the archivist is the only post-`.completed`
+  agent and that `/research-cleanup` covers that boundary on user invocation.
+  Neither is wrong; they are two frameworks' protocols firing on one marker, and
+  scc's is the one actually wired. Two live consequences: the parallel launch is
+  the concurrent-worktree hazard `docs/field-notes/` already documents, and
+  cleanup commits while the archivist's output is still unreviewed. Decide
+  whether r2p's convention should say what to do when another harness owns the
+  Stop hook, or whether this repo should wire its own and win.
 - **`lint-research.sh` has no CI job anywhere.** It is designed to run from CI
   and does not, in this repo or in the pilot. A GitHub Actions workflow is a
   dozen lines and would make the FAIL tier mean something.
